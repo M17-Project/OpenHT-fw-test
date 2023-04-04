@@ -1,0 +1,3 @@
+[submodule "OpenHT-fw/Drivers/lvgl"]
+	path = OpenHT-fw/Drivers/lvgl
+	url = https://github.com/lvgl/lvgl
