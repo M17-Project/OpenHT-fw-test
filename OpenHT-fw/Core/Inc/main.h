@@ -27,8 +27,11 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32469i_discovery.h"
 #include "stm32f4xx_hal.h"
+
+/* DISCOVERY includes component */
+#include "stm32469i_discovery.h"
+
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
