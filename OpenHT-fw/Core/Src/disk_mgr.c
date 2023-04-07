@@ -1,4 +1,5 @@
 #include "disk_mgr.h"
+#include "fatfs.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
