@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2023 M17 Project and contributors
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
+
 // LVGL version: 8.3.4
 // Project name: OpenHT_UI
 
@@ -7,6 +25,10 @@
 #include <lvgl.h>
 
 #include "lvgl_ui/ui.h"
+
+#include "disk_mgr.h"
+#include "fatfs.h"
+#include "bmp_utils.h"
 
 
 static lv_obj_t * currentActiveTextAreaFreq = NULL;
@@ -22,6 +44,7 @@ static void create_number_pad(lv_obj_t * lv_obj);
 static void end_input_text_area(void);
 static void update_cursor_pos(lv_obj_t * textAreaFreq);
 static void update_active_text_area_freq(lv_obj_t * newTextAreaFreq, char freqstr[]);
+static void screen_capture(void);
 
 void custom_ui_init(void)
 {
@@ -280,3 +303,54 @@ void on_xmit_button_release(lv_event_t * e)
 {
 	BSP_LED_Off(LED_RED);
 }
+
+void on_userbutton_press()
+{
+	BSP_LED_On(LED_BLUE);
+
+	// reset other LEDs
+	BSP_LED_Off(LED_GREEN);
+	BSP_LED_Off(LED_ORANGE);
+	BSP_LED_Off(LED_RED);
+
+	screen_capture();
+}
+
+void on_userbutton_release()
+{
+	BSP_LED_Off(LED_BLUE);
+}
+
+// assign buffer to SDRAM since we are limited on SRAM
+__attribute__((section(".sdram"))) static uint8_t img_buffer[480*800*3]; // 480px * 800px * 3 bytes per pixel
+
+static void screen_capture(void)
+{
+    lv_obj_t * scr = lv_scr_act();
+    lv_img_dsc_t snapshot_img;
+    lv_res_t snap = lv_snapshot_take_to_buf(scr, LV_IMG_CF_TRUE_COLOR_ALPHA, &snapshot_img, &img_buffer, sizeof(img_buffer));
+
+    if (snap == LV_RES_INV){
+        //Snapshot failed
+    	BSP_LED_Off(LED_ORANGE);
+    }
+    else{
+        //Snapshot Success
+
+    	lv_coord_t width  = lv_obj_get_width(scr);
+    	lv_coord_t height = lv_obj_get_height(scr);
+
+        uint8_t header[sizeof(struct bmp_header_t) + 2];
+
+        get_bitmap_header(width, height, LV_COLOR_DEPTH, header, sizeof(header));
+
+        if (save_image(header, sizeof(header), img_buffer, sizeof(img_buffer)) != OPENHT_OK) {
+        	// error
+        	BSP_LED_On(LED_ORANGE);
+        } else {
+        	BSP_LED_On(LED_GREEN);
+        }
+    }
+}
+
+

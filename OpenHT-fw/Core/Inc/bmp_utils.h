@@ -16,34 +16,42 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-// LVGL version: 8.3.4
-// Project name: OpenHT_UI
-
-/* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __OPENHT_UI_H
-#define __OPENHT_UI_H
+#ifndef INC_BMP_UTILS_H_
+#define INC_BMP_UTILS_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "stm32469i_discovery.h"
-#include "stm32f4xx_hal.h"
-#include <lvgl.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-void custom_ui_init(void);
+struct bmp_header_t
+{
+    uint32_t bfSize;
+    uint32_t bfReserved;
+    uint32_t bfOffBits;
 
-void button_matrix_event_cb(lv_event_t * e);
+    uint32_t biSize;
+    int32_t biWidth;
+    int32_t biHeight;
+    uint16_t biPlanes;
+    uint16_t biBitCount;
+    uint32_t biCompression;
+    uint32_t biSizeImage;
+    int32_t biXPelsPerMeter;
+    int32_t biYPelsPerMeter;
+    uint32_t biClrUsed;
+    uint32_t biClrImportant;
 
-uint32_t get_freq_from_str(const char * str);
-void get_str_from_freq(uint32_t i, char b[]);
+    uint32_t bdMask[3]; // RGB
+};
 
-void on_userbutton_press(void);
-void on_userbutton_release(void);
+void get_bitmap_header(uint32_t width, uint32_t height, uint32_t color_depth, uint8_t* buffer, size_t bufsize);
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __OPENHT_UI_H */
+#endif /* INC_BMP_UTILS_H_ */

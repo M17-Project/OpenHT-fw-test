@@ -27,10 +27,9 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "openht_types.h"
 #include "stm32f4xx_hal.h"
-
-/* DISCOVERY includes component */
-#include "stm32469i_discovery.h"
+#include "stm32469i_discovery.h" /* DISCOVERY includes component */
 
 
 /* Private includes ----------------------------------------------------------*/

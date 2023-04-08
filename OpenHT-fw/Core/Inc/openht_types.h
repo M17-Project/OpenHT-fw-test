@@ -16,34 +16,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-// LVGL version: 8.3.4
-// Project name: OpenHT_UI
-
-/* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __OPENHT_UI_H
-#define __OPENHT_UI_H
+#ifndef INC_OPENHT_TYPES_H_
+#define INC_OPENHT_TYPES_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "stm32469i_discovery.h"
-#include "stm32f4xx_hal.h"
-#include <lvgl.h>
 
-void custom_ui_init(void);
 
-void button_matrix_event_cb(lv_event_t * e);
+typedef enum {
+	OPENHT_OK = 0,		/* (0) Succeeded */
+	OPENHT_ERR,			/* (1) A error occurred */
+} openht_res_t;
 
-uint32_t get_freq_from_str(const char * str);
-void get_str_from_freq(uint32_t i, char b[]);
-
-void on_userbutton_press(void);
-void on_userbutton_release(void);
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __OPENHT_UI_H */
+#endif /* INC_OPENHT_TYPES_H_ */
