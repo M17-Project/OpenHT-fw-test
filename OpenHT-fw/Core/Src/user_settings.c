@@ -14,22 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 
 #include "user_settings.h"
 #include <stdlib.h>
 #include <stdio.h>
 
-
-void save_settings (const settings_t * settings)
+void save_settings(const settings_t *settings)
 {
 	BSP_LED_Off(LED_ORANGE);
 	BSP_LED_Off(LED_GREEN);
 
-	if(BSP_QSPI_Erase_Block(WRITE_READ_ADDR) != QSPI_OK) {
+	if (BSP_QSPI_Erase_Block(WRITE_READ_ADDR) != QSPI_OK) {
 		BSP_LED_On(LED_ORANGE);
 	} else {
-		if(BSP_QSPI_Write((uint8_t *)settings, WRITE_READ_ADDR, sizeof(settings_t)) != QSPI_OK) {
+		if (BSP_QSPI_Write((uint8_t*) settings, WRITE_READ_ADDR,
+				sizeof(settings_t)) != QSPI_OK) {
 			BSP_LED_On(LED_ORANGE);
 		} else {
 			BSP_LED_On(LED_GREEN);
@@ -37,16 +37,16 @@ void save_settings (const settings_t * settings)
 	}
 }
 
-void get_settings (const settings_t * settings)
+void get_settings(const settings_t *settings)
 {
 	BSP_LED_Off(LED_ORANGE);
 	BSP_LED_Off(LED_GREEN);
 
-	if(BSP_QSPI_Read((uint8_t *)settings, WRITE_READ_ADDR, sizeof(settings_t)) != QSPI_OK) {
+	if (BSP_QSPI_Read((uint8_t*) settings, WRITE_READ_ADDR,
+			sizeof(settings_t)) != QSPI_OK) {
 		BSP_LED_On(LED_ORANGE);
 	} else {
 		BSP_LED_On(LED_GREEN);
 	}
 }
-
 

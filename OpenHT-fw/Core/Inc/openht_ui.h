@@ -14,11 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 
 // LVGL version: 8.3.4
 // Project name: OpenHT_UI
-
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __OPENHT_UI_H
 #define __OPENHT_UI_H
@@ -33,14 +32,13 @@ extern "C" {
 
 void custom_ui_init(void);
 
-void button_matrix_event_cb(lv_event_t * e);
+void button_matrix_event_cb(lv_event_t *e);
 
-uint32_t get_freq_from_str(const char * str);
+uint32_t get_freq_from_str(const char *str);
 void get_str_from_freq(uint32_t i, char b[]);
 
 void on_userbutton_press(void);
 void on_userbutton_release(void);
-
 
 #ifdef __cplusplus
 }
