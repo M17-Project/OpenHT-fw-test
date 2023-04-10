@@ -195,6 +195,30 @@ int main(void)
   // Test the sdcard
   //test_fat();
 
+  // init flash...
+
+  /* QSPI info structure */
+  static QSPI_InfoTypeDef pQSPI_Info;
+  BSP_QSPI_Init();
+
+  pQSPI_Info.FlashSize        = (uint32_t)0x00;
+  pQSPI_Info.EraseSectorSize    = (uint32_t)0x00;
+  pQSPI_Info.EraseSectorsNumber = (uint32_t)0x00;
+  pQSPI_Info.ProgPageSize       = (uint32_t)0x00;
+  pQSPI_Info.ProgPagesNumber    = (uint32_t)0x00;
+
+  /* Read the QSPI memory info */
+  BSP_QSPI_GetInfo(&pQSPI_Info);
+
+  /* Test the correctness */
+  if((pQSPI_Info.FlashSize != 0x1000000) || (pQSPI_Info.EraseSectorSize != 0x1000)  ||
+     (pQSPI_Info.ProgPageSize != 0x100)  || (pQSPI_Info.EraseSectorsNumber != 4096) ||
+     (pQSPI_Info.ProgPagesNumber != 65536))
+  {
+	BSP_LED_On(LED_RED);
+	BSP_LED_On(LED_ORANGE);
+  }
+
   lv_init();
 
   screen_driver_init();

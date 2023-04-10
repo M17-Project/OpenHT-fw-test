@@ -56,6 +56,11 @@
 			<locationURI>PROJECT_LOC/Drivers/BSP/STM32469I-Discovery/stm32469i_discovery_lcd.c</locationURI>
 		</link>
 		<link>
+			<name>Drivers/BSP/STM32469I-Discovery/stm32469i_discovery_qspi.c</name>
+			<type>1</type>
+			<locationURI>PROJECT_LOC/Drivers/BSP/STM32469I-Discovery/stm32469i_discovery_qspi.c</locationURI>
+		</link>
+		<link>
 			<name>Drivers/BSP/STM32469I-Discovery/stm32469i_discovery_ts.c</name>
 			<type>1</type>
 			<locationURI>PROJECT_LOC/Drivers/BSP/STM32469I-Discovery/stm32469i_discovery_ts.c</locationURI>

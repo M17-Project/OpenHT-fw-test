@@ -29,6 +29,7 @@
 #include "disk_mgr.h"
 #include "fatfs.h"
 #include "bmp_utils.h"
+#include "user_settings.h"
 
 
 static lv_obj_t * currentActiveTextAreaFreq = NULL;
@@ -39,6 +40,8 @@ static char * currentFreeqStr = NULL;
 
 static char rxfreqstr[] = EMPTY_FREQ;
 static char txfreqstr[] = EMPTY_FREQ;
+
+static settings_t user_settings;
 
 static void create_number_pad(lv_obj_t * lv_obj);
 static void end_input_text_area(void);
@@ -61,6 +64,19 @@ void custom_ui_init(void)
 
 	//lv_obj_set_style_anim_time((lv_textarea_t *)ui_text_area_rx_freq, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
 	//lv_obj_set_style_anim_time((lv_textarea_t *)ui_text_area_tx_freq, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
+
+	get_settings(&user_settings);
+
+    char buffer[15];
+	snprintf(buffer, 15, "%d", user_settings.rx_freq);
+    lv_label_set_text(ui_label_test_rx, buffer);
+	get_str_from_freq(user_settings.rx_freq, rxfreqstr);
+	lv_textarea_set_text(ui_text_area_rx_freq, rxfreqstr);
+
+    snprintf(buffer, 15, "%d", user_settings.tx_freq);
+    lv_label_set_text(ui_label_test_tx, buffer);
+	get_str_from_freq(user_settings.tx_freq, txfreqstr);
+	lv_textarea_set_text(ui_text_area_tx_freq, txfreqstr);
 }
 
 void button_matrix_event_cb(lv_event_t * e)
@@ -144,11 +160,15 @@ static void end_input_text_area()
 
 	/* log output... */
     char buffer[15];
-    snprintf(buffer, 15, "%d", get_freq_from_str(rxfreqstr));
+    user_settings.rx_freq = get_freq_from_str(rxfreqstr);
+    snprintf(buffer, 15, "%d", user_settings.rx_freq);
     lv_label_set_text(ui_label_test_rx, buffer);
-    snprintf(buffer, 15, "%d", get_freq_from_str(txfreqstr));
+
+    user_settings.tx_freq = get_freq_from_str(txfreqstr);
+    snprintf(buffer, 15, "%d", user_settings.tx_freq);
     lv_label_set_text(ui_label_test_tx, buffer);
 
+    save_settings(&user_settings);
 }
 
 // array matrix of buttons
