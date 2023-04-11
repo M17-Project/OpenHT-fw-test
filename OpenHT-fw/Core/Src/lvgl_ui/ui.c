@@ -339,10 +339,11 @@ void ui_screen2_screen_init(void)
     ui_panel_numpad = lv_obj_create(ui_screen2);
     lv_obj_set_height(ui_panel_numpad, 400);
     lv_obj_set_width(ui_panel_numpad, lv_pct(100));
-    lv_obj_set_align(ui_panel_numpad, LV_ALIGN_BOTTOM_MID);
+    lv_obj_set_x(ui_panel_numpad, 0);
+    lv_obj_set_y(ui_panel_numpad, 600);
     lv_obj_clear_flag(ui_panel_numpad, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_bg_color(ui_panel_numpad, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_panel_numpad, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_panel_numpad, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_panel_numpad, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui_panel_numpad, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_panel_numpad, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui_panel_numpad, 0, LV_PART_MAIN | LV_STATE_DEFAULT);

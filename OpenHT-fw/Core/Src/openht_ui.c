@@ -45,16 +45,8 @@ static char txfreqstr[] = EMPTY_FREQ;
 
 static settings_t user_settings;
 
-// array matrix of buttons
-static const char *btnm_map[] = { "7", "8", "9", "\n",
-								  "4", "5", "6", "\n",
-								  "1", "2", "3", "\n",
-								//"*", "0", ".", "#", "\n",
-								  "0", LV_SYMBOL_LEFT, LV_SYMBOL_RIGHT, LV_SYMBOL_OK, ""
-								};
 
-static void create_number_pad(lv_obj_t *lv_obj);
-static void end_input_text_area(void);
+static void end_input_text_area(bool finished_input);
 static int32_t move_cursor(int32_t curs_pos, int32_t movement);
 static void update_cursor_pos(lv_obj_t *textAreaFreq);
 static void update_active_text_area_freq(lv_obj_t *newTextAreaFreq,
@@ -68,12 +60,10 @@ void custom_ui_init(void)
 	//get_str_from_freq(test, rxfreqstr);
 	//get_str_from_freq(0, rxfreqstr);
 
-	// remove the border for the UI placeholder
-	// Hint: using border in SquareLine Studio allows visibility while moving
-	// things around, then set border to none at runtime...
-	lv_obj_set_style_border_side(ui_panel_numpad, LV_BORDER_SIDE_NONE,
-			LV_PART_MAIN);
-	create_number_pad(ui_panel_numpad);
+	lv_obj_t * btnm1 = create_number_pad(ui_panel_numpad);
+	// callback handler
+	lv_obj_add_event_cb(btnm1, button_matrix_event_cb, LV_EVENT_ALL, NULL);
+
 
 	//lv_obj_set_style_anim_time((lv_textarea_t *)ui_text_area_rx_freq, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
 	//lv_obj_set_style_anim_time((lv_textarea_t *)ui_text_area_tx_freq, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
@@ -90,45 +80,6 @@ void custom_ui_init(void)
 	lv_label_set_text(ui_label_test_tx, buffer);
 	get_str_from_freq(user_settings.tx_freq, txfreqstr);
 	lv_textarea_set_text(ui_text_area_tx_freq, txfreqstr);
-}
-
-static void create_number_pad(lv_obj_t *lv_obj)
-{
-	// create button matrix and assign as parent: lv_obj
-	lv_obj_t *btnm1 = lv_btnmatrix_create(lv_obj);
-	lv_btnmatrix_set_map(btnm1, btnm_map);
-	lv_btnmatrix_set_btn_width(btnm1, 9, 7);
-	lv_btnmatrix_set_btn_width(btnm1, 10, 4);
-	lv_btnmatrix_set_btn_width(btnm1, 11, 4);
-	lv_btnmatrix_set_btn_width(btnm1, 12, 5);
-
-	// get the style width/height of the parent.
-	// Using this because actual width and height are not defined yet since not visible
-	lv_coord_t w = lv_obj_get_style_width(lv_obj, LV_PART_MAIN);
-	lv_coord_t h = lv_obj_get_style_height(lv_obj, LV_PART_MAIN);
-	lv_obj_align(btnm1, LV_ALIGN_DEFAULT, 0, 0);
-	lv_obj_set_width(btnm1, w);
-	lv_obj_set_height(btnm1, h);
-
-	// area between buttons
-	lv_obj_set_style_border_side(btnm1, LV_BORDER_SIDE_NONE, LV_PART_MAIN);
-	lv_obj_set_style_bg_color(btnm1, lv_color_hex(0x000000),
-			LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_opa(btnm1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-	// the buttons in the matrix
-	lv_obj_set_style_bg_color(btnm1, lv_color_hex(0x191C26),
-			LV_PART_ITEMS | LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_color(btnm1, lv_color_hex(0x37B9F5),
-			LV_PART_ITEMS | LV_STATE_PRESSED);
-
-	lv_obj_set_style_text_font(btnm1, &lv_font_montserrat_42,
-			LV_PART_ITEMS | LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(btnm1, lv_color_hex(0xFFFFFF),
-			LV_PART_ITEMS | LV_STATE_DEFAULT);
-
-	// callback handler
-	lv_obj_add_event_cb(btnm1, button_matrix_event_cb, LV_EVENT_ALL, NULL);
 }
 
 void button_matrix_event_cb(lv_event_t *e)
@@ -182,14 +133,14 @@ void button_matrix_event_cb(lv_event_t *e)
 		lv_textarea_set_cursor_pos(currentActiveTextAreaFreq, curs_pos);
 
 		if (curs_pos == END_POS) {
-			end_input_text_area();
+			end_input_text_area(true);
 		}
 	}
 }
 
 void on_screen_pressed(lv_event_t *e)
 {
-	end_input_text_area();
+	end_input_text_area(true);
 }
 
 void on_rx_click(lv_event_t *e)
@@ -237,10 +188,14 @@ void on_userbutton_release()
 	BSP_LED_Off(LED_BLUE);
 }
 
-static void end_input_text_area()
+static void end_input_text_area(bool finished_input)
 {
 	if (currentActiveTextAreaFreq == NULL) {
 		return;
+	}
+
+	if (finished_input) {
+		set_numpad_visibility(false);
 	}
 
 	lv_textarea_set_cursor_pos(currentActiveTextAreaFreq, END_POS);
@@ -267,15 +222,21 @@ static void end_input_text_area()
 	save_settings(&user_settings);
 }
 
+
+
 static void update_active_text_area_freq(lv_obj_t *newTextAreaFreq,
 		char freqstr[])
 {
 	if (newTextAreaFreq == NULL)
 		return;
 
-	end_input_text_area();
+	end_input_text_area(false);
+
+	set_numpad_visibility(true);
+
 	currentActiveTextAreaFreq = newTextAreaFreq;
 	currentFreeqStr = freqstr;
+
 	lv_obj_set_style_border_side(currentActiveTextAreaFreq, LV_BORDER_SIDE_FULL,
 			LV_PART_MAIN | LV_STATE_DEFAULT);
 	//lv_obj_set_style_anim_time(currentActiveTextAreaFreq, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);

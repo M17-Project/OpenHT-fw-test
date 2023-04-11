@@ -4566,7 +4566,7 @@
                     "InheritedType": 7
                   },
                   {
-                    "nid": 1280939748,
+                    "nid": -1302786800,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -4579,7 +4579,7 @@
                 "strval": "CHECKED",
                 "childs": [
                   {
-                    "nid": -1938889122,
+                    "nid": -2050848092,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -4592,7 +4592,7 @@
                 "strval": "PRESSED",
                 "childs": [
                   {
-                    "nid": -1533766945,
+                    "nid": -1821506363,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -4605,7 +4605,7 @@
                 "strval": "CHECKED|PRESSED",
                 "childs": [
                   {
-                    "nid": -1097627841,
+                    "nid": 1664137259,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -4618,7 +4618,7 @@
                 "strval": "DISABLED",
                 "childs": [
                   {
-                    "nid": 1234497438,
+                    "nid": 1310689043,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -4762,7 +4762,7 @@
                 "strtype": "OBJECT/Position",
                 "intarray": [
                   0,
-                  0
+                  600
                 ],
                 "InheritedType": 7
               },
@@ -4779,7 +4779,7 @@
               {
                 "nid": 1243615658,
                 "strtype": "OBJECT/Align",
-                "strval": "BOTTOM_MID",
+                "strval": "TOP_LEFT",
                 "InheritedType": 3
               },
               {
@@ -4948,10 +4948,10 @@
                         "nid": -238617473,
                         "strtype": "_style/Bg_Color",
                         "intarray": [
-                          255,
-                          255,
-                          255,
-                          0
+                          70,
+                          75,
+                          85,
+                          255
                         ],
                         "InheritedType": 7
                       },
@@ -7325,8 +7325,8 @@
     "theme_dark": false,
     "theme_color1": 5,
     "theme_color2": 0,
-    "exportFolderPath": "../OpenHT-fw/Core/Src/lvgl_ui",
-    "backup_cnt": 61,
+    "exportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/lvgl_ui",
+    "backup_cnt": 64,
     "autosave_cnt": 0,
     "lvgl_version": "8.3.4",
     "callfuncsexport": "C_FILE",
