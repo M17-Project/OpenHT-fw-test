@@ -21,6 +21,7 @@
 #include "openht_ui.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <limits.h>
 #include <lvgl.h>
 
 #include "lvgl_ui/ui.h"
@@ -33,16 +34,28 @@
 static lv_obj_t *currentActiveTextAreaFreq = NULL;
 static char *currentFreeqStr = NULL;
 
-#define EMPTY_FREQ "___.___.___"
-#define END_POS 11
+#define EMPTY_FREQ "_.___.___.___"
+#define END_POS 13
+#define THOU_POS 9
+#define MEG_POS 5
+#define GIG_POS 1
 
 static char rxfreqstr[] = EMPTY_FREQ;
 static char txfreqstr[] = EMPTY_FREQ;
 
 static settings_t user_settings;
 
+// array matrix of buttons
+static const char *btnm_map[] = { "7", "8", "9", "\n",
+								  "4", "5", "6", "\n",
+								  "1", "2", "3", "\n",
+								//"*", "0", ".", "#", "\n",
+								  "0", LV_SYMBOL_LEFT, LV_SYMBOL_RIGHT, LV_SYMBOL_OK, ""
+								};
+
 static void create_number_pad(lv_obj_t *lv_obj);
 static void end_input_text_area(void);
+static int32_t move_cursor(int32_t curs_pos, int32_t movement);
 static void update_cursor_pos(lv_obj_t *textAreaFreq);
 static void update_active_text_area_freq(lv_obj_t *newTextAreaFreq,
 		char freqstr[]);
@@ -68,124 +81,16 @@ void custom_ui_init(void)
 	get_settings(&user_settings);
 
 	char buffer[15];
-	snprintf(buffer, 15, "%d", user_settings.rx_freq);
+	snprintf(buffer, 15, "%u", user_settings.rx_freq);
 	lv_label_set_text(ui_label_test_rx, buffer);
 	get_str_from_freq(user_settings.rx_freq, rxfreqstr);
 	lv_textarea_set_text(ui_text_area_rx_freq, rxfreqstr);
 
-	snprintf(buffer, 15, "%d", user_settings.tx_freq);
+	snprintf(buffer, 15, "%u", user_settings.tx_freq);
 	lv_label_set_text(ui_label_test_tx, buffer);
 	get_str_from_freq(user_settings.tx_freq, txfreqstr);
 	lv_textarea_set_text(ui_text_area_tx_freq, txfreqstr);
 }
-
-void button_matrix_event_cb(lv_event_t *e)
-{
-	lv_event_code_t code = lv_event_get_code(e);
-	lv_obj_t *obj = lv_event_get_target(e);
-	if (code == LV_EVENT_VALUE_CHANGED) {
-		uint32_t id = lv_btnmatrix_get_selected_btn(obj);
-		const char *txt = lv_btnmatrix_get_btn_text(obj, id);
-
-		LV_LOG_USER("%s was pressed\n", txt);
-
-		if (currentActiveTextAreaFreq == NULL)
-			return;
-
-		// for future use...(or not!)
-		if ((strcmp(txt, "*") == 0) || (strcmp(txt, ".") == 0)
-				|| (strcmp(txt, "#") == 0))
-			return;
-
-		// get current cursor position
-		uint32_t curs_pos = lv_textarea_get_cursor_pos(
-				currentActiveTextAreaFreq);
-
-		// move cursor left
-		if (strcmp(txt, LV_SYMBOL_LEFT) == 0) {
-			if (curs_pos == 0)
-				curs_pos = 10;
-			else {
-				curs_pos = curs_pos - 1;
-				if (curs_pos == 3)
-					curs_pos = curs_pos - 1;
-				if (curs_pos == 7)
-					curs_pos = curs_pos - 1;
-				if (curs_pos == END_POS)
-					curs_pos = 0;
-			}
-		} // move cursor right
-		else if (strcmp(txt, LV_SYMBOL_RIGHT) == 0) {
-			curs_pos = curs_pos + 1;
-			if (curs_pos == 3)
-				curs_pos = curs_pos + 1;
-			if (curs_pos == 7)
-				curs_pos = curs_pos + 1;
-			if (curs_pos == END_POS)
-				curs_pos = 0;
-		} // end input
-		else if (strcmp(txt, LV_SYMBOL_OK) == 0) {
-			curs_pos = END_POS;
-		} else {
-			if (curs_pos == END_POS)
-				curs_pos = 0;
-			currentFreeqStr[curs_pos] = *txt;
-
-			// update the text
-			lv_textarea_set_text(currentActiveTextAreaFreq, currentFreeqStr);
-
-			// update cursor position...
-			curs_pos = curs_pos + 1;
-			if (curs_pos == 3)
-				curs_pos = curs_pos + 1;
-			if (curs_pos == 7)
-				curs_pos = curs_pos + 1;
-		}
-
-		// update cursor position
-		lv_textarea_set_cursor_pos(currentActiveTextAreaFreq, curs_pos);
-
-		if (curs_pos == END_POS) {
-			end_input_text_area();
-		}
-	}
-}
-
-static void end_input_text_area()
-{
-	if (currentActiveTextAreaFreq == NULL) {
-		return;
-	}
-
-	lv_textarea_set_cursor_pos(currentActiveTextAreaFreq, END_POS);
-	lv_obj_set_style_border_side(currentActiveTextAreaFreq, LV_BORDER_SIDE_NONE,
-			LV_PART_MAIN | LV_STATE_DEFAULT);
-
-	//const char * txt = lv_textarea_get_text(currentActiveTextAreaFreq);
-	uint32_t freq = get_freq_from_str(currentFreeqStr);
-	get_str_from_freq(freq, currentFreeqStr);
-	lv_textarea_set_text(currentActiveTextAreaFreq, currentFreeqStr);
-	currentFreeqStr = NULL;
-	currentActiveTextAreaFreq = NULL;
-
-	/* log output... */
-	char buffer[15];
-	user_settings.rx_freq = get_freq_from_str(rxfreqstr);
-	snprintf(buffer, 15, "%d", user_settings.rx_freq);
-	lv_label_set_text(ui_label_test_rx, buffer);
-
-	user_settings.tx_freq = get_freq_from_str(txfreqstr);
-	snprintf(buffer, 15, "%d", user_settings.tx_freq);
-	lv_label_set_text(ui_label_test_tx, buffer);
-
-	save_settings(&user_settings);
-}
-
-// array matrix of buttons
-static const char *btnm_map[] = { "7", "8", "9", "\n", "4", "5", "6", "\n", "1",
-		"2", "3", "\n",
-		//"*", "0", ".", "#", "\n",
-		"0", LV_SYMBOL_LEFT, LV_SYMBOL_RIGHT, LV_SYMBOL_OK, "" };
 
 static void create_number_pad(lv_obj_t *lv_obj)
 {
@@ -226,32 +131,60 @@ static void create_number_pad(lv_obj_t *lv_obj)
 	lv_obj_add_event_cb(btnm1, button_matrix_event_cb, LV_EVENT_ALL, NULL);
 }
 
-static void update_active_text_area_freq(lv_obj_t *newTextAreaFreq,
-		char freqstr[])
+void button_matrix_event_cb(lv_event_t *e)
 {
-	if (newTextAreaFreq == NULL)
-		return;
+	lv_event_code_t code = lv_event_get_code(e);
+	lv_obj_t *obj = lv_event_get_target(e);
+	if (code == LV_EVENT_VALUE_CHANGED) {
+		uint32_t id = lv_btnmatrix_get_selected_btn(obj);
+		const char *txt = lv_btnmatrix_get_btn_text(obj, id);
 
-	end_input_text_area();
-	currentActiveTextAreaFreq = newTextAreaFreq;
-	currentFreeqStr = freqstr;
-	lv_obj_set_style_border_side(currentActiveTextAreaFreq, LV_BORDER_SIDE_FULL,
-			LV_PART_MAIN | LV_STATE_DEFAULT);
-	//lv_obj_set_style_anim_time(currentActiveTextAreaFreq, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
+		LV_LOG_USER("%s was pressed\n", txt);
 
-	update_cursor_pos(currentActiveTextAreaFreq);
-}
+		if (currentActiveTextAreaFreq == NULL)
+			return;
 
-static void update_cursor_pos(lv_obj_t *textAreaFreq)
-{
-	uint32_t curs_pos = lv_textarea_get_cursor_pos((lv_obj_t*) textAreaFreq);
-	if (curs_pos == 3)
-		curs_pos = curs_pos + 1;
-	if (curs_pos == 7)
-		curs_pos = curs_pos + 1;
-	if (curs_pos == END_POS)
-		curs_pos = END_POS - 1;
-	lv_textarea_set_cursor_pos((lv_obj_t*) textAreaFreq, curs_pos);
+		// for future use...(or not!)
+//		if ((strcmp(txt, "*") == 0) || (strcmp(txt, ".") == 0)
+//				|| (strcmp(txt, "#") == 0))
+//			return;
+
+		// get current cursor position
+		uint32_t curs_pos = lv_textarea_get_cursor_pos(
+				currentActiveTextAreaFreq);
+
+		// move cursor left
+		if (strcmp(txt, LV_SYMBOL_LEFT) == 0) {
+			curs_pos = move_cursor(curs_pos, -1);
+		}
+		// move cursor right
+		else if (strcmp(txt, LV_SYMBOL_RIGHT) == 0) {
+			curs_pos = move_cursor(curs_pos, +1);
+		}
+		// end input
+		else if (strcmp(txt, LV_SYMBOL_OK) == 0) {
+			curs_pos = END_POS;
+		} else {
+			currentFreeqStr[curs_pos] = *txt;
+
+			// update the text
+			lv_textarea_set_text(currentActiveTextAreaFreq, currentFreeqStr);
+
+			if (curs_pos == END_POS - 1) {
+				curs_pos = END_POS;
+			} else {
+				// update cursor position...
+				curs_pos = move_cursor(curs_pos, +1);
+			}
+		}
+
+		// update cursor position
+		lv_textarea_set_cursor_pos(currentActiveTextAreaFreq, curs_pos);
+
+		if (curs_pos == END_POS) {
+			end_input_text_area();
+		}
+	}
 }
 
 void on_screen_pressed(lv_event_t *e)
@@ -277,22 +210,132 @@ void on_tx_click(lv_event_t *e)
 	update_active_text_area_freq(ui_text_area_tx_freq, txfreqstr);
 }
 
+void on_xmit_button_press(lv_event_t *e)
+{
+	BSP_LED_On(LED_RED);
+}
+
+void on_xmit_button_release(lv_event_t *e)
+{
+	BSP_LED_Off(LED_RED);
+}
+
+void on_userbutton_press()
+{
+	BSP_LED_On(LED_BLUE);
+
+	// reset other LEDs
+	BSP_LED_Off(LED_GREEN);
+	BSP_LED_Off(LED_ORANGE);
+	BSP_LED_Off(LED_RED);
+
+	screen_capture();
+}
+
+void on_userbutton_release()
+{
+	BSP_LED_Off(LED_BLUE);
+}
+
+static void end_input_text_area()
+{
+	if (currentActiveTextAreaFreq == NULL) {
+		return;
+	}
+
+	lv_textarea_set_cursor_pos(currentActiveTextAreaFreq, END_POS);
+	lv_obj_set_style_border_side(currentActiveTextAreaFreq, LV_BORDER_SIDE_NONE,
+			LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	//const char * txt = lv_textarea_get_text(currentActiveTextAreaFreq);
+	uint32_t freq = get_freq_from_str(currentFreeqStr);
+	get_str_from_freq(freq, currentFreeqStr);
+	lv_textarea_set_text(currentActiveTextAreaFreq, currentFreeqStr);
+	currentFreeqStr = NULL;
+	currentActiveTextAreaFreq = NULL;
+
+	/* log output... */
+	char buffer[15];
+	user_settings.rx_freq = get_freq_from_str(rxfreqstr);
+	snprintf(buffer, 15, "%u", user_settings.rx_freq);
+	lv_label_set_text(ui_label_test_rx, buffer);
+
+	user_settings.tx_freq = get_freq_from_str(txfreqstr);
+	snprintf(buffer, 15, "%u", user_settings.tx_freq);
+	lv_label_set_text(ui_label_test_tx, buffer);
+
+	save_settings(&user_settings);
+}
+
+static void update_active_text_area_freq(lv_obj_t *newTextAreaFreq,
+		char freqstr[])
+{
+	if (newTextAreaFreq == NULL)
+		return;
+
+	end_input_text_area();
+	currentActiveTextAreaFreq = newTextAreaFreq;
+	currentFreeqStr = freqstr;
+	lv_obj_set_style_border_side(currentActiveTextAreaFreq, LV_BORDER_SIDE_FULL,
+			LV_PART_MAIN | LV_STATE_DEFAULT);
+	//lv_obj_set_style_anim_time(currentActiveTextAreaFreq, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
+
+	update_cursor_pos(currentActiveTextAreaFreq);
+}
+
+static int32_t move_cursor(int32_t curs_pos, int32_t movement)
+{
+	curs_pos = curs_pos + movement;
+
+	if (curs_pos == -1)
+		curs_pos += END_POS;
+	else if ((curs_pos == GIG_POS) || (curs_pos == MEG_POS) || (curs_pos == THOU_POS)) {
+		curs_pos += movement;
+	} else if (curs_pos == END_POS) {
+		curs_pos = 0;
+	}
+
+	return curs_pos;
+}
+
+static void update_cursor_pos(lv_obj_t *textAreaFreq)
+{
+	uint32_t curs_pos = lv_textarea_get_cursor_pos((lv_obj_t*) textAreaFreq);
+	if ((curs_pos == GIG_POS) || (curs_pos == MEG_POS) || (curs_pos == THOU_POS)) {
+		curs_pos = curs_pos + 1;
+	} else 	if (curs_pos == END_POS) {
+		curs_pos = END_POS - 1;
+	}
+	lv_textarea_set_cursor_pos((lv_obj_t*) textAreaFreq, curs_pos);
+}
+
 uint32_t get_freq_from_str(const char *str)
 {
-	uint32_t num = 0;
+	uint32_t num = 0;  // uint32 max: 4294967295
 
 	// converting string to number
 	for (int i = 0; str[i] != '\0'; i++) {
-		int test = str[i] - 48;
-
-		// if it is a digit 0-9
-		if (test >= 0 && test <= 9) {
-			num = num * 10 + test;
-		}
+		uint32_t digit = str[i] - 48;
 
 		// if it is a "_" treat as a 0
-		if (test == 47) {
-			num = num * 10;
+		if (digit == 47) {
+			digit = 0;
+		}
+
+		// if it is a digit 0-9
+		if (digit >= 0 && digit <= 9) {
+
+			// check for overflow and handle it
+		    if (num > UINT_MAX / 10) {
+		    	return UINT_MAX;
+		    }
+		    num *= 10;
+
+		    // check for overflow and handle it
+		    if (num > UINT_MAX - digit) {
+		    	return UINT_MAX;
+		    }
+			num += digit;
 		}
 	}
 
@@ -330,33 +373,6 @@ void get_str_from_freq(uint32_t i, char b[])
 			thousands++;
 		}
 	} while (p > b);
-}
-
-void on_xmit_button_press(lv_event_t *e)
-{
-	BSP_LED_On(LED_RED);
-}
-
-void on_xmit_button_release(lv_event_t *e)
-{
-	BSP_LED_Off(LED_RED);
-}
-
-void on_userbutton_press()
-{
-	BSP_LED_On(LED_BLUE);
-
-	// reset other LEDs
-	BSP_LED_Off(LED_GREEN);
-	BSP_LED_Off(LED_ORANGE);
-	BSP_LED_Off(LED_RED);
-
-	screen_capture();
-}
-
-void on_userbutton_release()
-{
-	BSP_LED_Off(LED_BLUE);
 }
 
 // assign buffer to SDRAM since we are limited on SRAM

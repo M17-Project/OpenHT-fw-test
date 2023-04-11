@@ -4566,7 +4566,7 @@
                     "InheritedType": 7
                   },
                   {
-                    "nid": 443189402,
+                    "nid": 1280939748,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -4579,7 +4579,7 @@
                 "strval": "CHECKED",
                 "childs": [
                   {
-                    "nid": -1098812851,
+                    "nid": -1938889122,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -4592,7 +4592,7 @@
                 "strval": "PRESSED",
                 "childs": [
                   {
-                    "nid": 1289704657,
+                    "nid": -1533766945,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -4605,7 +4605,7 @@
                 "strval": "CHECKED|PRESSED",
                 "childs": [
                   {
-                    "nid": -812025680,
+                    "nid": -1097627841,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -4618,7 +4618,7 @@
                 "strval": "DISABLED",
                 "childs": [
                   {
-                    "nid": 1108003852,
+                    "nid": 1234497438,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -5034,7 +5034,7 @@
                 "flags": 17,
                 "strtype": "OBJECT/Position",
                 "intarray": [
-                  98,
+                  75,
                   166
                 ],
                 "InheritedType": 7
@@ -5044,7 +5044,7 @@
                 "flags": 49,
                 "strtype": "OBJECT/Size",
                 "intarray": [
-                  338,
+                  390,
                   84
                 ],
                 "InheritedType": 7
@@ -5218,7 +5218,7 @@
               {
                 "nid": -1800625016,
                 "strtype": "TEXTAREA/Text",
-                "strval": "___.___.___",
+                "strval": "_.___.___.___",
                 "InheritedType": 10
               },
               {
@@ -5470,7 +5470,7 @@
                 "flags": 17,
                 "strtype": "OBJECT/Position",
                 "intarray": [
-                  20,
+                  5,
                   175
                 ],
                 "InheritedType": 7
@@ -5746,7 +5746,7 @@
                 "flags": 17,
                 "strtype": "OBJECT/Position",
                 "intarray": [
-                  20,
+                  5,
                   250
                 ],
                 "InheritedType": 7
@@ -6022,7 +6022,7 @@
                 "flags": 17,
                 "strtype": "OBJECT/Position",
                 "intarray": [
-                  98,
+                  75,
                   240
                 ],
                 "InheritedType": 7
@@ -6032,7 +6032,7 @@
                 "flags": 49,
                 "strtype": "OBJECT/Size",
                 "intarray": [
-                  338,
+                  390,
                   84
                 ],
                 "InheritedType": 7
@@ -6206,7 +6206,7 @@
               {
                 "nid": 1435644329,
                 "strtype": "TEXTAREA/Text",
-                "strval": "___.___.___",
+                "strval": "_.___.___.___",
                 "InheritedType": 10
               },
               {

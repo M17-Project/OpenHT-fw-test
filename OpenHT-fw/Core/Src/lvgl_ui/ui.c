@@ -351,11 +351,11 @@ void ui_screen2_screen_init(void)
     lv_obj_set_style_pad_column(ui_panel_numpad, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_text_area_rx_freq = lv_textarea_create(ui_screen2);
-    lv_obj_set_width(ui_text_area_rx_freq, 338);
+    lv_obj_set_width(ui_text_area_rx_freq, 390);
     lv_obj_set_height(ui_text_area_rx_freq, LV_SIZE_CONTENT);    /// 84
-    lv_obj_set_x(ui_text_area_rx_freq, 98);
+    lv_obj_set_x(ui_text_area_rx_freq, 75);
     lv_obj_set_y(ui_text_area_rx_freq, 166);
-    lv_textarea_set_text(ui_text_area_rx_freq, "___.___.___");
+    lv_textarea_set_text(ui_text_area_rx_freq, "_.___.___.___");
     lv_textarea_set_placeholder_text(ui_text_area_rx_freq, "Placeholder...");
     lv_textarea_set_one_line(ui_text_area_rx_freq, true);
     lv_obj_clear_flag(ui_text_area_rx_freq, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -375,7 +375,7 @@ void ui_screen2_screen_init(void)
     ui_label_rx = lv_label_create(ui_screen2);
     lv_obj_set_width(ui_label_rx, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_label_rx, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_label_rx, 20);
+    lv_obj_set_x(ui_label_rx, 5);
     lv_obj_set_y(ui_label_rx, 175);
     lv_label_set_text(ui_label_rx, "RX:");
     lv_obj_set_style_text_color(ui_label_rx, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -385,7 +385,7 @@ void ui_screen2_screen_init(void)
     ui_label_tx = lv_label_create(ui_screen2);
     lv_obj_set_width(ui_label_tx, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_label_tx, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_label_tx, 20);
+    lv_obj_set_x(ui_label_tx, 5);
     lv_obj_set_y(ui_label_tx, 250);
     lv_label_set_text(ui_label_tx, "TX:");
     lv_obj_set_style_text_color(ui_label_tx, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -393,11 +393,11 @@ void ui_screen2_screen_init(void)
     lv_obj_set_style_text_font(ui_label_tx, &lv_font_montserrat_42, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_text_area_tx_freq = lv_textarea_create(ui_screen2);
-    lv_obj_set_width(ui_text_area_tx_freq, 338);
+    lv_obj_set_width(ui_text_area_tx_freq, 390);
     lv_obj_set_height(ui_text_area_tx_freq, LV_SIZE_CONTENT);    /// 84
-    lv_obj_set_x(ui_text_area_tx_freq, 98);
+    lv_obj_set_x(ui_text_area_tx_freq, 75);
     lv_obj_set_y(ui_text_area_tx_freq, 240);
-    lv_textarea_set_text(ui_text_area_tx_freq, "___.___.___");
+    lv_textarea_set_text(ui_text_area_tx_freq, "_.___.___.___");
     lv_textarea_set_placeholder_text(ui_text_area_tx_freq, "Placeholder...");
     lv_textarea_set_one_line(ui_text_area_tx_freq, true);
     lv_obj_clear_flag(ui_text_area_tx_freq, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
