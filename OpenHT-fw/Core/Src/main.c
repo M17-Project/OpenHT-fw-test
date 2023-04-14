@@ -220,8 +220,13 @@ int main(void)
 		BSP_LED_On(LED_ORANGE);
 	}
 
+	// init the hardware configuration (defines the capabilities of the hardware)
+	init_openht_hwconfig();
+
+	// init the LVGL gui library (draws UI on screen and handles user input)
 	lv_init();
 
+	// init the screen and touch driver hardware of the STM32F469I_DISCO board
 	screen_driver_init();
 	touch_sensor_driver_init();
 

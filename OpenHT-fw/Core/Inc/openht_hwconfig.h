@@ -16,42 +16,45 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-// LVGL version: 8.3.4
-// Project name: OpenHT_UI
-
-#ifndef __OPENHT_UI_H
-#define __OPENHT_UI_H
+#ifndef INC_OPENHT_HWCONFIG_H_
+#define INC_OPENHT_HWCONFIG_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "stm32469i_discovery.h"
-#include "stm32f4xx_hal.h"
-#include <lvgl.h>
+#define NUM_BANDS 3  // number of bands supported by hardware
 
-#define max(a,b) \
-  ({ __typeof__ (a) _a = (a); \
-      __typeof__ (b) _b = (b); \
-    _a > _b ? _a : _b; })
+//typedef enum
+//{
+//	OPENHT_OK = 0, /* (0) Succeeded */
+//	OPENHT_ERR, /* (1) A error occurred */
+//} openht_res_t;
 
-#define min(a,b) \
-  ({ __typeof__ (a) _a = (a); \
-      __typeof__ (b) _b = (b); \
-    _a < _b ? _a : _b; })
+typedef struct
+{
+	uint32_t start_freq;
+	uint32_t end_freq;
+} openht_bandrange_t;
 
-void custom_ui_init(void);
+typedef struct
+{
+	void (*set_frequency_cb)(uint32_t);
+	void (*tx_start_cb)(void);
+	void (*tx_end_cb)(void);
 
-void numpad_btnmatrix_event_cb(lv_event_t *e);
-void qwertypad_btnmatrix_event_cb(lv_event_t *e);
-uint32_t get_freq_from_str(const char *str);
-void get_str_from_freq(uint32_t i, char b[], bool prepend_blank);
+	uint8_t num_bands;
+	openht_bandrange_t * bands;
 
-void on_userbutton_press(void);
-void on_userbutton_release(void);
+} openht_hwconfig_t;
+
+
+
+void init_openht_hwconfig(void);
+openht_hwconfig_t get_openht_hwconfig();
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __OPENHT_UI_H */
+#endif /* INC_OPENHT_HWCONFIG_H_ */

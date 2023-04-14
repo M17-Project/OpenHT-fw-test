@@ -10,12 +10,17 @@
 extern "C" {
 #endif
 
-void fan_speed_value(lv_event_t * e);
+void on_vol_changed(lv_event_t * e);
 void on_xmit_button_press(lv_event_t * e);
 void on_xmit_button_release(lv_event_t * e);
 void on_screen_pressed(lv_event_t * e);
-void on_rx_click(lv_event_t * e);
-void on_tx_click(lv_event_t * e);
+void on_freq_button_down_press(lv_event_t * e);
+void on_freq_button_down_press(lv_event_t * e);
+void on_freq_button_up_press(lv_event_t * e);
+void on_freq_button_up_press(lv_event_t * e);
+void on_rx_freq_ta_click(lv_event_t * e);
+void on_tx_freq_ta_click(lv_event_t * e);
+void on_callsign_ta_click(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

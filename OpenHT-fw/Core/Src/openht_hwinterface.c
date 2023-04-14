@@ -16,31 +16,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef INC_USER_SETTINGS_H_
-#define INC_USER_SETTINGS_H_
+#include <stdlib.h>
+#include <stdio.h>
+#include <limits.h>
+#include <openht_hwconfig.h>
+#include <openht_hwinterface.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-#include "stm32469i_discovery.h" /* DISCOVERY includes component */
-#include "stm32469i_discovery_qspi.h"
-
-#define WRITE_READ_ADDR     ((uint32_t)0x0050)
-
-typedef struct
+void openht_hw_set_freq(const uint32_t freq)
 {
-	char callsign[10];
-	uint32_t tx_freq;
-	uint32_t rx_freq;
-	uint8_t audio_vol;
-} settings_t;
-
-void save_settings(const settings_t *settings);
-void get_settings(const settings_t *settings);
-
-#ifdef __cplusplus
+	// TODO: implement function
 }
-#endif
 
-#endif /* INC_USER_SETTINGS_H_ */
+void openht_hw_tx_start()
+{
+	// TODO: implement function
+}
+
+void openht_hw_tx_end()
+{
+	// TODO: implement function
+}

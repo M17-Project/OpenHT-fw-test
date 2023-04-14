@@ -16,42 +16,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-// LVGL version: 8.3.4
-// Project name: OpenHT_UI
-
-#ifndef __OPENHT_UI_H
-#define __OPENHT_UI_H
+#ifndef SRC_LVHT_NUMPAD_H_
+#define SRC_LVHT_NUMPAD_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "stm32469i_discovery.h"
-#include "stm32f4xx_hal.h"
 #include <lvgl.h>
 
-#define max(a,b) \
-  ({ __typeof__ (a) _a = (a); \
-      __typeof__ (b) _b = (b); \
-    _a > _b ? _a : _b; })
-
-#define min(a,b) \
-  ({ __typeof__ (a) _a = (a); \
-      __typeof__ (b) _b = (b); \
-    _a < _b ? _a : _b; })
-
-void custom_ui_init(void);
-
-void numpad_btnmatrix_event_cb(lv_event_t *e);
-void qwertypad_btnmatrix_event_cb(lv_event_t *e);
-uint32_t get_freq_from_str(const char *str);
-void get_str_from_freq(uint32_t i, char b[], bool prepend_blank);
-
-void on_userbutton_press(void);
-void on_userbutton_release(void);
+lv_obj_t* create_number_pad(lv_obj_t *lv_obj);
+void set_numpad_visibility(bool visible);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __OPENHT_UI_H */
+#endif /* SRC_LVHT_NUMPAD_H_ */

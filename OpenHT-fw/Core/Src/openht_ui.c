@@ -30,9 +30,8 @@
 #include "fatfs.h"
 #include "bmp_utils.h"
 #include "user_settings.h"
+#include "openht_hwconfig.h"
 
-static lv_obj_t *currentActiveTextAreaFreq = NULL;
-static char *currentFreeqStr = NULL;
 
 #define EMPTY_FREQ "_.___.___.___"
 #define END_POS 13
@@ -40,17 +39,22 @@ static char *currentFreeqStr = NULL;
 #define MEG_POS 5
 #define GIG_POS 1
 
-static char rxfreqstr[] = EMPTY_FREQ;
-static char txfreqstr[] = EMPTY_FREQ;
+static char callsign_str[10] = ""; // 9 digits for callsign
+
+static char current_freq_str[] = EMPTY_FREQ;
+static lv_obj_t *current_freq_ta = NULL;
+static uint32_t *current_freq = NULL;
 
 static settings_t user_settings;
 
-
-static void end_input_text_area(bool finished_input);
+static void change_vfo_frequency(bool move_up);
+static bool validate_freq(uint32_t *freq);
 static int32_t move_cursor(int32_t curs_pos, int32_t movement);
 static void update_cursor_pos(lv_obj_t *textAreaFreq);
-static void update_active_text_area_freq(lv_obj_t *newTextAreaFreq,
-		char freqstr[]);
+static void end_input_callsign_ta();
+static void update_active_freq_ta(lv_obj_t *new_freq_ta, uint32_t *freq);
+static void end_input_freq_ta(bool finished_input);
+
 static void screen_capture(void);
 
 void custom_ui_init(void)
@@ -60,105 +64,84 @@ void custom_ui_init(void)
 	//get_str_from_freq(test, rxfreqstr);
 	//get_str_from_freq(0, rxfreqstr);
 
-	lv_obj_t * btnm1 = create_number_pad(ui_panel_numpad);
+	// remove the border for the UI placeholder
+	// Hint: using border in SquareLine Studio allows visibility while moving
+	// things around, then set border to none at runtime...
+	lv_obj_set_style_border_side(ui_panel_qwerty_pad, LV_BORDER_SIDE_NONE,
+			LV_PART_MAIN);
+	lv_obj_set_style_border_side(ui_panel_num_pad, LV_BORDER_SIDE_NONE,
+			LV_PART_MAIN);
+	lv_obj_set_style_border_side(ui_panel_freq_bump, LV_BORDER_SIDE_NONE,
+			LV_PART_MAIN);
+	lv_dropdown_set_selected(ui_freq_dropdown, 1);
+
+	lv_obj_t * qwerty_pad = create_qwerty_pad(ui_panel_qwerty_pad);
+	lv_obj_t * num_pad = create_number_pad(ui_panel_num_pad);
+
 	// callback handler
-	lv_obj_add_event_cb(btnm1, button_matrix_event_cb, LV_EVENT_ALL, NULL);
-
-
-	//lv_obj_set_style_anim_time((lv_textarea_t *)ui_text_area_rx_freq, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
-	//lv_obj_set_style_anim_time((lv_textarea_t *)ui_text_area_tx_freq, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
+	lv_obj_add_event_cb(num_pad, numpad_btnmatrix_event_cb, LV_EVENT_ALL, NULL);
+	lv_obj_add_event_cb(qwerty_pad, qwertypad_btnmatrix_event_cb, LV_EVENT_ALL, NULL);
 
 	get_settings(&user_settings);
 
 	char buffer[15];
 	snprintf(buffer, 15, "%u", user_settings.rx_freq);
 	lv_label_set_text(ui_label_test_rx, buffer);
-	get_str_from_freq(user_settings.rx_freq, rxfreqstr);
-	lv_textarea_set_text(ui_text_area_rx_freq, rxfreqstr);
+	get_str_from_freq(user_settings.rx_freq, current_freq_str, true);
+	lv_textarea_set_text(ui_text_area_rx_freq, current_freq_str);
 
 	snprintf(buffer, 15, "%u", user_settings.tx_freq);
 	lv_label_set_text(ui_label_test_tx, buffer);
-	get_str_from_freq(user_settings.tx_freq, txfreqstr);
-	lv_textarea_set_text(ui_text_area_tx_freq, txfreqstr);
-}
+	get_str_from_freq(user_settings.tx_freq, current_freq_str, true);
+	lv_textarea_set_text(ui_text_area_tx_freq, current_freq_str);
 
-void button_matrix_event_cb(lv_event_t *e)
-{
-	lv_event_code_t code = lv_event_get_code(e);
-	lv_obj_t *obj = lv_event_get_target(e);
-	if (code == LV_EVENT_VALUE_CHANGED) {
-		uint32_t id = lv_btnmatrix_get_selected_btn(obj);
-		const char *txt = lv_btnmatrix_get_btn_text(obj, id);
-
-		LV_LOG_USER("%s was pressed\n", txt);
-
-		if (currentActiveTextAreaFreq == NULL)
-			return;
-
-		// for future use...(or not!)
-//		if ((strcmp(txt, "*") == 0) || (strcmp(txt, ".") == 0)
-//				|| (strcmp(txt, "#") == 0))
-//			return;
-
-		// get current cursor position
-		uint32_t curs_pos = lv_textarea_get_cursor_pos(
-				currentActiveTextAreaFreq);
-
-		// move cursor left
-		if (strcmp(txt, LV_SYMBOL_LEFT) == 0) {
-			curs_pos = move_cursor(curs_pos, -1);
-		}
-		// move cursor right
-		else if (strcmp(txt, LV_SYMBOL_RIGHT) == 0) {
-			curs_pos = move_cursor(curs_pos, +1);
-		}
-		// end input
-		else if (strcmp(txt, LV_SYMBOL_OK) == 0) {
-			curs_pos = END_POS;
-		} else {
-			currentFreeqStr[curs_pos] = *txt;
-
-			// update the text
-			lv_textarea_set_text(currentActiveTextAreaFreq, currentFreeqStr);
-
-			if (curs_pos == END_POS - 1) {
-				curs_pos = END_POS;
-			} else {
-				// update cursor position...
-				curs_pos = move_cursor(curs_pos, +1);
-			}
-		}
-
-		// update cursor position
-		lv_textarea_set_cursor_pos(currentActiveTextAreaFreq, curs_pos);
-
-		if (curs_pos == END_POS) {
-			end_input_text_area(true);
-		}
-	}
+	strcpy(callsign_str, user_settings.callsign);
+	lv_textarea_set_text(ui_text_area_callsign, callsign_str);
 }
 
 void on_screen_pressed(lv_event_t *e)
 {
-	end_input_text_area(true);
+	end_input_callsign_ta();
+	end_input_freq_ta(true);
 }
 
-void on_rx_click(lv_event_t *e)
+void on_freq_button_down_press(lv_event_t * e)
 {
-	if (currentActiveTextAreaFreq == ui_text_area_rx_freq) {
+	change_vfo_frequency(false);
+}
+
+void on_freq_button_up_press(lv_event_t * e)
+{
+	change_vfo_frequency(true);
+}
+
+void on_callsign_ta_click(lv_event_t *e)
+{
+	end_input_freq_ta(true);
+
+	lv_obj_set_style_border_side(ui_text_area_callsign, LV_BORDER_SIDE_FULL,
+			LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_text_area_callsign, 150, LV_PART_CURSOR | LV_STATE_DEFAULT);
+
+	set_qwertypad_visibility(true);
+}
+
+void on_rx_freq_ta_click(lv_event_t *e)
+{
+	if (current_freq_ta == ui_text_area_rx_freq) {
 		update_cursor_pos(ui_text_area_rx_freq);
 		return;
 	}
-	update_active_text_area_freq(ui_text_area_rx_freq, rxfreqstr);
+	update_active_freq_ta(ui_text_area_rx_freq, &user_settings.rx_freq);
 }
 
-void on_tx_click(lv_event_t *e)
+void on_tx_freq_ta_click(lv_event_t *e)
 {
-	if (currentActiveTextAreaFreq == ui_text_area_tx_freq) {
+	if (current_freq_ta == ui_text_area_tx_freq) {
 		update_cursor_pos(ui_text_area_tx_freq);
 		return;
 	}
-	update_active_text_area_freq(ui_text_area_tx_freq, txfreqstr);
+	update_active_freq_ta(ui_text_area_tx_freq, &user_settings.tx_freq);
 }
 
 void on_xmit_button_press(lv_event_t *e)
@@ -169,6 +152,10 @@ void on_xmit_button_press(lv_event_t *e)
 void on_xmit_button_release(lv_event_t *e)
 {
 	BSP_LED_Off(LED_RED);
+}
+
+void on_vol_changed(lv_event_t *e)
+{
 }
 
 void on_userbutton_press()
@@ -188,9 +175,212 @@ void on_userbutton_release()
 	BSP_LED_Off(LED_BLUE);
 }
 
-static void end_input_text_area(bool finished_input)
+void numpad_btnmatrix_event_cb(lv_event_t *e)
 {
-	if (currentActiveTextAreaFreq == NULL) {
+	lv_event_code_t code = lv_event_get_code(e);
+	lv_obj_t *obj = lv_event_get_target(e);
+	if (code == LV_EVENT_VALUE_CHANGED) {
+		uint32_t id = lv_btnmatrix_get_selected_btn(obj);
+		const char *txt = lv_btnmatrix_get_btn_text(obj, id);
+
+		LV_LOG_USER("%s was pressed\n", txt);
+
+		if (current_freq_ta == NULL)
+			return;
+
+		// for future use...(or not!)
+//		if ((strcmp(txt, "*") == 0) || (strcmp(txt, ".") == 0)
+//				|| (strcmp(txt, "#") == 0))
+//			return;
+
+		// get current cursor position
+		uint32_t curs_pos = lv_textarea_get_cursor_pos(
+				current_freq_ta);
+
+		// move cursor left
+		if (strcmp(txt, LV_SYMBOL_LEFT) == 0) {
+			curs_pos = move_cursor(curs_pos, -1);
+		}
+		// move cursor right
+		else if (strcmp(txt, LV_SYMBOL_RIGHT) == 0) {
+			curs_pos = move_cursor(curs_pos, +1);
+		}
+		// end input
+		else if (strcmp(txt, LV_SYMBOL_OK) == 0) {
+			curs_pos = END_POS;
+		} else {
+			current_freq_str[curs_pos] = *txt;
+
+			// update the text
+			lv_textarea_set_text(current_freq_ta, current_freq_str);
+
+			if (curs_pos == END_POS - 1) {
+				curs_pos = END_POS;
+			} else {
+				// update cursor position...
+				curs_pos = move_cursor(curs_pos, +1);
+			}
+		}
+
+		// update cursor position
+		lv_textarea_set_cursor_pos(current_freq_ta, curs_pos);
+
+		if (curs_pos == END_POS) {
+			end_input_freq_ta(true);
+		}
+	}
+}
+
+void qwertypad_btnmatrix_event_cb(lv_event_t *e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+	lv_obj_t *obj = lv_event_get_target(e);
+	if (code == LV_EVENT_VALUE_CHANGED) {
+		uint32_t id = lv_btnmatrix_get_selected_btn(obj);
+		const char *txt = lv_btnmatrix_get_btn_text(obj, id);
+
+		LV_LOG_USER("%s was pressed\n", txt);
+
+		// get current cursor position
+		uint32_t curs_pos = lv_textarea_get_cursor_pos(ui_text_area_callsign);
+
+		if (strcmp(txt, LV_SYMBOL_BACKSPACE) == 0) {
+			if (curs_pos > 0) {
+				curs_pos--;
+				memmove(&callsign_str[curs_pos], &callsign_str[curs_pos + 1], strlen(callsign_str) - curs_pos);
+			}
+		} else if (curs_pos < sizeof(callsign_str) - 1){
+			memmove(&callsign_str[curs_pos + 1], &callsign_str[curs_pos], sizeof(callsign_str) - 1 - curs_pos);
+			callsign_str[curs_pos] = *txt;
+			curs_pos++;
+		}
+
+		// update the text
+		lv_textarea_set_text(ui_text_area_callsign, callsign_str);
+
+		// update cursor position
+		lv_textarea_set_cursor_pos(ui_text_area_callsign, curs_pos);
+
+	}
+}
+
+static bool validate_freq(uint32_t *freq)
+{
+	openht_hwconfig_t config = get_openht_hwconfig();
+
+	bool found_band = false;
+	uint32_t test_freq = UINT_MAX;
+	uint32_t band_edge = 0;
+
+	for (int i = 0; i < config.num_bands; i++) {
+		if(*freq >= config.bands[i].start_freq && *freq <= config.bands[i].end_freq) {
+			found_band = true;
+			break;
+		} else {
+			int32_t test = abs(*freq - config.bands[i].start_freq);
+			if (test < test_freq) {
+				test_freq = test;
+				band_edge = config.bands[i].start_freq;
+			}
+			test = abs(*freq - config.bands[i].end_freq);
+			if (test < test_freq) {
+				test_freq = test;
+				band_edge = config.bands[i].end_freq;
+			}
+		}
+	}
+
+	// snap to closest band edge
+	if (!found_band) {
+		*freq = band_edge;
+	}
+
+	//config.set_frequency_cb(freq);
+
+	return found_band;
+}
+
+static void change_freq(int32_t freq_shift)
+{
+	if (current_freq_ta != NULL && current_freq != NULL) {
+		uint32_t curs_pos = lv_textarea_get_cursor_pos(current_freq_ta);
+		*current_freq += freq_shift;
+
+		validate_freq(current_freq);
+
+		get_str_from_freq(*current_freq, current_freq_str, false);
+		lv_textarea_set_text(current_freq_ta, current_freq_str);
+		lv_textarea_set_cursor_pos(current_freq_ta, curs_pos);
+	}
+}
+
+static void change_vfo_frequency(bool move_up)
+{
+	uint16_t selected_item = lv_dropdown_get_selected(ui_freq_dropdown);
+
+	// need signed value
+	int32_t freq_shift = 0;
+
+	switch (selected_item) {
+		case 0:
+			freq_shift = 6250;
+			break;
+		case 1:
+			freq_shift = 12500;
+			break;
+		case 2:
+			freq_shift = 25000;
+			break;
+		default:
+			break;
+	}
+
+	change_freq(move_up ? freq_shift : -freq_shift);
+}
+
+static void end_input_callsign_ta()
+{
+	set_qwertypad_visibility(false);
+
+	lv_textarea_set_cursor_pos(ui_text_area_callsign, LV_TEXTAREA_CURSOR_LAST);
+	lv_obj_set_style_border_side(ui_text_area_callsign, LV_BORDER_SIDE_NONE,
+			LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_text_area_callsign, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
+
+
+    strcpy(user_settings.callsign, callsign_str);
+	save_settings(&user_settings);
+}
+
+static void update_active_freq_ta(lv_obj_t *new_freq_ta, uint32_t *freq)
+{
+	if (new_freq_ta == NULL)
+		return;
+
+	end_input_freq_ta(false);
+	end_input_callsign_ta();
+	set_numpad_visibility(true);
+
+	current_freq_ta = new_freq_ta;
+
+	// store the ptr for the freq so val can be updated
+	current_freq = freq;
+
+	get_str_from_freq(*current_freq, current_freq_str, false);
+	uint32_t curs_pos = lv_textarea_get_cursor_pos(current_freq_ta);
+	lv_textarea_set_text(current_freq_ta, current_freq_str);
+	lv_textarea_set_cursor_pos(current_freq_ta, curs_pos);
+
+	lv_obj_set_style_border_side(current_freq_ta, LV_BORDER_SIDE_FULL,
+			LV_PART_MAIN | LV_STATE_DEFAULT);
+	//lv_obj_set_style_anim_time(currentActiveTextAreaFreq, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
+
+	update_cursor_pos(current_freq_ta);
+}
+
+static void end_input_freq_ta(bool finished_input)
+{
+	if (current_freq_ta == NULL) {
 		return;
 	}
 
@@ -198,50 +388,32 @@ static void end_input_text_area(bool finished_input)
 		set_numpad_visibility(false);
 	}
 
-	lv_textarea_set_cursor_pos(currentActiveTextAreaFreq, END_POS);
-	lv_obj_set_style_border_side(currentActiveTextAreaFreq, LV_BORDER_SIDE_NONE,
+	lv_textarea_set_cursor_pos(current_freq_ta, END_POS);
+	lv_obj_set_style_border_side(current_freq_ta, LV_BORDER_SIDE_NONE,
 			LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	//const char * txt = lv_textarea_get_text(currentActiveTextAreaFreq);
-	uint32_t freq = get_freq_from_str(currentFreeqStr);
-	get_str_from_freq(freq, currentFreeqStr);
-	lv_textarea_set_text(currentActiveTextAreaFreq, currentFreeqStr);
-	currentFreeqStr = NULL;
-	currentActiveTextAreaFreq = NULL;
+	*current_freq = get_freq_from_str(current_freq_str);
+
+	// validate input to ensure within bands
+	validate_freq(current_freq);
+
+	get_str_from_freq(*current_freq, current_freq_str, true);
+	lv_textarea_set_text(current_freq_ta, current_freq_str);
+	current_freq = NULL;
+	current_freq_ta = NULL;
 
 	/* log output... */
 	char buffer[15];
-	user_settings.rx_freq = get_freq_from_str(rxfreqstr);
+//	user_settings.rx_freq = get_freq_from_str(rxfreqstr);
 	snprintf(buffer, 15, "%u", user_settings.rx_freq);
 	lv_label_set_text(ui_label_test_rx, buffer);
 
-	user_settings.tx_freq = get_freq_from_str(txfreqstr);
+//	user_settings.tx_freq = get_freq_from_str(txfreqstr);
 	snprintf(buffer, 15, "%u", user_settings.tx_freq);
 	lv_label_set_text(ui_label_test_tx, buffer);
 
 	save_settings(&user_settings);
-}
-
-
-
-static void update_active_text_area_freq(lv_obj_t *newTextAreaFreq,
-		char freqstr[])
-{
-	if (newTextAreaFreq == NULL)
-		return;
-
-	end_input_text_area(false);
-
-	set_numpad_visibility(true);
-
-	currentActiveTextAreaFreq = newTextAreaFreq;
-	currentFreeqStr = freqstr;
-
-	lv_obj_set_style_border_side(currentActiveTextAreaFreq, LV_BORDER_SIDE_FULL,
-			LV_PART_MAIN | LV_STATE_DEFAULT);
-	//lv_obj_set_style_anim_time(currentActiveTextAreaFreq, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
-
-	update_cursor_pos(currentActiveTextAreaFreq);
 }
 
 static int32_t move_cursor(int32_t curs_pos, int32_t movement)
@@ -303,7 +475,7 @@ uint32_t get_freq_from_str(const char *str)
 	return num;
 }
 
-void get_str_from_freq(uint32_t i, char b[])
+void get_str_from_freq(uint32_t i, char b[], bool prepend_blank)
 {
 	char const digit[] = "0123456789";
 	char *p = b;
@@ -322,12 +494,18 @@ void get_str_from_freq(uint32_t i, char b[])
 	int thousands = 0;
 	do { // add digits backwards, inserting thousands separator
 		if (thousands == 3) {
-			*--p = '.';
+			if (i == 0 && prepend_blank) {
+				*--p = ' ';
+			} else {
+				*--p = '.';
+			}
 			thousands = 0;
 		} else {
 			if (i) {
 				*--p = digit[i % 10];
 				i = i / 10;
+			} else if (prepend_blank){
+				*--p = ' ';
 			} else { // prepend underscores
 				*--p = '_';
 			}
