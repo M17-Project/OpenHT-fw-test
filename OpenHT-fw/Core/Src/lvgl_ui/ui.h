@@ -33,7 +33,12 @@ void ui_event_Button2(lv_event_t * e);
 extern lv_obj_t * ui_Button2;
 extern lv_obj_t * ui_Label3;
 extern lv_obj_t * ui_label_test_rx;
+void ui_event_about_button(lv_event_t * e);
+extern lv_obj_t * ui_about_button;
+extern lv_obj_t * ui_Label5;
 extern lv_obj_t * ui_label_test_tx;
+void ui_event_display_brightness_ctrl(lv_event_t * e);
+extern lv_obj_t * ui_display_brightness_ctrl;
 void ui_event_screen2(lv_event_t * e);
 extern lv_obj_t * ui_screen2;
 extern lv_obj_t * ui_panel_qwerty_pad;
@@ -54,10 +59,24 @@ void ui_event_text_area_tx_freq(lv_event_t * e);
 extern lv_obj_t * ui_text_area_tx_freq;
 void ui_event_text_area_callsign(lv_event_t * e);
 extern lv_obj_t * ui_text_area_callsign;
+extern lv_obj_t * ui_screen_scratchpad;
+extern lv_obj_t * ui_about_panel;
+extern lv_obj_t * ui_wiggles_image;
+extern lv_obj_t * ui_about_tab_panel;
+extern lv_obj_t * ui_about_text_area;
+extern lv_obj_t * ui_about_hw_text_area;
+void ui_event_about_ok_btn(lv_event_t * e);
+extern lv_obj_t * ui_about_ok_btn;
+extern lv_obj_t * ui_Label6;
+extern lv_obj_t * ui_about_logo;
+extern lv_obj_t * ui_Label7;
+extern lv_obj_t * ui_Label9;
 extern lv_obj_t * ui____initial_actions0;
 
 
 LV_IMG_DECLARE(ui_img_m17_logo_w_sm_png);    // assets/m17_logo_w_sm.png
+LV_IMG_DECLARE(ui_img_wiggles_png);    // assets/wiggles.png
+LV_IMG_DECLARE(ui_img_m17_logo_sm_png);    // assets/m17_logo_sm.png
 
 
 LV_FONT_DECLARE(ui_font_Number60);

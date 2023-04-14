@@ -31,6 +31,7 @@
 #include "bmp_utils.h"
 #include "user_settings.h"
 #include "openht_hwconfig.h"
+#include <../../Drivers/BSP/Components/nt35510/nt35510.h>
 
 
 #define EMPTY_FREQ "_.___.___.___"
@@ -57,12 +58,63 @@ static void end_input_freq_ta(bool finished_input);
 
 static void screen_capture(void);
 
+static lv_obj_t *about_tabview = NULL;
+
 void custom_ui_init(void)
 {
 	// test inputs...
 	//uint32_t test = get_freq_from_str("_39.123.___");
 	//get_str_from_freq(test, rxfreqstr);
 	//get_str_from_freq(0, rxfreqstr);
+
+	// squareline designer clean up code...
+	lv_obj_set_parent(ui_about_panel, lv_layer_top());
+	lv_obj_add_flag(ui_about_panel, LV_OBJ_FLAG_HIDDEN);
+//    lv_obj_set_y(ui_about_panel, 800);
+	lv_obj_move_foreground(ui_about_panel);
+
+
+
+	about_tabview = lv_tabview_create(ui_about_tab_panel, LV_DIR_TOP, 40);
+
+    lv_obj_set_style_bg_color(about_tabview, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+
+    lv_obj_t * tab_btns = lv_tabview_get_tab_btns(about_tabview);
+//    lv_obj_set_style_bg_color(tab_btns, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
+//    lv_obj_set_style_text_color(tab_btns, lv_palette_lighten(LV_PALETTE_GREY, 5), 0);
+    lv_obj_set_style_bg_color(tab_btns, lv_color_hex(0x464B55), 0);
+    lv_obj_set_style_text_color(tab_btns, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_text_color(tab_btns, lv_color_hex(0x37B9F5), LV_PART_ITEMS | LV_STATE_CHECKED);
+    lv_obj_set_style_border_side(tab_btns, LV_BORDER_SIDE_BOTTOM, LV_PART_ITEMS | LV_STATE_CHECKED);
+
+
+    lv_obj_set_width(about_tabview, lv_pct(100));
+    lv_obj_set_height(about_tabview, lv_pct(100));
+    lv_obj_set_style_pad_left(about_tabview, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(about_tabview, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(about_tabview, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(about_tabview, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	lv_obj_t *about_tab = lv_tabview_add_tab(about_tabview, "About");
+    lv_obj_set_style_pad_left(about_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(about_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(about_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(about_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	lv_obj_set_parent(ui_about_text_area, about_tab);
+	lv_obj_clear_flag(ui_about_text_area, LV_OBJ_FLAG_HIDDEN);
+
+	lv_obj_t *capes_tab = lv_tabview_add_tab(about_tabview, "HW Info");
+    lv_obj_set_style_pad_left(capes_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(capes_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(capes_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(capes_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	lv_obj_set_parent(ui_about_hw_text_area, capes_tab);
+	lv_obj_clear_flag(ui_about_hw_text_area, LV_OBJ_FLAG_HIDDEN);
+
+
 
 	// remove the border for the UI placeholder
 	// Hint: using border in SquareLine Studio allows visibility while moving
@@ -74,6 +126,8 @@ void custom_ui_init(void)
 	lv_obj_set_style_border_side(ui_panel_freq_bump, LV_BORDER_SIDE_NONE,
 			LV_PART_MAIN);
 	lv_dropdown_set_selected(ui_freq_dropdown, 1);
+
+
 
 	lv_obj_t * qwerty_pad = create_qwerty_pad(ui_panel_qwerty_pad);
 	lv_obj_t * num_pad = create_number_pad(ui_panel_num_pad);
@@ -97,6 +151,22 @@ void custom_ui_init(void)
 
 	strcpy(callsign_str, user_settings.callsign);
 	lv_textarea_set_text(ui_text_area_callsign, callsign_str);
+}
+
+void on_about_clicked(lv_event_t *e)
+{
+	if (about_tabview != NULL) {
+    //lv_obj_set_y(ui_about_panel, 0);
+	lv_tabview_set_act(about_tabview, 0, LV_ANIM_OFF);
+	lv_obj_clear_flag(ui_about_panel, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
+	}
+}
+
+void on_about_ok_clicked(lv_event_t *e)
+{
+	lv_obj_add_flag(ui_about_panel, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
 }
 
 void on_screen_pressed(lv_event_t *e)
@@ -158,6 +228,14 @@ void on_vol_changed(lv_event_t *e)
 {
 }
 
+void on_disp_brightness_changed(lv_event_t *e)
+{
+    lv_obj_t * slider = lv_event_get_target(e);
+    NT35510_Set_Backlight((uint8_t)lv_slider_get_value(slider));
+}
+
+
+bool display_toggle = false;
 void on_userbutton_press()
 {
 	BSP_LED_On(LED_BLUE);
@@ -168,6 +246,17 @@ void on_userbutton_press()
 	BSP_LED_Off(LED_RED);
 
 	screen_capture();
+
+//	if (display_toggle) {
+//		NT35510_BacklightOn();
+//		//BSP_LCD_DisplayOn();
+//		display_toggle = false;
+//	} else {
+//		NT35510_BacklightOff();
+//		//BSP_LCD_DisplayOff();
+//		display_toggle = true;
+//	}
+
 }
 
 void on_userbutton_release()
