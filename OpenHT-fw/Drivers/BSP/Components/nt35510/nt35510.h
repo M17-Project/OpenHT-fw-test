@@ -202,6 +202,7 @@
   */
 #define NT35510_480X800_FREQUENCY_DIVIDER  2   /* LCD Frequency divider      */
 
+#define NT35510_DEFAULT_BRIGHTNESS 0x7F
 /**
   * @}
   */
@@ -225,6 +226,10 @@ void DSI_IO_WriteCmd(uint32_t NbrParams, uint8_t *pParams);
 uint8_t NT35510_Init(uint32_t ColorCoding, uint32_t orientation);
 uint8_t NT35510_DeInit(void);
 void NT35510_IO_Delay(uint32_t Delay);
+
+uint8_t NT35510_Set_Backlight(uint8_t val);
+uint8_t NT35510_BacklightOn(void);
+uint8_t NT35510_BacklightOff(void);
 
 /**
   * @}

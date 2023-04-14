@@ -119,8 +119,7 @@ uint8_t NT35510_Init(uint32_t ColorCoding, uint32_t orientation)
   const uint8_t nt35510_reg26[] = {NT35510_CMD_TEEON, 0x00};  /* Tear on */
   const uint8_t nt35510_reg27[] = {NT35510_CMD_SLPOUT, 0x00}; /* Sleep out */
   const uint8_t nt35510_reg30[] = {NT35510_CMD_DISPON, 0x00};
-
-  const uint8_t nt35510_reg31[] = {NT35510_CMD_WRDISBV, 0x7F};
+  const uint8_t nt35510_reg31[] = {NT35510_CMD_WRDISBV, NT35510_DEFAULT_BRIGHTNESS};
   const uint8_t nt35510_reg32[] = {NT35510_CMD_WRCTRLD, 0x2C};
   const uint8_t nt35510_reg33[] = {NT35510_CMD_WRCABC, 0x02};
   const uint8_t nt35510_reg34[] = {NT35510_CMD_WRCABCMB, 0xFF};
@@ -221,6 +220,31 @@ uint8_t NT35510_Init(uint32_t ColorCoding, uint32_t orientation)
   DSI_IO_WriteCmd(0, (uint8_t *)nt35510_reg35);
 
   return 0;
+}
+
+uint8_t NT35510_Set_Backlight(uint8_t val)
+{
+	  /* Note : default is 0 (lowest Brightness), 0xFF is highest Brightness */
+	  uint8_t nt35510_cmd[] = {NT35510_CMD_WRDISBV, 0x00};
+	  nt35510_cmd[1] = val;
+	  DSI_IO_WriteCmd(1, (uint8_t *)nt35510_cmd);
+	  return 0;
+}
+
+uint8_t NT35510_BacklightOn(void)
+{
+	  /* Note : defaut is 0 (lowest Brightness), 0xFF is highest Brightness, try 0x7F : intermediate value */
+	  const uint8_t nt35510_cmd[] = {NT35510_CMD_WRDISBV, NT35510_DEFAULT_BRIGHTNESS};
+	  DSI_IO_WriteCmd(1, (uint8_t *)nt35510_cmd);
+	  return 0;
+}
+
+uint8_t NT35510_BacklightOff(void)
+{
+	  /* Note : defaut is 0 (lowest Brightness), 0xFF is highest Brightness, try 0x7F : intermediate value */
+	  const uint8_t nt35510_cmd[] = {NT35510_CMD_WRDISBV, 0x00};
+	  DSI_IO_WriteCmd(1, (uint8_t *)nt35510_cmd);
+	  return 0;
 }
 
 
