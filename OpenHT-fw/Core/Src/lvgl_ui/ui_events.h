@@ -10,6 +10,9 @@
 extern "C" {
 #endif
 
+void on_about_clicked(lv_event_t * e);
+void on_callsign_clicked(lv_event_t * e);
+void on_mode_clicked(lv_event_t * e);
 void on_vol_changed(lv_event_t * e);
 void on_xmit_button_press(lv_event_t * e);
 void on_xmit_button_release(lv_event_t * e);
@@ -24,6 +27,8 @@ void on_rx_freq_ta_click(lv_event_t * e);
 void on_tx_freq_ta_click(lv_event_t * e);
 void on_callsign_ta_click(lv_event_t * e);
 void on_about_ok_clicked(lv_event_t * e);
+void on_mode_ok_clicked(lv_event_t * e);
+void on_mode_cancel_clicked(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

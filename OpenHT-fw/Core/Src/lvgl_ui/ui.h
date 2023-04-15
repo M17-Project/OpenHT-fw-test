@@ -13,34 +13,35 @@ extern "C" {
 #include "../../Drivers/lvgl/lvgl.h"
 
 #include "ui_events.h"
-void ui_event_Screen1(lv_event_t * e);
-extern lv_obj_t * ui_Screen1;
-extern lv_obj_t * ui_Header;
-extern lv_obj_t * ui_Header_Date;
-extern lv_obj_t * ui_Image1;
-extern lv_obj_t * ui_Header_Time;
+void ui_event_home_screen(lv_event_t * e);
+extern lv_obj_t * ui_home_screen;
+extern lv_obj_t * ui_home_screen_header_panel;
+void ui_event_title_image(lv_event_t * e);
+extern lv_obj_t * ui_title_image;
+extern lv_obj_t * ui_battery_image;
+extern lv_obj_t * ui_signal_strenth_image;
+void ui_event_header_callsign_button(lv_event_t * e);
+extern lv_obj_t * ui_header_callsign_button;
+extern lv_obj_t * ui_header_callsign_label;
+void ui_event_header_mode_button(lv_event_t * e);
+extern lv_obj_t * ui_header_mode_button;
+extern lv_obj_t * ui_header_mode_label;
 extern lv_obj_t * ui_Label2;
-extern lv_obj_t * ui_Arc_Group;
-void ui_event_Arc1(lv_event_t * e);
-extern lv_obj_t * ui_Arc1;
-extern lv_obj_t * ui_Temp_Bg;
-extern lv_obj_t * ui_Temp_Num_Bg;
-extern lv_obj_t * ui_Label_Celsius;
 extern lv_obj_t * ui_Label_Slider;
-void ui_event_Fan_Speed_Control(lv_event_t * e);
-extern lv_obj_t * ui_Fan_Speed_Control;
-void ui_event_Button2(lv_event_t * e);
-extern lv_obj_t * ui_Button2;
+void ui_event_vol_slider(lv_event_t * e);
+extern lv_obj_t * ui_vol_slider;
+void ui_event_transmit_button(lv_event_t * e);
+extern lv_obj_t * ui_transmit_button;
 extern lv_obj_t * ui_Label3;
 extern lv_obj_t * ui_label_test_rx;
 void ui_event_about_button(lv_event_t * e);
 extern lv_obj_t * ui_about_button;
 extern lv_obj_t * ui_Label5;
 extern lv_obj_t * ui_label_test_tx;
-void ui_event_display_brightness_ctrl(lv_event_t * e);
-extern lv_obj_t * ui_display_brightness_ctrl;
-void ui_event_screen2(lv_event_t * e);
-extern lv_obj_t * ui_screen2;
+void ui_event_display_brightness_slider(lv_event_t * e);
+extern lv_obj_t * ui_display_brightness_slider;
+void ui_event_config_screen(lv_event_t * e);
+extern lv_obj_t * ui_config_screen;
 extern lv_obj_t * ui_panel_qwerty_pad;
 extern lv_obj_t * ui_panel_num_pad;
 extern lv_obj_t * ui_panel_freq_bump;
@@ -59,9 +60,8 @@ void ui_event_text_area_tx_freq(lv_event_t * e);
 extern lv_obj_t * ui_text_area_tx_freq;
 void ui_event_text_area_callsign(lv_event_t * e);
 extern lv_obj_t * ui_text_area_callsign;
-extern lv_obj_t * ui_screen_scratchpad;
+extern lv_obj_t * ui_screen_scratchpad_1;
 extern lv_obj_t * ui_about_panel;
-extern lv_obj_t * ui_wiggles_image;
 extern lv_obj_t * ui_about_tab_panel;
 extern lv_obj_t * ui_about_text_area;
 extern lv_obj_t * ui_about_hw_text_area;
@@ -69,18 +69,28 @@ void ui_event_about_ok_btn(lv_event_t * e);
 extern lv_obj_t * ui_about_ok_btn;
 extern lv_obj_t * ui_Label6;
 extern lv_obj_t * ui_about_logo;
-extern lv_obj_t * ui_Label7;
+extern lv_obj_t * ui_about_openht_logo;
 extern lv_obj_t * ui_Label9;
+extern lv_obj_t * ui_screen_scratchpad_2;
+extern lv_obj_t * ui_mode_change_panel;
+extern lv_obj_t * ui_mode_roller;
+void ui_event_mode_ok_button(lv_event_t * e);
+extern lv_obj_t * ui_mode_ok_button;
+extern lv_obj_t * ui_Label7;
+void ui_event_mode_cancel_button(lv_event_t * e);
+extern lv_obj_t * ui_mode_cancel_button;
+extern lv_obj_t * ui_Label8;
 extern lv_obj_t * ui____initial_actions0;
 
 
-LV_IMG_DECLARE(ui_img_m17_logo_w_sm_png);    // assets/m17_logo_w_sm.png
-LV_IMG_DECLARE(ui_img_wiggles_png);    // assets/wiggles.png
+LV_IMG_DECLARE(ui_img_openht_logo_w_png);    // assets/openht_logo_w.png
+LV_IMG_DECLARE(ui_img_152149816);    // assets/battery-charging_w.png
+LV_IMG_DECLARE(ui_img_492966190);    // assets/reception-3_w.png
 LV_IMG_DECLARE(ui_img_m17_logo_sm_png);    // assets/m17_logo_sm.png
+LV_IMG_DECLARE(ui_img_openht_logo_png);    // assets/openht_logo.png
 
 
-LV_FONT_DECLARE(ui_font_Number60);
-LV_FONT_DECLARE(ui_font_Number80);
+LV_FONT_DECLARE(ui_font_number_60);
 
 
 void ui_init(void);

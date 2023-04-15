@@ -31,6 +31,7 @@
 #include "bmp_utils.h"
 #include "user_settings.h"
 #include "openht_hwconfig.h"
+#include "openht_types.h"
 #include <../../Drivers/BSP/Components/nt35510/nt35510.h>
 
 
@@ -71,20 +72,23 @@ void custom_ui_init(void)
 	lv_obj_set_parent(ui_about_panel, lv_layer_top());
 	lv_obj_add_flag(ui_about_panel, LV_OBJ_FLAG_HIDDEN);
 //    lv_obj_set_y(ui_about_panel, 800);
-	lv_obj_move_foreground(ui_about_panel);
+	//lv_obj_move_foreground(ui_about_panel);
+
+	lv_obj_set_parent(ui_mode_change_panel, lv_layer_top());
+	lv_obj_add_flag(ui_mode_change_panel, LV_OBJ_FLAG_HIDDEN);
 
 
+    // BEGIN ABOUT TABVIEW UI INIT
 
 	about_tabview = lv_tabview_create(ui_about_tab_panel, LV_DIR_TOP, 40);
-
     lv_obj_set_style_bg_color(about_tabview, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
-
 
     lv_obj_t * tab_btns = lv_tabview_get_tab_btns(about_tabview);
 //    lv_obj_set_style_bg_color(tab_btns, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
 //    lv_obj_set_style_text_color(tab_btns, lv_palette_lighten(LV_PALETTE_GREY, 5), 0);
-    lv_obj_set_style_bg_color(tab_btns, lv_color_hex(0x464B55), 0);
-    lv_obj_set_style_text_color(tab_btns, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_text_font(tab_btns, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(tab_btns, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(tab_btns, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(tab_btns, lv_color_hex(0x37B9F5), LV_PART_ITEMS | LV_STATE_CHECKED);
     lv_obj_set_style_border_side(tab_btns, LV_BORDER_SIDE_BOTTOM, LV_PART_ITEMS | LV_STATE_CHECKED);
 
@@ -114,6 +118,27 @@ void custom_ui_init(void)
 	lv_obj_set_parent(ui_about_hw_text_area, capes_tab);
 	lv_obj_clear_flag(ui_about_hw_text_area, LV_OBJ_FLAG_HIDDEN);
 
+	// END ABOUT TABVIEW UI INIT
+
+	// BEGIN MODE CHANGE UI INIT
+
+	char labels[128];
+	char *label = labels;
+
+	for (int i = 0; i < openht_mode_count; i++) {
+		if (i > 0) {
+			*label++ = '\n';
+		}
+		int mode_str_len = strlen(openht_mode_data[i].mode_name);
+		strlcpy(label, openht_mode_data[i].mode_name, sizeof(labels) - (label - labels));
+
+		label += mode_str_len;
+	}
+
+    lv_roller_set_options(ui_mode_roller, labels, LV_ROLLER_MODE_NORMAL);
+
+
+	// END MODE CHANGE UI INIT
 
 
 	// remove the border for the UI placeholder
@@ -136,6 +161,8 @@ void custom_ui_init(void)
 	lv_obj_add_event_cb(num_pad, numpad_btnmatrix_event_cb, LV_EVENT_ALL, NULL);
 	lv_obj_add_event_cb(qwerty_pad, qwertypad_btnmatrix_event_cb, LV_EVENT_ALL, NULL);
 
+
+	// GET STORED SETTINGS AND UPDATE UI
 	get_settings(&user_settings);
 
 	char buffer[15];
@@ -151,6 +178,11 @@ void custom_ui_init(void)
 
 	strcpy(callsign_str, user_settings.callsign);
 	lv_textarea_set_text(ui_text_area_callsign, callsign_str);
+	lv_label_set_text_fmt(ui_header_callsign_label, "Call: %s", callsign_str);
+
+	lv_roller_set_selected(ui_mode_roller, user_settings.mode, LV_ANIM_OFF);
+
+	lv_label_set_text_fmt(ui_header_mode_label, "Mode: %s", openht_get_mode_str(user_settings.mode));
 }
 
 void on_about_clicked(lv_event_t *e)
@@ -167,6 +199,37 @@ void on_about_ok_clicked(lv_event_t *e)
 {
 	lv_obj_add_flag(ui_about_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
+}
+
+void on_callsign_clicked(lv_event_t *e)
+{
+}
+
+void on_mode_clicked(lv_event_t *e)
+{
+	lv_obj_clear_flag(ui_mode_change_panel, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
+
+}
+
+void on_mode_cancel_clicked(lv_event_t *e)
+{
+	lv_obj_add_flag(ui_mode_change_panel, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
+}
+
+void on_mode_ok_clicked(lv_event_t *e)
+{
+	lv_obj_add_flag(ui_mode_change_panel, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
+
+	char roller_str[15];
+
+	lv_roller_get_selected_str(ui_mode_roller, roller_str, sizeof(roller_str));
+	lv_label_set_text_fmt(ui_header_mode_label, "Mode: %s", roller_str);
+
+	user_settings.mode = lv_roller_get_selected(ui_mode_roller);
+	save_settings(&user_settings);
 }
 
 void on_screen_pressed(lv_event_t *e)
@@ -436,6 +499,7 @@ static void end_input_callsign_ta()
 			LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_text_area_callsign, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
 
+	lv_label_set_text_fmt(ui_header_callsign_label, "Call: %s", callsign_str);
 
     strcpy(user_settings.callsign, callsign_str);
 	save_settings(&user_settings);

@@ -23,11 +23,34 @@
 extern "C" {
 #endif
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+
 typedef enum
 {
 	OPENHT_OK = 0, /* (0) Succeeded */
 	OPENHT_ERR, /* (1) A error occurred */
 } openht_res_t;
+
+typedef enum
+{
+    M17,
+    FreeDV,
+    NFM,
+    SSB
+} openht_mode_t;
+
+struct mode_datum
+{
+	openht_mode_t mode;
+    char          mode_name[10];
+};
+
+extern struct mode_datum openht_mode_data[];
+extern uint32_t openht_mode_count;
+
+const char * openht_get_mode_str(openht_mode_t mode);
 
 #ifdef __cplusplus
 }

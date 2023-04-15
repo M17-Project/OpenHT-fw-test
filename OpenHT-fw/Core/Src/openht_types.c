@@ -16,33 +16,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef INC_USER_SETTINGS_H_
-#define INC_USER_SETTINGS_H_
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "openht_types.h"
-#include "stm32469i_discovery.h" /* DISCOVERY includes component */
-#include "stm32469i_discovery_qspi.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
 
-#define WRITE_READ_ADDR     ((uint32_t)0x0050)
-
-typedef struct
+struct mode_datum openht_mode_data[] =
 {
-	char callsign[10];
-	uint32_t tx_freq;
-	uint32_t rx_freq;
-	openht_mode_t mode;
-	uint8_t audio_vol;
-} settings_t;
+    {M17, "M17"},
+    {FreeDV, "FreeDV"},
+    {NFM,  "NFM"},
+    {SSB,  "SSB"},
+};
 
-void save_settings(const settings_t *settings);
-void get_settings(const settings_t *settings);
+uint32_t openht_mode_count = sizeof(openht_mode_data)/sizeof(openht_mode_data[0]);
 
-#ifdef __cplusplus
+const char * openht_get_mode_str(openht_mode_t mode)
+{
+	for (int i = 0; i < openht_mode_count; i++) {
+		if (openht_mode_data[i].mode == mode) {
+			return openht_mode_data[i].mode_name;
+		}
+	}
 }
-#endif
-
-#endif /* INC_USER_SETTINGS_H_ */
