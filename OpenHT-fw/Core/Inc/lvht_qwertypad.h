@@ -16,8 +16,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef SRC_LVHT_NUMPAD_H_
-#define SRC_LVHT_NUMPAD_H_
+#ifndef SRC_LVHT_QWERTYPAD_H_
+#define SRC_LVHT_QWERTYPAD_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,11 +25,11 @@ extern "C" {
 
 #include <lvgl.h>
 
-lv_obj_t* create_number_pad(lv_obj_t *lv_obj);
-void set_numpad_visibility(bool visible);
+lv_obj_t* create_qwerty_pad(lv_obj_t *lv_obj);
+void set_qwertypad_visibility(bool visible);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SRC_LVHT_NUMPAD_H_ */
+#endif /* SRC_LVHT_QWERTYPAD_H_ */

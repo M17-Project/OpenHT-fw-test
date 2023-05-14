@@ -30,6 +30,7 @@
 #include "openht_ui.h"
 #include "lvgl_ui/ui.h"
 #include "disk_mgr.h"
+#include "openht_hwconfig.h"
 
 /* USER CODE END Includes */
 

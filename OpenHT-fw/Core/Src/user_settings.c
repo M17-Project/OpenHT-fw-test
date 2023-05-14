@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 const static uint32_t SUBSECTOR_SIZE = 4096; // bytes per subsector
 static uint32_t current_address = 0;
@@ -128,7 +129,7 @@ void save_settings(const settings_t *settings)
 //	}
 }
 
-void get_settings(const settings_t *settings)
+void get_settings(settings_t *settings)
 {
 	BSP_LED_Off(LED_ORANGE);
 	BSP_LED_Off(LED_GREEN);

@@ -164,7 +164,7 @@ void test_fat(void)
 {
 	FRESULT res; /* FatFs function common result code */
 	uint32_t byteswritten, bytesread; /* File write/read counts */
-	uint8_t wtext[] = "This is OpenHT writing to a txt file!!"; /* File write buffer */
+	char wtext[] = "This is OpenHT writing to a txt file!!"; /* File write buffer */
 	uint8_t rtext[100]; /* File read buffer */
 
 	/*##-1- Link the SD disk I/O driver ########################################*/

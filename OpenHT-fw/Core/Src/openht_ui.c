@@ -33,6 +33,8 @@
 #include "openht_hwconfig.h"
 #include "openht_types.h"
 #include <../../Drivers/BSP/Components/nt35510/nt35510.h>
+#include "lvht_numpad.h"
+#include "lvht_qwertypad.h"
 
 
 #define EMPTY_FREQ "_.___.___.___"
@@ -166,12 +168,12 @@ void custom_ui_init(void)
 	get_settings(&user_settings);
 
 	char buffer[15];
-	snprintf(buffer, 15, "%u", user_settings.rx_freq);
+	snprintf(buffer, 15, "%lu", user_settings.rx_freq);
 	lv_label_set_text(ui_label_test_rx, buffer);
 	get_str_from_freq(user_settings.rx_freq, current_freq_str, true);
 	lv_textarea_set_text(ui_text_area_rx_freq, current_freq_str);
 
-	snprintf(buffer, 15, "%u", user_settings.tx_freq);
+	snprintf(buffer, 15, "%lu", user_settings.tx_freq);
 	lv_label_set_text(ui_label_test_tx, buffer);
 	get_str_from_freq(user_settings.tx_freq, current_freq_str, true);
 	lv_textarea_set_text(ui_text_area_tx_freq, current_freq_str);
@@ -559,11 +561,11 @@ static void end_input_freq_ta(bool finished_input)
 	/* log output... */
 	char buffer[15];
 //	user_settings.rx_freq = get_freq_from_str(rxfreqstr);
-	snprintf(buffer, 15, "%u", user_settings.rx_freq);
+	snprintf(buffer, 15, "%lu", user_settings.rx_freq);
 	lv_label_set_text(ui_label_test_rx, buffer);
 
 //	user_settings.tx_freq = get_freq_from_str(txfreqstr);
-	snprintf(buffer, 15, "%u", user_settings.tx_freq);
+	snprintf(buffer, 15, "%lu", user_settings.tx_freq);
 	lv_label_set_text(ui_label_test_tx, buffer);
 
 	save_settings(&user_settings);

@@ -39,7 +39,7 @@ typedef struct
 } settings_t;
 
 void save_settings(const settings_t *settings);
-void get_settings(const settings_t *settings);
+void get_settings(settings_t *settings);
 
 #ifdef __cplusplus
 }

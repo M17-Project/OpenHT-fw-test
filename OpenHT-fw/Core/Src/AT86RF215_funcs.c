@@ -22,7 +22,7 @@
 #include "openht_types.h"
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_spi.h"
-
+#include <math.h>
 
 // TODO: pins and SPI not configured yet!
 #define FPGA_RST_Pin 0

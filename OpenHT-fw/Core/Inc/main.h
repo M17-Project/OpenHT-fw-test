@@ -27,14 +27,14 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "openht_types.h"
 #include "stm32f4xx_hal.h"
-#include "stm32469i_discovery.h" /* DISCOVERY includes component */
-#include "stm32469i_discovery_qspi.h"
+
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "openht_types.h"
+#include "stm32469i_discovery.h" /* DISCOVERY includes component */
+#include "stm32469i_discovery_qspi.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
