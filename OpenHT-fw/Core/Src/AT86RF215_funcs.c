@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
+#include <main.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
@@ -23,10 +23,6 @@
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_spi.h"
 #include <math.h>
-
-// TODO: pins and SPI not configured yet!
-#define FPGA_RST_Pin 0
-#define FPGA_RST_GPIO_Port 1
 
 static SPI_HandleTypeDef hspi1;
 
@@ -124,8 +120,6 @@ void AT86_RX09(uint32_t freq, float ppm, uint8_t agc_en, uint8_t agc_tgt)
 	AT86_SetFreq(freq*(1.0f+ppm*1e-6));
 	
 	AT86_Write(0x010A,(4<<5)| 0xA);		//RF09: sample rate 400kHz, f_cut at 1x f_s/2
-	
-	HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, 0);
 	HAL_Delay(5);
 	AT86_Write(0x0103, 0x05);			//RF09: set mode to RX; CMD=RX
 }
@@ -142,7 +136,6 @@ void AT86_TX09(uint32_t freq, float ppm, uint8_t pwr)
 	AT86_Write(0x0113, 0xA);			//RF09: sample rate 400kHz, f_cut at 1/4x f_s/2
 
 	AT86_Write(0x0103, 0x03);			//RF09: set mode to TXPREP; CMD=TXPREP
-	HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, 0);
 	HAL_Delay(5);
 	AT86_Write(0x0103, 0x04);			//RF09: issue TX command
 }
@@ -160,7 +153,6 @@ void AT86_RX24(uint32_t freq, float ppm, uint8_t agc_en, uint8_t agc_tgt)
 
 	AT86_Write(0x020A,(4<<5)| 0xA);		//RF24: sample rate 400kHz, f_cut at 1x f_s/2
 
-	HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, 0);
 	HAL_Delay(5);
 	AT86_Write(0x0203, 0x05);			//RF24: set mode to RX; CMD=RX
 }
@@ -177,7 +169,6 @@ void AT86_TX24(uint32_t freq, float ppm, uint8_t pwr)
 	AT86_Write(0x0213, 0xA);			//RF24: sample rate 400kHz, f_cut at 1/4x f_s/2
 
 	AT86_Write(0x0203, 0x03);			//RF24: set mode to TXPREP; CMD=TXPREP
-	HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, 0);
 	HAL_Delay(5);
 	AT86_Write(0x0203, 0x04);			//RF24: issue TX command
 }

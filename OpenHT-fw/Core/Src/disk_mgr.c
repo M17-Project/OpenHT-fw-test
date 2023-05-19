@@ -16,17 +16,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "disk_mgr.h"
 #include "fatfs.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include "openht_types.h"
+#include <stm32469i_discovery.h>
 
-FATFS SDFatFs; /* File system object for SD disk logical drive */
-char SDPath[4]; /* SD disk logical drive path */
-
-//static uint8_t buffer[_MAX_SS]; /* a work buffer for the f_mkfs() */
 
 static openht_res_t fat_error_handler(void);
 static FRESULT scan_files(char *path);
@@ -35,64 +32,52 @@ static uint32_t num_from_str(const char *str, uint32_t start, uint32_t end);
 
 static uint16_t screen_capture_num = 0;
 
-openht_res_t save_image(uint8_t *bmp_header, size_t bmp_headersize,
+FRESULT save_image(uint8_t *bmp_header, size_t bmp_headersize,
 		uint8_t *img_buffer, size_t img_buffersize)
 {
 	FRESULT res;
-	openht_res_t ret = OPENHT_OK;
-	FIL the_file;
 	uint32_t byteswritten;
 
-	if (FATFS_LinkDriver(&SD_Driver, SDPath) == 0) {
-		if (f_mount(&SDFatFs, (TCHAR const*) SDPath, 0) != FR_OK) {
-			/* FatFs Initialization Error */
-			res = fat_error_handler();
-		} else {
-			// get next filename
-			char buff[256];
-			strcpy(buff, "/");
-			res = scan_files(buff);
+	// get next filename
+	char buff[256];
+	strcpy(buff, "/");
+	res = scan_files(buff);
 
-			FIL the_file;
-			char filename[13];
+	FIL the_file;
+	char filename[13];
 
-			sprintf(filename, "SCREEN%02d.BMP", screen_capture_num + 1);
+	sprintf(filename, "SCREEN%02d.BMP", screen_capture_num + 1);
 
-			if (f_open(&the_file, filename, FA_CREATE_ALWAYS | FA_WRITE)
-					!= FR_OK) {
-				res = fat_error_handler();
-			} else {
-				bool write_ok = true;
-				res = f_write(&the_file, bmp_header, bmp_headersize,
-						(void*) &byteswritten);
-
-				if ((byteswritten == 0) || (res != FR_OK)) {
-					res = fat_error_handler();
-					write_ok = false;
-				} else {
-					res = f_write(&the_file, img_buffer, img_buffersize,
-							(void*) &byteswritten);
-					if ((byteswritten == 0) || (res != FR_OK)) {
-						res = fat_error_handler();
-						write_ok = false;
-					}
-				}
-
-				f_close(&the_file);
-
-				if (!write_ok) {
-					// TODO: DISK ERROR occasionally so need to remove file
-					//res = f_unlink(filename);
-					BSP_LED_On(LED_RED);
-				}
-
-			}
-
-		}
-		FATFS_UnLinkDriver(SDPath);
-	} else {
+	if (f_open(&the_file, filename, FA_CREATE_ALWAYS | FA_WRITE)
+			!= FR_OK) {
 		res = fat_error_handler();
+	} else {
+		bool write_ok = true;
+		res = f_write(&the_file, bmp_header, bmp_headersize,
+				(void*) &byteswritten);
+
+		if ((byteswritten == 0) || (res != FR_OK)) {
+			res = fat_error_handler();
+			write_ok = false;
+		} else {
+			res = f_write(&the_file, img_buffer, img_buffersize,
+					(void*) &byteswritten);
+			if ((byteswritten == 0) || (res != FR_OK)) {
+				res = fat_error_handler();
+				write_ok = false;
+			}
+		}
+
+		f_close(&the_file);
+
+		if (!write_ok) {
+			// TODO: DISK ERROR occasionally so need to remove file
+			//res = f_unlink(filename);
+			BSP_LED_On(LED_RED);
+		}
+
 	}
+
 	return res;
 }
 
@@ -158,82 +143,6 @@ static FRESULT scan_files(char *path) /* Start node to be scanned (***also used 
 	}
 
 	return res;
-}
-
-void test_fat(void)
-{
-	FRESULT res; /* FatFs function common result code */
-	uint32_t byteswritten, bytesread; /* File write/read counts */
-	char wtext[] = "This is OpenHT writing to a txt file!!"; /* File write buffer */
-	uint8_t rtext[100]; /* File read buffer */
-
-	/*##-1- Link the SD disk I/O driver ########################################*/
-	if (FATFS_LinkDriver(&SD_Driver, SDPath) == 0) {
-		/*##-2- Register the file system object to the FatFs module ##############*/
-		if (f_mount(&SDFatFs, (TCHAR const*) SDPath, 0) != FR_OK) {
-			/* FatFs Initialization Error */
-			fat_error_handler();
-		} else {
-			FIL the_file;
-//	  /*##-3- Create a FAT file system (format) on the logical drive #########*/
-//	  if(f_mkfs((TCHAR const*)SDPath, FM_ANY, 0, buffer, sizeof(buffer)) != FR_OK)
-//	  {
-//		fat_error_handler();
-//	  }
-//	  else
-//	  {
-			/*##-4- Create and Open a new text file object with write access #####*/
-			if (f_open(&the_file, "test456.txt", FA_CREATE_ALWAYS | FA_WRITE)
-					!= FR_OK) {
-				/* 'STM32.TXT' file Open for write Error */
-				fat_error_handler();
-			} else {
-				/*##-5- Write data to the text file ################################*/
-				res = f_write(&the_file, wtext, (UINT) strlen(wtext),
-						(void*) &byteswritten);
-
-				if ((byteswritten == 0) || (res != FR_OK)) {
-					/* 'STM32.TXT' file Write or EOF Error */
-					fat_error_handler();
-				} else {
-					/*##-6- Close the open text file #################################*/
-					f_close(&the_file);
-
-					/*##-7- Open the text file object with read access ###############*/
-					if (f_open(&the_file, "test456.txt", FA_READ) != FR_OK) {
-						/* 'STM32.TXT' file Open for read Error */
-						fat_error_handler();
-					} else {
-						/*##-8- Read data from the text file ###########################*/
-						res = f_read(&the_file, rtext, sizeof(rtext),
-								(UINT*) &bytesread);
-
-						if ((bytesread == 0) || (res != FR_OK)) /* EOF or Error */
-						{
-							/* 'STM32.TXT' file Read or EOF Error */
-							fat_error_handler();
-						} else {
-							/*##-9- Close the open text file #############################*/
-							f_close(&the_file);
-
-							/*##-10- Compare read data with the expected data ############*/
-							if ((bytesread != byteswritten)) {
-								/* Read data is different from the expected data */
-								fat_error_handler();
-							} else {
-								/* Success of the demo: no error occurrence */
-								BSP_LED_On(LED_GREEN);
-							}
-						}
-					}
-//		  }
-				}
-			}
-		}
-	}
-
-	/*##-11- Unlink the SD disk I/O driver ####################################*/
-	FATFS_UnLinkDriver(SDPath);
 }
 
 static openht_res_t fat_error_handler(void)

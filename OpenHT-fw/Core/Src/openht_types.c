@@ -38,4 +38,6 @@ const char * openht_get_mode_str(openht_mode_t mode)
 			return openht_mode_data[i].mode_name;
 		}
 	}
+
+	return "\0";
 }

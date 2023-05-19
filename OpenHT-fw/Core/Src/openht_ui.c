@@ -694,7 +694,7 @@ static void screen_capture(void)
 				sizeof(header));
 
 		if (save_image(header, sizeof(header), img_buffer, sizeof(img_buffer))
-				!= OPENHT_OK) {
+				!= FR_OK) {
 			// error
 			BSP_LED_On(LED_ORANGE);
 		} else {

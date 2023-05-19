@@ -29,7 +29,6 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "openht_types.h"
@@ -66,6 +65,8 @@ void Error_Handler(void);
 #define FMC_NBL0_GPIO_Port GPIOE
 #define I2C1_SCL_Pin GPIO_PIN_8
 #define I2C1_SCL_GPIO_Port GPIOB
+#define XCVR_NSS_Pin GPIO_PIN_15
+#define XCVR_NSS_GPIO_Port GPIOA
 #define SWCLK_Pin GPIO_PIN_14
 #define SWCLK_GPIO_Port GPIOA
 #define SWDIO_Pin GPIO_PIN_13
@@ -78,6 +79,8 @@ void Error_Handler(void);
 #define D2_GPIO_Port GPIOD
 #define FMC_NBL2_Pin GPIO_PIN_4
 #define FMC_NBL2_GPIO_Port GPIOI
+#define MAIN_KILL_Pin GPIO_PIN_12
+#define MAIN_KILL_GPIO_Port GPIOG
 #define LED3_Pin GPIO_PIN_5
 #define LED3_GPIO_Port GPIOD
 #define D3_Pin GPIO_PIN_1
@@ -116,6 +119,8 @@ void Error_Handler(void);
 #define D24_GPIO_Port GPIOI
 #define A2_Pin GPIO_PIN_2
 #define A2_GPIO_Port GPIOF
+#define SW_CTL1_Pin GPIO_PIN_7
+#define SW_CTL1_GPIO_Port GPIOC
 #define A3_Pin GPIO_PIN_3
 #define A3_GPIO_Port GPIOF
 #define SDCLK_Pin GPIO_PIN_8
@@ -132,16 +137,24 @@ void Error_Handler(void);
 #define SDCKE0_GPIO_Port GPIOH
 #define D1_Pin GPIO_PIN_15
 #define D1_GPIO_Port GPIOD
+#define SW_CTL2_Pin GPIO_PIN_13
+#define SW_CTL2_GPIO_Port GPIOB
 #define D15_Pin GPIO_PIN_10
 #define D15_GPIO_Port GPIOD
+#define FPGA_PROGRAMN_Pin GPIO_PIN_3
+#define FPGA_PROGRAMN_GPIO_Port GPIOC
 #define D0_Pin GPIO_PIN_14
 #define D0_GPIO_Port GPIOD
+#define RF_RST_Pin GPIO_PIN_12
+#define RF_RST_GPIO_Port GPIOB
 #define D14_Pin GPIO_PIN_9
 #define D14_GPIO_Port GPIOD
 #define D13_Pin GPIO_PIN_8
 #define D13_GPIO_Port GPIOD
 #define SDNWE_Pin GPIO_PIN_0
 #define SDNWE_GPIO_Port GPIOC
+#define FPGA_DONE_Pin GPIO_PIN_2
+#define FPGA_DONE_GPIO_Port GPIOC
 #define OTG_FS1_PowerSwitchOn_Pin GPIO_PIN_2
 #define OTG_FS1_PowerSwitchOn_GPIO_Port GPIOB
 #define A6_Pin GPIO_PIN_12
@@ -150,12 +163,20 @@ void Error_Handler(void);
 #define A11_GPIO_Port GPIOG
 #define A9_Pin GPIO_PIN_15
 #define A9_GPIO_Port GPIOF
+#define uSD_Detect_Pin GPIO_PIN_2
+#define uSD_Detect_GPIO_Port GPIOG
 #define LCD_INT_Pin GPIO_PIN_5
 #define LCD_INT_GPIO_Port GPIOJ
 #define D20_Pin GPIO_PIN_12
 #define D20_GPIO_Port GPIOH
+#define IRQ_XCVR_Pin GPIO_PIN_1
+#define IRQ_XCVR_GPIO_Port GPIOA
 #define WAKEUP_Pin GPIO_PIN_0
 #define WAKEUP_GPIO_Port GPIOA
+#define Batt_Measurement_Pin GPIO_PIN_4
+#define Batt_Measurement_GPIO_Port GPIOA
+#define FPGA_INITN_Pin GPIO_PIN_4
+#define FPGA_INITN_GPIO_Port GPIOC
 #define A7_Pin GPIO_PIN_13
 #define A7_GPIO_Port GPIOF
 #define A10_Pin GPIO_PIN_0
@@ -166,6 +187,10 @@ void Error_Handler(void);
 #define D17_GPIO_Port GPIOH
 #define D19_Pin GPIO_PIN_11
 #define D19_GPIO_Port GPIOH
+#define PB_INT_Pin GPIO_PIN_2
+#define PB_INT_GPIO_Port GPIOA
+#define PTT_Pin GPIO_PIN_5
+#define PTT_GPIO_Port GPIOC
 #define A8_Pin GPIO_PIN_14
 #define A8_GPIO_Port GPIOF
 #define DSI_TE_Pin GPIO_PIN_2
@@ -180,10 +205,16 @@ void Error_Handler(void);
 #define D11_GPIO_Port GPIOE
 #define STLK_RX_Pin GPIO_PIN_10
 #define STLK_RX_GPIO_Port GPIOB
+#define FPGA_RST_Pin GPIO_PIN_6
+#define FPGA_RST_GPIO_Port GPIOH
 #define D16_Pin GPIO_PIN_8
 #define D16_GPIO_Port GPIOH
 #define D18_Pin GPIO_PIN_10
 #define D18_GPIO_Port GPIOH
+#define FPGA_NSS_Pin GPIO_PIN_7
+#define FPGA_NSS_GPIO_Port GPIOA
+#define PGOOD_Pin GPIO_PIN_1
+#define PGOOD_GPIO_Port GPIOB
 #define EXT_RESET_Pin GPIO_PIN_0
 #define EXT_RESET_GPIO_Port GPIOB
 #define D4_Pin GPIO_PIN_7

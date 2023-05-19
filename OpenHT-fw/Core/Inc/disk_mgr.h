@@ -26,13 +26,10 @@ extern "C" {
 
 #include "openht_types.h"
 #include "stm32469i_discovery_sd.h"
-
-/* FatFs includes component */
-#include "ff_gen_drv.h"
-#include "sd_diskio.h"
+#include "fatfs.h"
 
 void test_fat(void);
-openht_res_t save_image(uint8_t *bmp_header, size_t bmp_headersize,
+FRESULT save_image(uint8_t *bmp_header, size_t bmp_headersize,
 		uint8_t *img_buffer, size_t img_buffersize);
 
 #ifdef __cplusplus
