@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -95,6 +96,20 @@ UART_HandleTypeDef huart3;
 DMA_HandleTypeDef hdma_memtomem_dma2_stream0;
 SDRAM_HandleTypeDef hsdram1;
 
+/* Definitions for defaultTask */
+osThreadId_t defaultTaskHandle;
+const osThreadAttr_t defaultTask_attributes = {
+  .name = "defaultTask",
+  .stack_size = 1536 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for lvgl */
+osThreadId_t lvglHandle;
+const osThreadAttr_t lvgl_attributes = {
+  .name = "lvgl",
+  .stack_size = 2048 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
+};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -113,6 +128,9 @@ static void MX_USART3_UART_Init(void);
 static void MX_SDIO_SD_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_QUADSPI_Init(void);
+void StartDefaultTask(void *argument);
+void StartLVGLTask(void *argument);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -209,9 +227,6 @@ int main(void)
 	BSP_LED_Off(LED_RED);
 	BSP_LED_Off(LED_BLUE);
 
-	// Test the sdcard
-	//test_fat();
-
 	// init flash...
 
 	/* QSPI info structure */
@@ -240,46 +255,48 @@ int main(void)
 	// init the hardware configuration (defines the capabilities of the hardware)
 	init_openht_hwconfig();
 
-	// init the LVGL gui library (draws UI on screen and handles user input)
-	lv_init();
-
-	// init the screen and touch driver hardware of the STM32F469I_DISCO board
-	screen_driver_init();
-	touch_sensor_driver_init();
-
-	// SquareLine Studio ui_init...
-	ui_init();
-
-	// Custom ui init code unsupported by SquareLine...
-	custom_ui_init();
-
-	//go_button();
-	//lv_disp_set_rotation(NULL, LV_DISP_ROT_90);
-
-	//lv_demo_benchmark();
-	//lv_demo_widgets();
   /* USER CODE END 2 */
 
+  /* Init scheduler */
+  osKernelInitialize();
+
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* creation of defaultTask */
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+
+  /* creation of lvgl */
+  lvglHandle = osThreadNew(StartLVGLTask, NULL, &lvgl_attributes);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+  /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
+
+  /* Start scheduler */
+  osKernelStart();
+  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1) {
-		// small delay
-		HAL_Delay(5);
-
-		// poll the lvgl ui to get things done
-		lv_timer_handler();
-
-		// avoid hw interrupts with lvgl ui code, this simply polls the state of the blue hw user button
-		// and calls the appropriate function in the ui code to handle the "event"
-		// this also avoids any need to de-bounce
-		if (BSP_PB_GetState(BUTTON_USER) == 1 && !user_button_pressed) {
-			user_button_pressed = true;
-			on_userbutton_press();
-		}
-		if (BSP_PB_GetState(BUTTON_USER) == 0 && user_button_pressed) {
-			user_button_pressed = false;
-			on_userbutton_release();
-		}
 
     /* USER CODE END WHILE */
 
@@ -767,7 +784,7 @@ static void MX_DMA_Init(void)
 
   /* DMA interrupt init */
   /* DMA2_Stream0_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
 
 }
@@ -1034,6 +1051,87 @@ int _write(int file, char *ptr, int len)
 }
 
 /* USER CODE END 4 */
+
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void *argument)
+{
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+  for(;;)
+  {
+	// avoid hw interrupts with lvgl ui code, this simply polls the state of the blue hw user button
+	// and calls the appropriate function in the ui code to handle the "event"
+	// this also avoids any need to de-bounce
+	if (BSP_PB_GetState(BUTTON_USER) == 1 && !user_button_pressed) {
+		user_button_pressed = true;
+		on_userbutton_press();
+	}
+	if (BSP_PB_GetState(BUTTON_USER) == 0 && user_button_pressed) {
+		user_button_pressed = false;
+		on_userbutton_release();
+	}
+    osDelay(10);
+  }
+  /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_StartLVGLTask */
+/**
+* @brief Function implementing the lvgl thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartLVGLTask */
+void StartLVGLTask(void *argument)
+{
+  /* USER CODE BEGIN StartLVGLTask */
+	// init the LVGL gui library (draws UI on screen and handles user input)
+	lv_init();
+
+	// init the screen and touch driver hardware of the STM32F469I_DISCO board
+	screen_driver_init();
+	touch_sensor_driver_init();
+
+	// SquareLine Studio ui_init...
+	ui_init();
+
+	// Custom ui init code unsupported by SquareLine...
+	custom_ui_init();
+  /* Infinite loop */
+  for(;;)
+  {
+	lv_timer_handler();
+    osDelay(5);
+  }
+  /* USER CODE END StartLVGLTask */
+}
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM6 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM6) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
