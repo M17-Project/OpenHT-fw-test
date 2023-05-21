@@ -37,6 +37,11 @@ FRESULT save_image(uint8_t *bmp_header, size_t bmp_headersize,
 {
 	FRESULT res;
 	uint32_t byteswritten;
+	FATFS fs;
+	// Mount the filesystem
+	if(f_mount(&fs, "0:", 1) != FR_OK){
+		return fat_error_handler();
+	}
 
 	// get next filename
 	char buff[256];
@@ -77,6 +82,9 @@ FRESULT save_image(uint8_t *bmp_header, size_t bmp_headersize,
 		}
 
 	}
+
+	// Unmount FS
+	f_mount(NULL, "0:", 1);
 
 	return res;
 }
