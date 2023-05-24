@@ -33,6 +33,8 @@
 
 //Register 1 - Control Register 2
 #define CR_2						((uint16_t)1)
+#define FM_TX_N						((uint16_t)0<<8)
+#define FM_TX_W						((uint16_t)1<<8)
 #define CTCSS_TX_NONE				((uint16_t)0<<2)
 #define CTCSS_TX_67_0				((uint16_t)1<<2)
 #define CTCSS_TX_69_3				((uint16_t)2<<2)
