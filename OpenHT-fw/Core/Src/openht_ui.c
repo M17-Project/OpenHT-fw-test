@@ -36,6 +36,8 @@
 #include "lvht_numpad.h"
 #include "lvht_qwertypad.h"
 
+#include "task_microphone.h"
+
 
 #define EMPTY_FREQ "_.___.___.___"
 #define END_POS 13
@@ -282,11 +284,13 @@ void on_tx_freq_ta_click(lv_event_t *e)
 void on_xmit_button_press(lv_event_t *e)
 {
 	BSP_LED_On(LED_RED);
+	start_microphone_acquisition();
 }
 
 void on_xmit_button_release(lv_event_t *e)
 {
 	BSP_LED_Off(LED_RED);
+	stop_microphone_acquisition();
 }
 
 void on_vol_changed(lv_event_t *e)

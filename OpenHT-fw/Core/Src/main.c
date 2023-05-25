@@ -20,6 +20,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "fatfs.h"
+#include "pdm2pcm.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -77,6 +78,8 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+CRC_HandleTypeDef hcrc;
+
 DMA2D_HandleTypeDef hdma2d;
 
 DSI_HandleTypeDef hdsi;
@@ -91,6 +94,8 @@ SD_HandleTypeDef hsd;
 DMA_HandleTypeDef hdma_sdio;
 
 SPI_HandleTypeDef hspi1;
+
+TIM_HandleTypeDef htim4;
 
 UART_HandleTypeDef huart3;
 
@@ -111,6 +116,18 @@ const osThreadAttr_t lvgl_attributes = {
   .stack_size = 2048 * 4,
   .priority = (osPriority_t) osPriorityHigh,
 };
+/* Definitions for microphones */
+osThreadId_t microphonesHandle;
+const osThreadAttr_t microphones_attributes = {
+  .name = "microphones",
+  .stack_size = 768 * 4,
+  .priority = (osPriority_t) osPriorityRealtime,
+};
+/* Definitions for microphoneEvents */
+osEventFlagsId_t microphoneEventsHandle;
+const osEventFlagsAttr_t microphoneEvents_attributes = {
+  .name = "microphoneEvents"
+};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -129,8 +146,11 @@ static void MX_USART3_UART_Init(void);
 static void MX_SDIO_SD_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_QUADSPI_Init(void);
+static void MX_TIM4_Init(void);
+static void MX_CRC_Init(void);
 void StartDefaultTask(void *argument);
 void StartLVGLTask(void *argument);
+extern void StartMicrophonesTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -214,7 +234,12 @@ int main(void)
   MX_FATFS_Init();
   MX_SPI1_Init();
   MX_QUADSPI_Init();
+  MX_TIM4_Init();
+  MX_CRC_Init();
+  MX_PDM2PCM_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
+  HAL_TIM_IC_Start(&htim4, TIM_CHANNEL_1);
 
   HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(RF_RST_GPIO_Port, RF_RST_Pin, GPIO_PIN_RESET);
@@ -223,38 +248,36 @@ int main(void)
   HAL_GPIO_WritePin(RF_RST_GPIO_Port, RF_RST_Pin, GPIO_PIN_SET);
   HAL_Delay(100);
 
-	BSP_LED_Off(LED_GREEN);
-	BSP_LED_Off(LED_ORANGE);
-	BSP_LED_Off(LED_RED);
-	BSP_LED_Off(LED_BLUE);
+  BSP_LED_Off(LED_GREEN);
+  BSP_LED_Off(LED_ORANGE);
+  BSP_LED_Off(LED_RED);
+  BSP_LED_Off(LED_BLUE);
 
-	// init flash...
+  /* QSPI info structure */
+  static QSPI_InfoTypeDef pQSPI_Info;
+  BSP_QSPI_Init();
 
-	/* QSPI info structure */
-	static QSPI_InfoTypeDef pQSPI_Info;
-	BSP_QSPI_Init();
+  pQSPI_Info.FlashSize = (uint32_t) 0x00;
+  pQSPI_Info.EraseSectorSize = (uint32_t) 0x00;
+  pQSPI_Info.EraseSectorsNumber = (uint32_t) 0x00;
+  pQSPI_Info.ProgPageSize = (uint32_t) 0x00;
+  pQSPI_Info.ProgPagesNumber = (uint32_t) 0x00;
 
-	pQSPI_Info.FlashSize = (uint32_t) 0x00;
-	pQSPI_Info.EraseSectorSize = (uint32_t) 0x00;
-	pQSPI_Info.EraseSectorsNumber = (uint32_t) 0x00;
-	pQSPI_Info.ProgPageSize = (uint32_t) 0x00;
-	pQSPI_Info.ProgPagesNumber = (uint32_t) 0x00;
+  /* Read the QSPI memory info */
+  BSP_QSPI_GetInfo(&pQSPI_Info);
 
-	/* Read the QSPI memory info */
-	BSP_QSPI_GetInfo(&pQSPI_Info);
+  /* Test the correctness */
+  if ((pQSPI_Info.FlashSize != 0x1000000)
+		  || (pQSPI_Info.EraseSectorSize != 0x1000)
+		  || (pQSPI_Info.ProgPageSize != 0x100)
+		  || (pQSPI_Info.EraseSectorsNumber != 4096)
+		  || (pQSPI_Info.ProgPagesNumber != 65536)) {
+	  BSP_LED_On(LED_RED);
+	  BSP_LED_On(LED_ORANGE);
+  }
 
-	/* Test the correctness */
-	if ((pQSPI_Info.FlashSize != 0x1000000)
-			|| (pQSPI_Info.EraseSectorSize != 0x1000)
-			|| (pQSPI_Info.ProgPageSize != 0x100)
-			|| (pQSPI_Info.EraseSectorsNumber != 4096)
-			|| (pQSPI_Info.ProgPagesNumber != 65536)) {
-		BSP_LED_On(LED_RED);
-		BSP_LED_On(LED_ORANGE);
-	}
-
-	// init the hardware configuration (defines the capabilities of the hardware)
-	init_openht_hwconfig();
+  // init the hardware configuration (defines the capabilities of the hardware)
+  init_openht_hwconfig();
 
   /* USER CODE END 2 */
 
@@ -284,9 +307,16 @@ int main(void)
   /* creation of lvgl */
   lvglHandle = osThreadNew(StartLVGLTask, NULL, &lvgl_attributes);
 
+  /* creation of microphones */
+  microphonesHandle = osThreadNew(StartMicrophonesTask, NULL, &microphones_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* Create the event(s) */
+  /* creation of microphoneEvents */
+  microphoneEventsHandle = osEventFlagsNew(&microphoneEvents_attributes);
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
@@ -297,7 +327,7 @@ int main(void)
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	while (1) {
+  while (1) {
 
     /* USER CODE END WHILE */
 
@@ -327,8 +357,8 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 360;
+  RCC_OscInitStruct.PLL.PLLM = 5;
+  RCC_OscInitStruct.PLL.PLLN = 225;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 6;
   RCC_OscInitStruct.PLL.PLLR = 6;
@@ -371,7 +401,7 @@ void PeriphCommonClock_Config(void)
   */
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SDIO|RCC_PERIPHCLK_CLK48
                               |RCC_PERIPHCLK_LTDC;
-  PeriphClkInitStruct.PLLSAI.PLLSAIN = 384;
+  PeriphClkInitStruct.PLLSAI.PLLSAIN = 240;
   PeriphClkInitStruct.PLLSAI.PLLSAIR = 7;
   PeriphClkInitStruct.PLLSAI.PLLSAIP = RCC_PLLSAIP_DIV8;
   PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_2;
@@ -381,6 +411,33 @@ void PeriphCommonClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief CRC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_CRC_Init(void)
+{
+
+  /* USER CODE BEGIN CRC_Init 0 */
+
+  /* USER CODE END CRC_Init 0 */
+
+  /* USER CODE BEGIN CRC_Init 1 */
+
+  /* USER CODE END CRC_Init 1 */
+  hcrc.Instance = CRC;
+  if (HAL_CRC_Init(&hcrc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  __HAL_CRC_DR_RESET(&hcrc);
+  /* USER CODE BEGIN CRC_Init 2 */
+
+  /* USER CODE END CRC_Init 2 */
+
 }
 
 /**
@@ -721,6 +778,80 @@ static void MX_SPI1_Init(void)
 }
 
 /**
+  * @brief TIM4 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM4_Init(void)
+{
+
+  /* USER CODE BEGIN TIM4_Init 0 */
+
+  /* USER CODE END TIM4_Init 0 */
+
+  TIM_SlaveConfigTypeDef sSlaveConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_IC_InitTypeDef sConfigIC = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM4_Init 1 */
+
+  /* USER CODE END TIM4_Init 1 */
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 0;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 1;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_IC_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sSlaveConfig.SlaveMode = TIM_SLAVEMODE_EXTERNAL1;
+  sSlaveConfig.InputTrigger = TIM_TS_TI1F_ED;
+  sSlaveConfig.TriggerFilter = 0;
+  if (HAL_TIM_SlaveConfigSynchro(&htim4, &sSlaveConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_TRC;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim4, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 1;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM4_Init 2 */
+
+  /* USER CODE END TIM4_Init 2 */
+  HAL_TIM_MspPostInit(&htim4);
+
+}
+
+/**
   * @brief USART3 Initialization Function
   * @param None
   * @retval None
@@ -763,6 +894,7 @@ static void MX_DMA_Init(void)
 
   /* DMA controller clock enable */
   __HAL_RCC_DMA2_CLK_ENABLE();
+  __HAL_RCC_DMA1_CLK_ENABLE();
 
   /* Configure DMA request hdma_memtomem_dma2_stream0 on DMA2_Stream0 */
   hdma_memtomem_dma2_stream0.Instance = DMA2_Stream0;
@@ -784,6 +916,9 @@ static void MX_DMA_Init(void)
   }
 
   /* DMA interrupt init */
+  /* DMA1_Stream0_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
   /* DMA2_Stream0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
@@ -924,9 +1059,6 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOJ_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, XCVR_NSS_Pin|FPGA_NSS_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOG, MAIN_KILL_Pin|LED1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -944,12 +1076,8 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOH, GPIO_PIN_7|FPGA_RST_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : XCVR_NSS_Pin FPGA_NSS_Pin */
-  GPIO_InitStruct.Pin = XCVR_NSS_Pin|FPGA_NSS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : MAIN_KILL_Pin */
   GPIO_InitStruct.Pin = MAIN_KILL_Pin;
@@ -1030,6 +1158,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : FPGA_NSS_Pin */
+  GPIO_InitStruct.Pin = FPGA_NSS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(FPGA_NSS_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pin : PGOOD_Pin */
   GPIO_InitStruct.Pin = PGOOD_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
@@ -1066,6 +1201,9 @@ int _write(int file, char *ptr, int len)
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
+	// Mount SD fatfs
+	FATFS fs;
+	f_mount(&fs, "0:", 1);
   /* Infinite loop */
   for(;;)
   {
