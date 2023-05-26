@@ -36,10 +36,9 @@ uint8_t pdm_buffer[2*PDM_BYTES] = {0}; // Each byte is 8 samples so we divide de
 uint8_t pcm_buffer[PCM_BYTES] = {0};
 uint8_t *pdm_reading_ptr;
 volatile bool save_file = false;
-volatile bool restart_dma = false;
 
 __attribute__ ( (section(".sdram"))) uint8_t sound_buffer[2*1024*1024];
-__attribute__ ( (section(".sdram"))) uint8_t raw_pdm_storage[4*1024*1024];
+//__attribute__ ( (section(".sdram"))) uint8_t raw_pdm_storage[4*1024*1024];
 
 FRESULT save_wav_file(const char *filename, const uint8_t *data, const uint32_t number_bytes);
 
@@ -91,7 +90,7 @@ void StartMicrophonesTask(void *argument)
 	}
 
 	uint32_t sound_buffer_offset = 0;
-	uint32_t raw_buffer_offset = 0;
+	//uint32_t raw_buffer_offset = 0;
 	memset(sound_buffer, 0, sizeof(sound_buffer));
 
 	/* Infinite loop */
@@ -104,22 +103,22 @@ void StartMicrophonesTask(void *argument)
 			save_wav_file("rec.wav", sound_buffer, sound_buffer_offset);
 			sound_buffer_offset = 0;
 
-			FIL fp;
+			/*FIL fp;
 			UINT bw;
 			f_open(&fp, "/raw.bin", FA_CREATE_ALWAYS | FA_WRITE);
 			f_write(&fp, raw_pdm_storage, raw_buffer_offset, &bw);
 			f_close(&fp);
-			save_file = 0;
+			save_file = 0;*/
 		}else{
-			PDM_Filter(pdm_reading_ptr, pcm_buffer, &pdm_handle);
-			memcpy(sound_buffer + sound_buffer_offset, pcm_buffer, PCM_BYTES);
-			sound_buffer_offset += PCM_BYTES;
-
-			if(raw_buffer_offset < sizeof(raw_pdm_storage)){
+			int16_t *pcm = (int16_t *)pcm_buffer;
+			/*if(raw_buffer_offset < sizeof(raw_pdm_storage)){
 				memcpy(raw_pdm_storage + raw_buffer_offset, pdm_reading_ptr, PDM_BYTES);
 				raw_buffer_offset += PDM_BYTES;
-			}
+			}*/
 
+			PDM_Filter(pdm_reading_ptr, pcm, &pdm_handle);
+			memcpy(sound_buffer + sound_buffer_offset, pcm_buffer, PCM_BYTES);
+			sound_buffer_offset += PCM_BYTES;
 		}
 	}
 }
@@ -142,6 +141,7 @@ void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hdma){
 }
 
 void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hdma){
+	pdm_reading_ptr = pdm_buffer + PDM_BYTES;
 	osEventFlagsSet(microphoneEventsHandle, ACQ_DONE_FLAG);
 }
 
@@ -263,7 +263,9 @@ FRESULT save_wav_file(const char *filename, const uint8_t *data, const uint32_t 
 			16, 0, 0, 0,		/* chunk size of 16 */
 			1, 0,				/* audio format is 1 for PCM*/
 			1, 0,				/* 1 channel */
+			//0x40, 0x1F, 0, 0, 	/* sample rate 16000 Hz (0x3E80) */
 			0x80, 0x3E, 0, 0, 	/* sample rate 16000 Hz (0x3E80) */
+			//0x80, 0x3E, 0, 0, 	/* byterate (sample_rate * n_ch * bytes_per_sample) (0x7D00) */
 			0x00, 0x7D, 0, 0, 	/* byterate (sample_rate * n_ch * bytes_per_sample) (0x7D00) */
 			2, 0,				/* block align: n_ch * bytes_per_sample */
 			16, 0 };			/* bits per sample */
