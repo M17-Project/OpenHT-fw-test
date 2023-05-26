@@ -116,7 +116,7 @@ void StartMicrophonesTask(void *argument)
 			sound_buffer_offset += PCM_BYTES;
 
 			if(raw_buffer_offset < sizeof(raw_pdm_storage)){
-				memcpy(raw_pdm_storage + raw_buffer_offset, pdm_buffer, PDM_BYTES);
+				memcpy(raw_pdm_storage + raw_buffer_offset, pdm_reading_ptr, PDM_BYTES);
 				raw_buffer_offset += PDM_BYTES;
 			}
 
