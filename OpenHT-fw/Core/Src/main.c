@@ -20,7 +20,6 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "fatfs.h"
-#include "pdm2pcm.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -236,7 +235,6 @@ int main(void)
   MX_QUADSPI_Init();
   MX_TIM4_Init();
   MX_CRC_Init();
-  MX_PDM2PCM_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
   HAL_TIM_IC_Start(&htim4, TIM_CHANNEL_1);

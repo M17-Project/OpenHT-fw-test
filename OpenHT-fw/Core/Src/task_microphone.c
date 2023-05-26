@@ -13,9 +13,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#define DECIMATION 128			// 64 pdm samples (bits) -> 1 PCM sample (16 bits)
-#define BLOCK_LENGTH 16			// Process data 16 pcm samples by 16 pcm samples
-#define ACQUISITION_LENGTH (BLOCK_LENGTH*DECIMATION/16) /* in 16 bits samples */
+/* Lengths for one execution of the filter process*/
+#define DECIMATION 	(64)						// 64 pdm samples (bits) -> 1 PCM sample (16 bits)
+#define PCM_SAMPLES (16)						/* 16 */
+#define PCM_BYTES	(PCM_SAMPLES*2)				/* 32 */
+#define PDM_SAMPLES (PCM_SAMPLES*DECIMATION/16) /* 64 */
+#define PDM_BYTES	(PDM_SAMPLES*2) 			/* 128 */
+
 
 #define ACQ_DONE_FLAG (1<<0)
 
@@ -28,12 +32,14 @@ DMA_HandleTypeDef hdma_spi3_rx;
  *
  * at the input we need 16*64 samples of 1 bit each
  */
-uint8_t pdm_samples[2*BLOCK_LENGTH*DECIMATION/8] = {0}; // Each byte is 8 samples so we divide decimation by 8
-uint8_t pcm_samples[BLOCK_LENGTH*2] = {0};
+uint8_t pdm_buffer[2*PDM_BYTES] = {0}; // Each byte is 8 samples so we divide decimation by 8
+uint8_t pcm_buffer[PCM_BYTES] = {0};
 uint8_t *pdm_reading_ptr;
 volatile bool save_file = false;
 volatile bool restart_dma = false;
+
 __attribute__ ( (section(".sdram"))) uint8_t sound_buffer[2*1024*1024];
+__attribute__ ( (section(".sdram"))) uint8_t raw_pdm_storage[4*1024*1024];
 
 FRESULT save_wav_file(const char *filename, const uint8_t *data, const uint32_t number_bytes);
 
@@ -47,6 +53,22 @@ void StartMicrophonesTask(void *argument)
 
 	//Init the PDM2PCM library
 	//MX_PDM2PCM_Init(); // Initialized in main
+	PDM_Filter_Handler_t pdm_handle = {
+			.bit_order = PDM_FILTER_BIT_ORDER_LSB,
+			.endianness = PDM_FILTER_ENDIANNESS_BE,
+			.high_pass_tap = 2143188679, //0.998*(2^31-1)
+			.in_ptr_channels = 1,
+			.out_ptr_channels = 1
+	};
+
+	PDM_Filter_Config_t pdm_config = {
+			.decimation_factor = PDM_FILTER_DEC_FACTOR_64,
+			.mic_gain = 24,
+			.output_samples_number = PCM_SAMPLES
+	};
+
+	PDM_Filter_Init(&pdm_handle);
+	PDM_Filter_setConfig(&pdm_handle, &pdm_config);
 
 	// DMA
 	__HAL_RCC_DMA1_CLK_ENABLE();
@@ -59,9 +81,8 @@ void StartMicrophonesTask(void *argument)
 	hi2s3.Init.Standard = I2S_STANDARD_LSB;
 	hi2s3.Init.DataFormat = I2S_DATAFORMAT_16B;
 	hi2s3.Init.MCLKOutput = I2S_MCLKOUTPUT_DISABLE;
-	hi2s3.Init.AudioFreq = 64000;
+	hi2s3.Init.AudioFreq = 32000; // I2S clk -> 2.048M
 	hi2s3.Init.CPOL = I2S_CPOL_LOW;
-	//hi2s3.Init.CPOL = I2S_CPOL_HIGH;
 	hi2s3.Init.ClockSource = I2S_CLOCK_PLL;
 	hi2s3.Init.FullDuplexMode = I2S_FULLDUPLEXMODE_DISABLE;
 	if (HAL_I2S_Init(&hi2s3) != HAL_OK)
@@ -70,6 +91,7 @@ void StartMicrophonesTask(void *argument)
 	}
 
 	uint32_t sound_buffer_offset = 0;
+	uint32_t raw_buffer_offset = 0;
 	memset(sound_buffer, 0, sizeof(sound_buffer));
 
 	/* Infinite loop */
@@ -81,11 +103,23 @@ void StartMicrophonesTask(void *argument)
 		if(save_file){
 			save_wav_file("rec.wav", sound_buffer, sound_buffer_offset);
 			sound_buffer_offset = 0;
+
+			FIL fp;
+			UINT bw;
+			f_open(&fp, "/raw.bin", FA_CREATE_ALWAYS | FA_WRITE);
+			f_write(&fp, raw_pdm_storage, raw_buffer_offset, &bw);
+			f_close(&fp);
 			save_file = 0;
 		}else{
-			MX_PDM2PCM_Process((uint16_t *)pdm_reading_ptr, (uint16_t *)pcm_samples);
-			memcpy(sound_buffer + sound_buffer_offset, pcm_samples, BLOCK_LENGTH*2);
-			sound_buffer_offset += BLOCK_LENGTH*2;
+			PDM_Filter(pdm_reading_ptr, pcm_buffer, &pdm_handle);
+			memcpy(sound_buffer + sound_buffer_offset, pcm_buffer, PCM_BYTES);
+			sound_buffer_offset += PCM_BYTES;
+
+			if(raw_buffer_offset < sizeof(raw_pdm_storage)){
+				memcpy(raw_pdm_storage + raw_buffer_offset, pdm_buffer, PDM_BYTES);
+				raw_buffer_offset += PDM_BYTES;
+			}
+
 		}
 	}
 }
@@ -93,7 +127,7 @@ void StartMicrophonesTask(void *argument)
 
 void start_microphone_acquisition() {
 	// Start DMA acquisition
-	HAL_I2S_Receive_DMA(&hi2s3, (uint16_t *)pdm_samples, ACQUISITION_LENGTH*2);
+	HAL_I2S_Receive_DMA(&hi2s3, (uint16_t *)pdm_buffer, PDM_SAMPLES*2);
 }
 
 void stop_microphone_acquisition() {
@@ -103,12 +137,11 @@ void stop_microphone_acquisition() {
 }
 
 void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hdma){
-	pdm_reading_ptr = pdm_samples;
+	pdm_reading_ptr = pdm_buffer;
 	osEventFlagsSet(microphoneEventsHandle, ACQ_DONE_FLAG);
 }
 
 void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hdma){
-	restart_dma=true;
 	osEventFlagsSet(microphoneEventsHandle, ACQ_DONE_FLAG);
 }
 
