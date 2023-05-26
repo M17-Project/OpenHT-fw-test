@@ -107,8 +107,8 @@ void StartMicrophonesTask(void *argument)
 			UINT bw;
 			f_open(&fp, "/raw.bin", FA_CREATE_ALWAYS | FA_WRITE);
 			f_write(&fp, raw_pdm_storage, raw_buffer_offset, &bw);
-			f_close(&fp);
-			save_file = 0;*/
+			f_close(&fp);*/
+			save_file = 0;
 		}else{
 			int16_t *pcm = (int16_t *)pcm_buffer;
 			/*if(raw_buffer_offset < sizeof(raw_pdm_storage)){
@@ -116,7 +116,7 @@ void StartMicrophonesTask(void *argument)
 				raw_buffer_offset += PDM_BYTES;
 			}*/
 
-			PDM_Filter(pdm_reading_ptr, pcm, &pdm_handle);
+			PDM_Filter(pdm_reading_ptr, pcm_buffer, &pdm_handle);
 			memcpy(sound_buffer + sound_buffer_offset, pcm_buffer, PCM_BYTES);
 			sound_buffer_offset += PCM_BYTES;
 		}
