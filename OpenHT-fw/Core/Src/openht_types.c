@@ -23,10 +23,14 @@
 
 struct mode_datum openht_mode_data[] =
 {
-    {M17, "M17"},
-    {FreeDV, "FreeDV"},
-    {NFM,  "NFM"},
-    {SSB,  "SSB"},
+    {M17, "M17"}, // digital
+    {FreeDV, "FreeDV"}, // digital
+    {NFM,  "NFM"},  // 6.25k
+    {FM,  "FM"},  // 12.5k
+    {WFM,  "WFM"},  // 25k
+    {AM,  "AM"},
+    {LSB,  "LSB"}, // Lower
+    {USB,  "USB"}, // Upper
 };
 
 uint32_t openht_mode_count = sizeof(openht_mode_data)/sizeof(openht_mode_data[0]);
