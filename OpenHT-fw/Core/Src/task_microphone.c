@@ -15,7 +15,7 @@
 
 /* Lengths for one execution of the filter process*/
 #define DECIMATION 	(64)						// 64 pdm samples (bits) -> 1 PCM sample (16 bits)
-#define PCM_SAMPLES (16)						/* 16 */
+#define PCM_SAMPLES (64)						/* 16 */
 #define PCM_BYTES	(PCM_SAMPLES*2)				/* 32 */
 #define PDM_SAMPLES (PCM_SAMPLES*DECIMATION/16) /* 64 */
 #define PDM_BYTES	(PDM_SAMPLES*2) 			/* 128 */
@@ -51,11 +51,10 @@ void StartMicrophonesTask(void *argument)
 {
 
 	//Init the PDM2PCM library
-	//MX_PDM2PCM_Init(); // Initialized in main
 	PDM_Filter_Handler_t pdm_handle = {
 			.bit_order = PDM_FILTER_BIT_ORDER_LSB,
 			.endianness = PDM_FILTER_ENDIANNESS_BE,
-			.high_pass_tap = 2143188679, //0.998*(2^31-1)
+			.high_pass_tap = 1932735282, //0.9*(2^31-1)
 			.in_ptr_channels = 1,
 			.out_ptr_channels = 1
 	};
@@ -80,7 +79,7 @@ void StartMicrophonesTask(void *argument)
 	hi2s3.Init.Standard = I2S_STANDARD_LSB;
 	hi2s3.Init.DataFormat = I2S_DATAFORMAT_16B;
 	hi2s3.Init.MCLKOutput = I2S_MCLKOUTPUT_DISABLE;
-	hi2s3.Init.AudioFreq = 32000; // I2S clk -> 2.048M
+	hi2s3.Init.AudioFreq = 32000; // I2S clk -> 1.024M
 	hi2s3.Init.CPOL = I2S_CPOL_LOW;
 	hi2s3.Init.ClockSource = I2S_CLOCK_PLL;
 	hi2s3.Init.FullDuplexMode = I2S_FULLDUPLEXMODE_DISABLE;
@@ -91,7 +90,6 @@ void StartMicrophonesTask(void *argument)
 
 	uint32_t sound_buffer_offset = 0;
 	//uint32_t raw_buffer_offset = 0;
-	memset(sound_buffer, 0, sizeof(sound_buffer));
 
 	/* Infinite loop */
 	for(;;)
@@ -110,14 +108,12 @@ void StartMicrophonesTask(void *argument)
 			f_close(&fp);*/
 			save_file = 0;
 		}else{
-			int16_t *pcm = (int16_t *)pcm_buffer;
 			/*if(raw_buffer_offset < sizeof(raw_pdm_storage)){
 				memcpy(raw_pdm_storage + raw_buffer_offset, pdm_reading_ptr, PDM_BYTES);
 				raw_buffer_offset += PDM_BYTES;
 			}*/
 
-			PDM_Filter(pdm_reading_ptr, pcm_buffer, &pdm_handle);
-			memcpy(sound_buffer + sound_buffer_offset, pcm_buffer, PCM_BYTES);
+			PDM_Filter(pdm_reading_ptr, sound_buffer + sound_buffer_offset, &pdm_handle);
 			sound_buffer_offset += PCM_BYTES;
 		}
 	}
@@ -175,7 +171,6 @@ void HAL_I2S_MspInit(I2S_HandleTypeDef* hi2s)
     __HAL_RCC_GPIOD_CLK_ENABLE();
     /**I2S3 GPIO Configuration
     PB3     ------> I2S3_CK
-    PA15     ------> I2S3_WS
     PD6     ------> I2S3_SD
     */
     GPIO_InitStruct.Pin = GPIO_PIN_3;

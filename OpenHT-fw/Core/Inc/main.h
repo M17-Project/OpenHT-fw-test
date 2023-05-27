@@ -61,12 +61,18 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define SPKR_HP_Pin GPIO_PIN_3
+#define SPKR_HP_GPIO_Port GPIOE
+#define audio_rst_Pin GPIO_PIN_2
+#define audio_rst_GPIO_Port GPIOE
 #define FMC_NBL1_Pin GPIO_PIN_1
 #define FMC_NBL1_GPIO_Port GPIOE
 #define FMC_NBL0_Pin GPIO_PIN_0
 #define FMC_NBL0_GPIO_Port GPIOE
 #define I2C1_SCL_Pin GPIO_PIN_8
 #define I2C1_SCL_GPIO_Port GPIOB
+#define XCVR_NSS_Pin GPIO_PIN_15
+#define XCVR_NSS_GPIO_Port GPIOA
 #define SWCLK_Pin GPIO_PIN_14
 #define SWCLK_GPIO_Port GPIOA
 #define SWDIO_Pin GPIO_PIN_13
