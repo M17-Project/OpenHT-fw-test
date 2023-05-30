@@ -81,6 +81,9 @@ void custom_ui_init(void)
 	lv_obj_set_parent(ui_mode_change_panel, lv_layer_top());
 	lv_obj_add_flag(ui_mode_change_panel, LV_OBJ_FLAG_HIDDEN);
 
+	lv_obj_set_parent(ui_settings_panel, lv_layer_top());
+	lv_obj_add_flag(ui_settings_panel, LV_OBJ_FLAG_HIDDEN);
+
 
     // BEGIN ABOUT TABVIEW UI INIT
 
@@ -203,6 +206,54 @@ void on_about_ok_clicked(lv_event_t *e)
 {
 	lv_obj_add_flag(ui_about_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
+}
+
+void on_settings_clicked(lv_event_t *e)
+{
+	lv_obj_clear_flag(ui_settings_panel, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
+}
+
+void on_settings_ok_clicked(lv_event_t *e)
+{
+	lv_obj_add_flag(ui_settings_panel, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
+}
+
+void on_settings_erase_usr_clicked(lv_event_t *e)
+{
+	// TODO: add erase user settings
+}
+
+void on_settings_load_fpga_clicked(lv_event_t *e)
+{
+	// TODO: add load fpga to NOR
+}
+
+void on_settings_erase_fpga_clicked(lv_event_t *e)
+{
+	// TODO: add erase fpga to NOR
+}
+
+void on_settings_a_clicked(lv_event_t *e)
+{
+	// TODO: add button a
+
+}
+
+void on_settings_b_clicked(lv_event_t *e)
+{
+	// TODO: add button b
+}
+
+void on_settings_c_clicked(lv_event_t *e)
+{
+	// TODO: add button c
+}
+
+void on_settings_d_clicked(lv_event_t *e)
+{
+	// TODO: add button d
 }
 
 void on_callsign_clicked(lv_event_t *e)

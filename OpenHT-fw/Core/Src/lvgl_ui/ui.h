@@ -26,6 +26,9 @@ extern lv_obj_t * ui_header_callsign_label;
 void ui_event_header_mode_button(lv_event_t * e);
 extern lv_obj_t * ui_header_mode_button;
 extern lv_obj_t * ui_header_mode_label;
+void ui_event_header_settings_button(lv_event_t * e);
+extern lv_obj_t * ui_header_settings_button;
+extern lv_obj_t * ui_Image1;
 extern lv_obj_t * ui_Label2;
 extern lv_obj_t * ui_Label_Slider;
 void ui_event_vol_slider(lv_event_t * e);
@@ -80,12 +83,39 @@ extern lv_obj_t * ui_Label7;
 void ui_event_mode_cancel_button(lv_event_t * e);
 extern lv_obj_t * ui_mode_cancel_button;
 extern lv_obj_t * ui_Label8;
+extern lv_obj_t * ui_screen_scratchpad_3;
+extern lv_obj_t * ui_settings_panel;
+void ui_event_settings_ok_btn(lv_event_t * e);
+extern lv_obj_t * ui_settings_ok_btn;
+extern lv_obj_t * ui_Label10;
+void ui_event_settings_erase_user_btn(lv_event_t * e);
+extern lv_obj_t * ui_settings_erase_user_btn;
+extern lv_obj_t * ui_Label11;
+void ui_event_settings_load_fpga_btn(lv_event_t * e);
+extern lv_obj_t * ui_settings_load_fpga_btn;
+extern lv_obj_t * ui_Label12;
+void ui_event_settings_erase_fpga_btn(lv_event_t * e);
+extern lv_obj_t * ui_settings_erase_fpga_btn;
+extern lv_obj_t * ui_Label13;
+void ui_event_settings_a_btn(lv_event_t * e);
+extern lv_obj_t * ui_settings_a_btn;
+extern lv_obj_t * ui_Label14;
+void ui_event_settings_c_btn(lv_event_t * e);
+extern lv_obj_t * ui_settings_c_btn;
+extern lv_obj_t * ui_Label15;
+void ui_event_settings_b_btn(lv_event_t * e);
+extern lv_obj_t * ui_settings_b_btn;
+extern lv_obj_t * ui_Label16;
+void ui_event_settings_d_btn(lv_event_t * e);
+extern lv_obj_t * ui_settings_d_btn;
+extern lv_obj_t * ui_Label17;
 extern lv_obj_t * ui____initial_actions0;
 
 
 LV_IMG_DECLARE(ui_img_openht_logo_w_png);    // assets/openht_logo_w.png
 LV_IMG_DECLARE(ui_img_152149816);    // assets/battery-charging_w.png
 LV_IMG_DECLARE(ui_img_492966190);    // assets/reception-3_w.png
+LV_IMG_DECLARE(ui_img_gear_w_png);    // assets/gear_w.png
 LV_IMG_DECLARE(ui_img_m17_logo_sm_png);    // assets/m17_logo_sm.png
 LV_IMG_DECLARE(ui_img_openht_logo_png);    // assets/openht_logo.png
 

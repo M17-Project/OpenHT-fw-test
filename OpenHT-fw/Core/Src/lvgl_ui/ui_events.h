@@ -13,6 +13,7 @@ extern "C" {
 void on_about_clicked(lv_event_t * e);
 void on_callsign_clicked(lv_event_t * e);
 void on_mode_clicked(lv_event_t * e);
+void on_settings_clicked(lv_event_t * e);
 void on_vol_changed(lv_event_t * e);
 void on_xmit_button_press(lv_event_t * e);
 void on_xmit_button_release(lv_event_t * e);
@@ -29,6 +30,14 @@ void on_callsign_ta_click(lv_event_t * e);
 void on_about_ok_clicked(lv_event_t * e);
 void on_mode_ok_clicked(lv_event_t * e);
 void on_mode_cancel_clicked(lv_event_t * e);
+void on_settings_ok_clicked(lv_event_t * e);
+void on_settings_erase_usr_clicked(lv_event_t * e);
+void on_settings_load_fpga_clicked(lv_event_t * e);
+void on_settings_erase_fpga_clicked(lv_event_t * e);
+void on_settings_a_clicked(lv_event_t * e);
+void on_settings_c_clicked(lv_event_t * e);
+void on_settings_b_clicked(lv_event_t * e);
+void on_settings_d_clicked(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/
