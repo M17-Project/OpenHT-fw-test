@@ -33,6 +33,8 @@
 #include "lvgl_ui/ui.h"
 #include "disk_mgr.h"
 #include "openht_hwconfig.h"
+#include "task_microphone.h"
+#include "task_fpga.h"
 
 /* USER CODE END Includes */
 
@@ -125,6 +127,13 @@ const osThreadAttr_t microphones_attributes = {
   .stack_size = 768 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
 };
+/* Definitions for fpga */
+osThreadId_t fpgaHandle;
+const osThreadAttr_t fpga_attributes = {
+  .name = "fpga",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityNormal1,
+};
 /* Definitions for microphoneEvents */
 osEventFlagsId_t microphoneEventsHandle;
 const osEventFlagsAttr_t microphoneEvents_attributes = {
@@ -155,6 +164,7 @@ static void MX_RNG_Init(void);
 void StartDefaultTask(void *argument);
 void StartLVGLTask(void *argument);
 extern void StartMicrophonesTask(void *argument);
+extern void StartTaskFPGA(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -314,6 +324,9 @@ int main(void)
 
   /* creation of microphones */
   microphonesHandle = osThreadNew(StartMicrophonesTask, NULL, &microphones_attributes);
+
+  /* creation of fpga */
+  fpgaHandle = osThreadNew(StartTaskFPGA, NULL, &fpga_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

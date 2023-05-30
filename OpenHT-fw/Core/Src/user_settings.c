@@ -31,14 +31,12 @@
 #include <stdbool.h>
 #include <string.h>
 
-const static uint32_t SUBSECTOR_SIZE = 4096; // bytes per subsector
-static uint32_t current_address = 0;
+#include "nor_map.h"
 
+static uint32_t current_address = 0;
 const static uint32_t END_PATTERN = 0xBEEFADDF;
 
 // memory mapped
-const static uint32_t START_MMP_NOR_ADDR = 0x90000000;
-const static uint32_t END_MMP_NOR_ADDR = 0x91000000;
 
 // is this hackish? need a zero buffer
 const static uint32_t data_size = (sizeof(settings_t) + 4);
