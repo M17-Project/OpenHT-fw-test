@@ -29,3 +29,36 @@ When the PTT button is pressed by the operator, the MCU (over SPI) will instruct
 Callsign             |  Frequency
 :-------------------------:|:-------------------------:
 ![](https://github.com/M17-Project/OpenHT-fw-test/blob/main/docs/openht_screen_callsign.jpg)  |  ![](https://github.com/M17-Project/OpenHT-fw-test/blob/main/docs/openht_screen_freq.jpg)
+
+## FPGA SPI interface
+### General setup
+First, AT86RF215 needs to be initialized to accept (and output) I/Q baseband over LVDS:<br>
+`AT86_ConfigCommon();`
+
+After that's done, the chip needs to be tuned to the required frequency for either transmission or reception:<br>
+```
+AT86_TX09(433475000, 2.0f, 0x13);
+AT86_TX24(2400000000, 1.1f, 0x17);
+AT86_RX09(433475000+40000, 1.1f, 1, 0);
+AT86_RX24(2400000000+40000, 1.1f, 1, 0);
+```
+
+AT86_xXnn - x -> R=reception, T=transmission; nn -> 09=sub-GHz or 24=2.4GHz<br>
+The parameters are as follows:<br>
+- frequency in Hz, for RX add frequency translation of 40kHz, `uint32_t`
+- frequency correction in ppm (float)
+- for TX: power setting, 0-23 (0=min, 23=max)
+- for RX: AGC enable (0=disabled, 1=enabled) and AGC target level (0=max, 7=min)
+
+### Register setups
+It's assumed that two `uint16_t` variables are declared: `reg_addr` and `reg_val`. Additionally, one array of `uint8_t` is needed to hold the data for SPI transfer.
+
+#### FM transceiver, sub-GHz, narrow
+```
+reg_addr=REG_WR|CR_1;
+reg_val=MOD_FM|PD_ON|DEM_FM|BAND_09;
+...
+reg_addr=REG_WR|CR_2;
+reg_val=CTCSS_TX_NONE|STATE_RX|FM_TX_N;
+...
+```
