@@ -90,6 +90,8 @@ LTDC_HandleTypeDef hltdc;
 
 QSPI_HandleTypeDef hqspi;
 
+RNG_HandleTypeDef hrng;
+
 SD_HandleTypeDef hsd;
 DMA_HandleTypeDef hdma_sdio;
 
@@ -149,6 +151,7 @@ static void MX_QUADSPI_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_CRC_Init(void);
 static void MX_I2C2_Init(void);
+static void MX_RNG_Init(void);
 void StartDefaultTask(void *argument);
 void StartLVGLTask(void *argument);
 extern void StartMicrophonesTask(void *argument);
@@ -238,6 +241,7 @@ int main(void)
   MX_TIM4_Init();
   MX_CRC_Init();
   MX_I2C2_Init();
+  MX_RNG_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
   HAL_TIM_IC_Start(&htim4, TIM_CHANNEL_1);
@@ -743,6 +747,32 @@ static void MX_QUADSPI_Init(void)
   /* USER CODE BEGIN QUADSPI_Init 2 */
 
   /* USER CODE END QUADSPI_Init 2 */
+
+}
+
+/**
+  * @brief RNG Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_RNG_Init(void)
+{
+
+  /* USER CODE BEGIN RNG_Init 0 */
+
+  /* USER CODE END RNG_Init 0 */
+
+  /* USER CODE BEGIN RNG_Init 1 */
+
+  /* USER CODE END RNG_Init 1 */
+  hrng.Instance = RNG;
+  if (HAL_RNG_Init(&hrng) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN RNG_Init 2 */
+
+  /* USER CODE END RNG_Init 2 */
 
 }
 
