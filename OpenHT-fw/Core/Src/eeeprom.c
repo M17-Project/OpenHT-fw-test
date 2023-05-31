@@ -217,7 +217,7 @@ bool EEEPROM_write_data(EEEPROMHandle_t *handle, uint32_t address, const void *d
 }
 
 bool EEEPROM_read_data(EEEPROMHandle_t *handle, uint32_t address, void *data){
-	uint32_t index = handle->priv->current_address - handle->priv->actual_entry_size;
+	int32_t index = handle->priv->current_address - handle->priv->actual_entry_size;
 
 	// Go backward in the active page until we find the requested address
 	while(index >= handle->priv->active_page * handle->page_size){
