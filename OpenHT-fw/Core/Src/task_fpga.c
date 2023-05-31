@@ -41,7 +41,7 @@ void StartTaskFPGA(void *argument) {
 	// Init EEEPROM
 	EEEPROMHandle_t eeeprom = {
 			.start_address = FPGA_BIN_TABLE_START_ADDR,
-			.erase_page = erase_subsector,
+			.erase_page = _erase_subsector,
 			.read = _qspi_read,
 			.write = _qspi_write,
 			.page_offset = FPGA_BIN_TABLE_START_SECTOR,
