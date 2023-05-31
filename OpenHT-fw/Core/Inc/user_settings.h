@@ -27,19 +27,19 @@ extern "C" {
 #include "stm32469i_discovery.h" /* DISCOVERY includes component */
 #include "stm32469i_discovery_qspi.h"
 
-#define WRITE_READ_ADDR     ((uint32_t)0x0050)
 
 typedef struct
 {
-	char callsign[10];
 	uint32_t tx_freq;
 	uint32_t rx_freq;
+	char callsign[10];
 	openht_mode_t mode;
 	uint8_t audio_vol;
 } settings_t;
 
-void save_settings(const settings_t *settings);
-void get_settings(settings_t *settings);
+void user_settings_reset();
+void user_settings_save(const settings_t *settings);
+void user_settings_get(settings_t *settings);
 
 #ifdef __cplusplus
 }

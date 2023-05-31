@@ -170,7 +170,7 @@ void custom_ui_init(void)
 
 
 	// GET STORED SETTINGS AND UPDATE UI
-	get_settings(&user_settings);
+	user_settings_get(&user_settings);
 
 	char buffer[15];
 	snprintf(buffer, 15, "%lu", user_settings.rx_freq);
@@ -222,7 +222,7 @@ void on_settings_ok_clicked(lv_event_t *e)
 
 void on_settings_erase_usr_clicked(lv_event_t *e)
 {
-	// TODO: add erase user settings
+	user_settings_reset();
 }
 
 void on_settings_load_fpga_clicked(lv_event_t *e)
@@ -284,7 +284,7 @@ void on_mode_ok_clicked(lv_event_t *e)
 	lv_label_set_text_fmt(ui_header_mode_label, "Mode: %s", roller_str);
 
 	user_settings.mode = lv_roller_get_selected(ui_mode_roller);
-	save_settings(&user_settings);
+	user_settings_save(&user_settings);
 }
 
 void on_screen_pressed(lv_event_t *e)
@@ -559,7 +559,7 @@ static void end_input_callsign_ta()
 	lv_label_set_text_fmt(ui_header_callsign_label, "Call: %s", callsign_str);
 
     strcpy(user_settings.callsign, callsign_str);
-	save_settings(&user_settings);
+	user_settings_save(&user_settings);
 }
 
 static void update_active_freq_ta(lv_obj_t *new_freq_ta, uint32_t *freq)
@@ -623,7 +623,7 @@ static void end_input_freq_ta(bool finished_input)
 	snprintf(buffer, 15, "%lu", user_settings.tx_freq);
 	lv_label_set_text(ui_label_test_tx, buffer);
 
-	save_settings(&user_settings);
+	user_settings_save(&user_settings);
 }
 
 static int32_t move_cursor(int32_t curs_pos, int32_t movement)
