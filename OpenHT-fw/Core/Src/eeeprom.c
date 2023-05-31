@@ -41,7 +41,7 @@ bool _move_active_page(EEEPROMHandle_t *handle);
 
 
 /* Functions declarations */
-bool EEEPROM_Init(EEEPROMHandle_t *handle){
+bool EEEPROM_init(EEEPROMHandle_t *handle){
 	/* Check the different lengths/sizes/...*/
 	if(handle->erase_page == NULL){
 		return EXIT_FAILURE;
@@ -180,8 +180,7 @@ bool EEEPROM_delete(EEEPROMHandle_t *handle){
 	return EXIT_SUCCESS;
 }
 
-bool EEEPROM_write_data(EEEPROMHandle_t *handle, uint32_t address, void *data){
-	uint8_t *byte_data = (uint8_t *)data;
+bool EEEPROM_write_data(EEEPROMHandle_t *handle, uint32_t address, const void *data){
 	/* Check if this entry would go beyond the page limit */
 	if(handle->priv->current_address + handle->priv->actual_entry_size
 			> handle->start_address + (handle->priv->active_page+1)*handle->page_size){
@@ -246,7 +245,7 @@ bool EEEPROM_read_data(EEEPROMHandle_t *handle, uint32_t address, void *data){
 	return EXIT_FAILURE;
 }
 
-bool EEPROM_erase(EEEPROMHandle_t *handle){
+bool EEEPROM_erase(EEEPROMHandle_t *handle){
 	for(uint8_t i = 0; i < handle->number_pages; i++){
 		handle->erase_page(handle->page_offset + i);
 	}

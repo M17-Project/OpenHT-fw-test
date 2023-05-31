@@ -78,7 +78,7 @@ typedef struct {
  *
  * @return EXIT_SUCCESS or EXIT_FAILURE
  */
-bool EEEPROM_Init(EEEPROMHandle_t *handle);
+bool EEEPROM_init(EEEPROMHandle_t *handle);
 
 /**
  * Writes some data to an EEEPROM specified by the handle
@@ -89,7 +89,7 @@ bool EEEPROM_Init(EEEPROMHandle_t *handle);
  *
  * @return EXIT_SUCCESS or EXIT_FAILURE
  */
-bool EEEPROM_write_data(EEEPROMHandle_t *handle, uint32_t address, void *data);
+bool EEEPROM_write_data(EEEPROMHandle_t *handle, uint32_t address, const void *data);
 
 /**
  * Writes some data to an EEEPROM specified by the handle

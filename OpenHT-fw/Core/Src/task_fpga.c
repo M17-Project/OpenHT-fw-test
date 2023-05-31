@@ -52,7 +52,7 @@ void StartTaskFPGA(void *argument) {
 			.alignment = 4,
 	};
 
-	if(EEEPROM_Init(&eeeprom) == EXIT_FAILURE){
+	if(EEEPROM_init(&eeeprom) == EXIT_FAILURE){
 		printf("Error initializing fpga binaries EEEPROM.\r\n");
 	}
 
