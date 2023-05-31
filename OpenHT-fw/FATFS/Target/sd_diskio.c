@@ -30,7 +30,7 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <cmsis_os.h>
+
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 
