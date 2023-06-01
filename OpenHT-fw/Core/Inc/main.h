@@ -48,6 +48,11 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
+#define CLI_NAME openHT
+
+#define CLI_ADDITIONAL_LOG_CATEGORIES \
+	X(EEEPROM, true) \
+	X(FPGA, true) \
 
 /* USER CODE END EM */
 

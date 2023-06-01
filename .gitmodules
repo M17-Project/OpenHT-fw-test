@@ -1,3 +1,6 @@
 [submodule "OpenHT-fw/Drivers/lvgl"]
 	path = OpenHT-fw/Drivers/lvgl
 	url = https://github.com/lvgl/lvgl
+[submodule "OpenHT-fw/Core/shell"]
+	path = OpenHT-fw/Core/shell
+	url = https://github.com/M17-Project/ushell-stm32

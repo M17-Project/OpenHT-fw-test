@@ -35,6 +35,7 @@
 #include "openht_hwconfig.h"
 #include "task_microphone.h"
 #include "task_fpga.h"
+#include "../shell/inc/sys_command_line.h"
 
 /* USER CODE END Includes */
 
@@ -1279,10 +1280,29 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-int _write(int file, char *ptr, int len)
-{
-	HAL_UART_Transmit(&huart3, (const uint8_t*) ptr, len, 100);
-	return len;
+void greet(void){
+    TERMINAL_BACK_DEFAULT(); /* set terminal background color: black */
+    TERMINAL_DISPLAY_CLEAR();
+    TERMINAL_RESET_CURSOR();
+    NL1();
+    printf("                   \033[38;5;m@\033[38;5;247m*\033[38;5;m        \033[38;5;m@\033[38;5;247m*\033[38;5;m        \033[38;5;196m#\033[38;5;247m*\033[38;5;m");NL1();
+    printf("                  \033[38;5;m@@\033[38;5;248m*\033[38;5;m       @@\033[38;5;248m*\033[38;5;m       \033[38;5;196m##\033[38;5;248m*   \033[38;5;196m############\033[38;5;247m*\033[38;5;m");NL1();
+    printf("                \033[38;5;m@@@@\033[38;5;248m*\033[38;5;m     @@@@\033[38;5;248m*\033[38;5;m     \033[38;5;196m####\033[38;5;248m*\033[38;5;m          \033[38;5;196m####\033[38;5;m*");NL1();
+    printf("               \033[38;5;m@@@@@\033[38;5;248m*\033[38;5;m    @@@@@\033[38;5;248m*\033[38;5;m    \033[38;5;196m#####\033[38;5;248m*\033[38;5;m         \033[38;5;196m###\033[38;5;247m*\033[38;5;m");NL1();
+    printf("             \033[38;5;m@@@@,@@\033[38;5;145m*\033[38;5;m  @@@@,@@\033[38;5;248m*\033[38;5;m  \033[38;5;196m####\033[38;5;m.\033[38;5;196m##\033[38;5;248m*\033[38;5;m       \033[38;5;196m####\033[38;5;247m*\033[38;5;m");NL1();
+    printf("            \033[38;5;m@@@\033[38;5;248m*\033[38;5;m ,@@\033[38;5;145m*\033[38;5;m @@@\033[38;5;145m*\033[38;5;m ,@@\033[38;5;248m*\033[38;5;m    \033[38;5;248m*\033[38;5;m .\033[38;5;196m##\033[38;5;248m*\033[38;5;m      \033[38;5;196m###\033[38;5;247m*\033[38;5;m");NL1();
+    printf("          \033[38;5;m@@@@*  ,@@@@@@,  ,@@\033[38;5;248m*\033[38;5;m      .\033[38;5;196m##\033[38;5;248m*\033[38;5;m    *\033[38;5;196m###\033[38;5;247m*\033[38;5;m");NL1();
+    printf("         \033[38;5;m@@@\033[38;5;248m*\033[38;5;m    ,@@@@\033[38;5;248m*\033[38;5;m    *@@\033[38;5;248m*\033[38;5;m      .\033[38;5;196m##\033[38;5;248m*\033[38;5;m   \033[38;5;196m###\033[38;5;247m*\033[38;5;m");NL1();
+    printf("        \033[38;5;246m/\033[38;5;m@@\033[38;5;247m*\033[38;5;m     ,@@@\033[38;5;248m*\033[38;5;m     *@@\033[38;5;247m*\033[38;5;m      .\033[38;5;196m##\033[38;5;247m*\033[38;5;m  ,\033[38;5;196m##\033[38;5;247m*\033[38;5;m");NL1();
+    printf("                 ,\033[38;5;m@\033[38;5;247m*\033[38;5;m");NL1();
+    printf("                 ,\033[38;5;247m*\033[38;5;m\033[0m");NL2();
+    printf("µShell v0.1 - by Morgan Diepart (mdiepart@uliege.be)");NL1();
+    printf("Original work from https://github.com/ShareCat/STM32CommandLine");NL1();
+    printf("-------------------------------");
+    NL2();
+    TERMINAL_FONT_DEFAULT();
+    PRINT_CLI_NAME();
+    TERMINAL_SHOW_CURSOR();
 }
 
 /* USER CODE END 4 */
@@ -1300,6 +1320,8 @@ void StartDefaultTask(void *argument)
 	// Mount SD fatfs
 	FATFS fs;
 	f_mount(&fs, "0:", 1);
+
+	CLI_INIT(&huart3, USART3_IRQn);
   /* Infinite loop */
   for(;;)
   {
@@ -1314,6 +1336,7 @@ void StartDefaultTask(void *argument)
 		user_button_pressed = false;
 		on_userbutton_release();
 	}
+	CLI_RUN();
     osDelay(10);
   }
   /* USER CODE END 5 */
