@@ -38,7 +38,11 @@ typedef enum
     M17,
     FreeDV,
     NFM,
-    SSB
+	FM,
+	WFM,
+	AM,
+	LSB,
+	USB,
 } openht_mode_t;
 
 struct mode_datum

@@ -27,3 +27,6 @@ local.properties
 
 Debug/
 Release/
+
+.settings/
+.mxproject

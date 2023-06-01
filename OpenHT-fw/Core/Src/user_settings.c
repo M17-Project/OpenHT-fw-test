@@ -29,129 +29,153 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
-const static uint32_t SUBSECTOR_SIZE = 4096; // bytes per subsector
-static uint32_t current_address = 0;
+#include "nor_map.h"
+#include "eeeprom.h"
+#include "eeeprom_hal.h"
 
-const static uint32_t END_PATTERN = 0xBEEFADDF;
+#define CALLSIGN1_EEEPROM_ADDR		0x00	// Contains CS letters [1:4]
+#define CALLSIGN2_EEEPROM_ADDR		0x01	// Contains CS letters [5:8]
+#define CALLSIGN3_EEEPROM_ADDR 		0x02	// Contains CS letters [9:10]
+#define TX_FREQ_EEEPROM_ADDR		0x03	// Tx frequency (in Hz)
+#define RX_FREQ_EEEPROM_ADDR		0x04	// Rx frequency (in Hz)
+#define AV_MODE_EEEPROM_ADDR		0x05	// Contains Audio volume and mode
 
-// memory mapped
-const static uint32_t START_MMP_NOR_ADDR = 0x90000000;
-const static uint32_t END_MMP_NOR_ADDR = 0x91000000;
 
-// is this hackish? need a zero buffer
-const static uint32_t data_size = (sizeof(settings_t) + 4);
-static uint8_t* zero_buf;
 
-void initialize_settings()
-{
-//	if (BSP_QSPI_Erase_Chip() != QSPI_OK) {
-//		BSP_LED_On(LED_ORANGE);
-//	}
+EEEPROMHandle_t user_settings_eeeprom = {
+		.address_size = EEEPROM_ADDRESS_1BYTE,
+		.alignment = 1,
+		.data_size = 4,
+		.read = EEEPROM_HAL_qspi_read,
+		.write = EEEPROM_HAL_qspi_write,
+		.erase_page = EEEPROM_HAL_erase_subsector,
+		.number_pages = USER_SETTINGS_NB_SECTORS,
+		.page_offset = USER_SETTINGS_START_SECTOR,
+		.page_size = SUBSECTOR_SIZE,
+		.start_address = USER_SETTINGS_START_ADDRESS,
+};
 
-	// strategy is to zero data once discarded
-	zero_buf = malloc(data_size);
-	memset(zero_buf, 0, data_size);
+bool init_done = false;
+settings_t cached_settings;
 
-	// memory mapped mode is relatively fast and can loop by
-	// 4 bytes through the entire 16MB NOR flash in 5 seconds
-	BSP_QSPI_EnableMemoryMappedMode();
-
-	// find the end of zeros going forward...
-	uint32_t data_start_addr = START_MMP_NOR_ADDR;
-	while (data_start_addr < END_MMP_NOR_ADDR) {
-		uint32_t data = *(uint32_t*) data_start_addr;
-
-		// found the start of data
-		if (data != 0) {
-			break;
-		} else {
-			data_start_addr += 4;
-		}
+void user_settings_reset(){
+	bool res = EEEPROM_erase(&user_settings_eeeprom);
+	if( res != EXIT_SUCCESS){
+		printf("Error erasing EEPROM content for user settings.\r\n");
+		return;
 	}
-
-	// find the last END_PATTERN going in reverse
-	// use the zeros as a cheat so we don't need to traverse the entire
-	// flash memory
-
-	// uint32_t readaddr = END_MMP_NOR_ADDR - 4;
-	uint32_t readaddr = data_start_addr + SUBSECTOR_SIZE;
-	while (readaddr > START_MMP_NOR_ADDR) {
-		uint32_t data = *(uint32_t*) readaddr;
-		if (data == END_PATTERN) {
-			BSP_LED_On(LED_BLUE);
-			current_address = readaddr - START_MMP_NOR_ADDR;
-			current_address -= sizeof(settings_t);
-			break;
-		} else {
-			BSP_LED_On(LED_GREEN);
-			readaddr -= 4;
-		}
-	}
-
-	BSP_QSPI_Init();
+	printf("Successfully erased user settings. Rebooting\r\n");
+	NVIC_SystemReset();
 }
 
-void save_settings(const settings_t *settings)
+void user_settings_init()
 {
+	if(EEEPROM_init(&user_settings_eeeprom) != EXIT_SUCCESS){
+		printf("Error initializing EEEPROM for user settings.\r\n");
+	}
+	uint32_t buffer;
+
+	// CS letters 1 to 4
+	if(EEEPROM_read_data(&user_settings_eeeprom, CALLSIGN1_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
+		*(uint32_t *)(cached_settings.callsign) = buffer;
+	}else{
+		cached_settings.callsign[0] = '\0';
+	}
+
+
+	// CS letters 5 to 8
+	if(EEEPROM_read_data(&user_settings_eeeprom, CALLSIGN2_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
+		*(uint32_t *)(cached_settings.callsign+4) = buffer;
+	}else{
+		cached_settings.callsign[4] = '\0';
+	}
+
+
+	// CS letters 9-10
+	if(EEEPROM_read_data(&user_settings_eeeprom, CALLSIGN3_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
+		*(uint16_t *)(cached_settings.callsign+8) = (uint16_t)buffer;
+	}else{
+		cached_settings.callsign[8] = '\0';
+	}
+
+
+	// RX freq
+	if(EEEPROM_read_data(&user_settings_eeeprom, RX_FREQ_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
+		cached_settings.rx_freq = buffer;
+	}else{
+		cached_settings.rx_freq = 0;
+	}
+
+
+	// TX freq
+	if(EEEPROM_read_data(&user_settings_eeeprom, TX_FREQ_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
+		cached_settings.tx_freq = buffer;
+	}else{
+		cached_settings.tx_freq = 0;
+	}
+
+
+	// Audio volume and mode
+	if(EEEPROM_read_data(&user_settings_eeeprom, AV_MODE_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
+		cached_settings.audio_vol = buffer & 0xFF;
+		cached_settings.mode = (buffer>>8) & 0xFF;
+	}else{
+		cached_settings.audio_vol = 0;
+		cached_settings.mode = FM;
+	}
+
+	init_done = true;
+}
+
+void user_settings_save(const settings_t *settings)
+{
+	uint32_t buffer;
+	if(strcmp(settings->callsign, cached_settings.callsign) != 0){
+		// Compare first four letters
+		if(*(uint32_t *)(settings->callsign) != *(uint32_t *)(cached_settings.callsign)){
+			EEEPROM_write_data(&user_settings_eeeprom, CALLSIGN1_EEEPROM_ADDR, (void *)settings->callsign);
+		}
+		// Compare letters 5 to 8
+		if(*(uint32_t *)(settings->callsign+4) != *(uint32_t *)(cached_settings.callsign+4)){
+			EEEPROM_write_data(&user_settings_eeeprom, CALLSIGN2_EEEPROM_ADDR, (void *)(settings->callsign+4));
+		}
+		// Compare letters 9-10
+		if(*(uint16_t *)(settings->callsign+8) != *(uint16_t *)(cached_settings.callsign+8)){
+			EEEPROM_write_data(&user_settings_eeeprom, CALLSIGN3_EEEPROM_ADDR, (void *)(settings->callsign+8));
+		}
+		memcpy(cached_settings.callsign, settings->callsign, 10);
+	}
+	if( (cached_settings.audio_vol != settings->audio_vol)
+			|| (cached_settings.mode != settings->mode) ){
+		buffer = settings->audio_vol + ( ( (uint16_t)settings->mode ) << 8 );
+		EEEPROM_write_data(&user_settings_eeeprom, AV_MODE_EEEPROM_ADDR, (void *)(&buffer));
+		cached_settings.audio_vol = settings->audio_vol;
+		cached_settings.mode = settings->mode;
+	}
+
+	if(cached_settings.rx_freq != settings->rx_freq){
+		EEEPROM_write_data(&user_settings_eeeprom, RX_FREQ_EEEPROM_ADDR, &(settings->rx_freq) );
+		cached_settings.rx_freq = settings->rx_freq;
+	}
+
+	if(cached_settings.tx_freq != settings->tx_freq){
+		EEEPROM_write_data(&user_settings_eeeprom, TX_FREQ_EEEPROM_ADDR, (void *)(&(settings->tx_freq)));
+		cached_settings.tx_freq = settings->tx_freq;
+	}
+}
+
+void user_settings_get(settings_t *settings)
+{
+
 	BSP_LED_Off(LED_ORANGE);
 	BSP_LED_Off(LED_GREEN);
 
-	uint32_t old_address = current_address;
-	current_address += (sizeof(settings_t) + 4);
-
-//	if (BSP_QSPI_Erase_Block(current_address) != QSPI_OK) {
-//		BSP_LED_On(LED_ORANGE);
-//	} else {
-		if (BSP_QSPI_Write((uint8_t*) settings, current_address, sizeof(settings_t)) != QSPI_OK) {
-			BSP_LED_On(LED_ORANGE);
-		} else {
-			if (BSP_QSPI_Write((uint8_t*) &END_PATTERN, current_address + sizeof(settings_t),
-					sizeof(END_PATTERN)) != QSPI_OK) {
-				BSP_LED_On(LED_ORANGE);
-			} else {
-				BSP_LED_On(LED_GREEN);
-			}
-		}
-
-		// zero out previous flash data
-		if (BSP_QSPI_Write((uint8_t*) zero_buf, old_address, data_size) != QSPI_OK) {
-			BSP_LED_On(LED_ORANGE);
-		}
-
-		// test
-		//uint8_t buff [4096];
-		//if (BSP_QSPI_Read((uint8_t*) &buff, 0, sizeof(buff)) != QSPI_OK) {
-		//	BSP_LED_On(LED_ORANGE);
-		//}
-
-//	}
-}
-
-void get_settings(const settings_t *settings)
-{
-	BSP_LED_Off(LED_ORANGE);
-	BSP_LED_Off(LED_GREEN);
-
-	settings_t temp_settings;
-	initialize_settings();
-
-	if (BSP_QSPI_Read((uint8_t*) &temp_settings, current_address,
-			sizeof(settings_t)) != QSPI_OK) {
-		BSP_LED_On(LED_ORANGE);
-	} else {
-		uint32_t end;
-		if (BSP_QSPI_Read((uint8_t*) &end, current_address + sizeof(settings_t),
-				sizeof(end)) != QSPI_OK) {
-			BSP_LED_On(LED_ORANGE);
-		} else {
-			if (end == END_PATTERN) {
-				BSP_LED_On(LED_GREEN);
-				memcpy(settings, &temp_settings, sizeof(settings_t));
-			} else {
-				BSP_LED_On(LED_ORANGE);
-			}
-		}
+	if(!init_done){
+		user_settings_init();
 	}
+
+	memcpy(settings, &cached_settings, sizeof(settings_t));
 }
 

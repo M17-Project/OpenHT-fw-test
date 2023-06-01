@@ -33,7 +33,11 @@
 #include "openht_hwconfig.h"
 #include "openht_types.h"
 #include <../../Drivers/BSP/Components/nt35510/nt35510.h>
+#include "lvht_numpad.h"
+#include "lvht_qwertypad.h"
 
+#include "task_microphone.h"
+#include "task_fpga.h"
 
 #define EMPTY_FREQ "_.___.___.___"
 #define END_POS 13
@@ -76,6 +80,9 @@ void custom_ui_init(void)
 
 	lv_obj_set_parent(ui_mode_change_panel, lv_layer_top());
 	lv_obj_add_flag(ui_mode_change_panel, LV_OBJ_FLAG_HIDDEN);
+
+	lv_obj_set_parent(ui_settings_panel, lv_layer_top());
+	lv_obj_add_flag(ui_settings_panel, LV_OBJ_FLAG_HIDDEN);
 
 
     // BEGIN ABOUT TABVIEW UI INIT
@@ -163,15 +170,15 @@ void custom_ui_init(void)
 
 
 	// GET STORED SETTINGS AND UPDATE UI
-	get_settings(&user_settings);
+	user_settings_get(&user_settings);
 
 	char buffer[15];
-	snprintf(buffer, 15, "%u", user_settings.rx_freq);
+	snprintf(buffer, 15, "%lu", user_settings.rx_freq);
 	lv_label_set_text(ui_label_test_rx, buffer);
 	get_str_from_freq(user_settings.rx_freq, current_freq_str, true);
 	lv_textarea_set_text(ui_text_area_rx_freq, current_freq_str);
 
-	snprintf(buffer, 15, "%u", user_settings.tx_freq);
+	snprintf(buffer, 15, "%lu", user_settings.tx_freq);
 	lv_label_set_text(ui_label_test_tx, buffer);
 	get_str_from_freq(user_settings.tx_freq, current_freq_str, true);
 	lv_textarea_set_text(ui_text_area_tx_freq, current_freq_str);
@@ -199,6 +206,54 @@ void on_about_ok_clicked(lv_event_t *e)
 {
 	lv_obj_add_flag(ui_about_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
+}
+
+void on_settings_clicked(lv_event_t *e)
+{
+	lv_obj_clear_flag(ui_settings_panel, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
+}
+
+void on_settings_ok_clicked(lv_event_t *e)
+{
+	lv_obj_add_flag(ui_settings_panel, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
+}
+
+void on_settings_erase_usr_clicked(lv_event_t *e)
+{
+	user_settings_reset();
+}
+
+void on_settings_load_fpga_clicked(lv_event_t *e)
+{
+	download_fpga_binary_file();
+}
+
+void on_settings_erase_fpga_clicked(lv_event_t *e)
+{
+	// TODO: add erase fpga to NOR
+}
+
+void on_settings_a_clicked(lv_event_t *e)
+{
+	// TODO: add button a
+
+}
+
+void on_settings_b_clicked(lv_event_t *e)
+{
+	// TODO: add button b
+}
+
+void on_settings_c_clicked(lv_event_t *e)
+{
+	// TODO: add button c
+}
+
+void on_settings_d_clicked(lv_event_t *e)
+{
+	// TODO: add button d
 }
 
 void on_callsign_clicked(lv_event_t *e)
@@ -229,7 +284,7 @@ void on_mode_ok_clicked(lv_event_t *e)
 	lv_label_set_text_fmt(ui_header_mode_label, "Mode: %s", roller_str);
 
 	user_settings.mode = lv_roller_get_selected(ui_mode_roller);
-	save_settings(&user_settings);
+	user_settings_save(&user_settings);
 }
 
 void on_screen_pressed(lv_event_t *e)
@@ -280,11 +335,13 @@ void on_tx_freq_ta_click(lv_event_t *e)
 void on_xmit_button_press(lv_event_t *e)
 {
 	BSP_LED_On(LED_RED);
+	start_microphone_acquisition();
 }
 
 void on_xmit_button_release(lv_event_t *e)
 {
 	BSP_LED_Off(LED_RED);
+	stop_microphone_acquisition();
 }
 
 void on_vol_changed(lv_event_t *e)
@@ -502,7 +559,7 @@ static void end_input_callsign_ta()
 	lv_label_set_text_fmt(ui_header_callsign_label, "Call: %s", callsign_str);
 
     strcpy(user_settings.callsign, callsign_str);
-	save_settings(&user_settings);
+	user_settings_save(&user_settings);
 }
 
 static void update_active_freq_ta(lv_obj_t *new_freq_ta, uint32_t *freq)
@@ -559,14 +616,14 @@ static void end_input_freq_ta(bool finished_input)
 	/* log output... */
 	char buffer[15];
 //	user_settings.rx_freq = get_freq_from_str(rxfreqstr);
-	snprintf(buffer, 15, "%u", user_settings.rx_freq);
+	snprintf(buffer, 15, "%lu", user_settings.rx_freq);
 	lv_label_set_text(ui_label_test_rx, buffer);
 
 //	user_settings.tx_freq = get_freq_from_str(txfreqstr);
-	snprintf(buffer, 15, "%u", user_settings.tx_freq);
+	snprintf(buffer, 15, "%lu", user_settings.tx_freq);
 	lv_label_set_text(ui_label_test_tx, buffer);
 
-	save_settings(&user_settings);
+	user_settings_save(&user_settings);
 }
 
 static int32_t move_cursor(int32_t curs_pos, int32_t movement)
@@ -692,7 +749,7 @@ static void screen_capture(void)
 				sizeof(header));
 
 		if (save_image(header, sizeof(header), img_buffer, sizeof(img_buffer))
-				!= OPENHT_OK) {
+				!= FR_OK) {
 			// error
 			BSP_LED_On(LED_ORANGE);
 		} else {
