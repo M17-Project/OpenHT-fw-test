@@ -295,6 +295,8 @@ int main(void)
   // init the hardware configuration (defines the capabilities of the hardware)
   init_openht_hwconfig();
 
+  CLI_INIT(&huart3, USART3_IRQn);
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -1320,8 +1322,6 @@ void StartDefaultTask(void *argument)
 	// Mount SD fatfs
 	FATFS fs;
 	f_mount(&fs, "0:", 1);
-
-	CLI_INIT(&huart3, USART3_IRQn);
   /* Infinite loop */
   for(;;)
   {

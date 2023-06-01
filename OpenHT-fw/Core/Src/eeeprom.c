@@ -17,11 +17,12 @@
  */
 
 #include "main.h"
+#include "eeeprom.h"
 #include <stdlib.h>
 #include <cmsis_os2.h>
 #include <FreeRTOS.h>
-#include "eeeprom.h"
 #include <string.h>
+#include "../shell/inc/sys_command_line.h"
 
 /* Types definitions */
 struct s_EEPROMInternalData{
@@ -43,6 +44,7 @@ bool _move_active_page(EEEPROMHandle_t *handle);
 /* Functions declarations */
 bool EEEPROM_init(EEEPROMHandle_t *handle){
 	/* Check the different lengths/sizes/...*/
+	LOG(CLI_LOG_EEEPROM, "Start EEEPROM init.\r\n");
 	if(handle->erase_page == NULL){
 		return EXIT_FAILURE;
 	}else if( (handle->data_size + handle->address_size) > handle->page_size){
@@ -92,8 +94,10 @@ bool EEEPROM_init(EEEPROMHandle_t *handle){
 			uint32_t data = 0;
 			handle->read((uint8_t *)(&data), handle->start_address + i*handle->page_size, 4);
 			if(data == 0xFFFFFFFF){
+				LOG(CLI_LOG_EEEPROM, "page %u is empty.\r\n", i);
 				continue;
 			}else{
+				LOG(CLI_LOG_EEEPROM, "page %u set as active page.\r\n", i);
 				handle->priv->active_page = i;
 				break;
 			}
@@ -109,6 +113,7 @@ bool EEEPROM_init(EEEPROMHandle_t *handle){
 
 	if(handle->priv->active_page >= handle->number_pages){
 		//Randomly pick a page to get started
+		LOG(CLI_LOG_EEEPROM, "No active page set. Picking one randomly.");
 		handle->priv->active_page = HAL_RNG_GetRandomNumber(&hrng)%handle->number_pages;
 	}
 
@@ -120,6 +125,7 @@ bool EEEPROM_init(EEEPROMHandle_t *handle){
 			uint32_t data = 0;
 			handle->read((uint8_t *)(&data), handle->start_address + (handle->page_size * (handle->number_pages - 1)), 4);
 			if(data != 0xFFFFFFFF){
+				LOG(CLI_LOG_EEEPROM, "Previous page corrupted...\r\n");
 				prev_page_corrupted = true;
 				handle->priv->active_page = handle->number_pages-1;
 			}
@@ -162,6 +168,7 @@ bool EEEPROM_init(EEEPROMHandle_t *handle){
 		handle->priv->current_address += handle->priv->actual_entry_size;
 		index += handle->priv->actual_entry_size;
 	}
+	LOG(CLI_LOG_EEEPROM, "Current address set at 0x%04lx.\r\n", handle->priv->current_address);
 
 	// if the previous page (which is now the current page) is corrupted, we have to re-do the move
 	if(prev_page_corrupted){
@@ -227,6 +234,7 @@ bool EEEPROM_read_data(EEEPROMHandle_t *handle, uint32_t address, void *data){
 		}
 
 		if(temp == address){
+			LOG(CLI_LOG_EEEPROM, "Found address %ld at address 0x%04lx.\r\n", address, index);
 			if(handle->read){
 				handle->read(data, index + handle->address_size, handle->data_size);
 			}else{

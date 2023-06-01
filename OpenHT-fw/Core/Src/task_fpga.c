@@ -23,6 +23,7 @@
 #include "eeeprom.h"
 #include "eeeprom_hal.h"
 #include "nor_map.h"
+#include "../shell/inc/sys_command_line.h"
 
 typedef struct __attribute((__packed__)){
 	uint32_t start_sector:24;
@@ -62,7 +63,7 @@ void StartTaskFPGA(void *argument) {
 	};
 
 	if(EEEPROM_init(&eeeprom) == EXIT_FAILURE){
-		printf("Error initializing fpga binaries EEEPROM.\r\n");
+		ERR("Error initializing fpga binaries EEEPROM.");
 	}
 
 	fpga_bin_entry_t e;
@@ -70,9 +71,9 @@ void StartTaskFPGA(void *argument) {
 	if(EEEPROM_read_data(&eeeprom, 0, &e) == EXIT_SUCCESS){
 		uint32_t prev_bin_size = e.size;
 		uint32_t nb_sectors = (prev_bin_size/SUBSECTOR_SIZE) + 1*(prev_bin_size%SUBSECTOR_SIZE);
-		printf("An image is already stored in memory. It occupies %lu sectors.\r\n", nb_sectors);
+		LOG(CLI_LOG_FPGA, "An image is already stored in memory. It occupies %lu sectors.\r\n", nb_sectors);
 	}else{
-		printf("No previous image found.\r\n");
+		LOG(CLI_LOG_FPGA, "No previous image found.\r\n");
 	}
 
 	/*fpga_bin_entry_t e;
@@ -106,7 +107,7 @@ void StartTaskFPGA(void *argument) {
 			osThreadFlagsClear(FPGA_DOWNLOAD_BIN);				// Clear the flag
 			osPriority_t prev_prio = osThreadGetPriority(NULL); // Lower task's priority
 			osThreadSetPriority(NULL, osPriorityBelowNormal);
-			printf("Started FPGA bitstream download...\r\n");
+			LOG(CLI_LOG_FPGA, "Started FPGA bitstream download...\r\n");
 
 			// Download BIN image from SD card to NOR flash
 			// Open bitstream file
@@ -116,7 +117,7 @@ void StartTaskFPGA(void *argument) {
 			UINT btf;
 
 			if(f_open(&bin_file, "/fpga_00.bit", FA_OPEN_EXISTING | FA_READ) != FR_OK){
-				printf("Error opening file fpga_00.bit.\r\n");
+				ERR("Error opening file fpga_00.bit.\r\n");
 				osThreadSetPriority(NULL, prev_prio);
 				continue;
 			}
@@ -124,7 +125,7 @@ void StartTaskFPGA(void *argument) {
 			// Check that the bitstream size fits in the allocated space
 			file_size = f_size(&bin_file);
 			if(file_size > FPGA_BIN_MAX_SIZE){
-				printf("FPGA bitstream file is too large to fit in the allocated space.\r\n");
+				ERR("FPGA bitstream file is too large to fit in the allocated space.\r\n");
 				f_close(&bin_file);
 				osThreadSetPriority(NULL, prev_prio);
 				continue;
@@ -134,11 +135,11 @@ void StartTaskFPGA(void *argument) {
 			if(EEEPROM_read_data(&eeeprom, 0, &bin_entry) == EXIT_SUCCESS){
 				uint32_t prev_bin_size = bin_entry.size;
 				uint32_t nb_sectors = (prev_bin_size/SUBSECTOR_SIZE) + 1*(prev_bin_size%SUBSECTOR_SIZE);
-				printf("An image is already stored in memory. Erasing %lu sectors.\r\n", nb_sectors);
+				LOG(CLI_LOG_FPGA, "An image is already stored in memory. Erasing %lu sectors.\r\n", nb_sectors);
 				bool error = false;
 				for(size_t i = 0; i < nb_sectors; i += 16){
 					if(CUSTOM_QSPI_Erase_Sector(FPGA_BIN_STORAGE_START_SECTOR + i*SUBSECTOR_SIZE) != QSPI_OK){
-						printf("Could not erase NOR flash sector %d.\r\n", FPGA_BIN_STORAGE_START_SECTOR + i*SUBSECTOR_SIZE);
+						ERR("Could not erase NOR flash sector %d.\r\n", FPGA_BIN_STORAGE_START_SECTOR + i*SUBSECTOR_SIZE);
 						error = true;
 						break;
 					}
@@ -149,14 +150,14 @@ void StartTaskFPGA(void *argument) {
 					continue;
 				}
 			}else{
-				printf("No previous image found.\r\n");
+				LOG(CLI_LOG_FPGA, "No previous image found.\r\n");
 			}
 
 			// Write the entry to the table
 			bin_entry.size = file_size;
 			bin_entry.start_sector = FPGA_BIN_STORAGE_START_SECTOR;
 			if(EEEPROM_write_data(&eeeprom, 0, (void *)(&bin_entry)) == EXIT_FAILURE){
-				printf("Error writing bin file entry to EEEPROM.\r\n");
+				ERR("Error writing bin file entry to EEEPROM.\r\n");
 				f_close(&bin_file);
 				osThreadSetPriority(NULL, prev_prio);
 				continue;
@@ -166,7 +167,7 @@ void StartTaskFPGA(void *argument) {
 			bitstream_load_address = FPGA_BIN_STORAGE_START_ADDR;
 			bitstream_load_offset = 0;
 			f_forward(&bin_file, fatfs_bitstream_stream, file_size, &btf);
-			printf("Written %u/%lu bytes of the FPGA bitstream.\r\n", btf, file_size);
+			LOG(CLI_LOG_FPGA, "Written %u/%lu bytes of the FPGA bitstream.\r\n", btf, file_size);
 			f_close(&bin_file);
 			osThreadSetPriority(NULL, prev_prio);
 		}else if(flag & FPGA_RESET){
@@ -182,10 +183,10 @@ bool download_fpga_binary_file(){
 		if(result < 0x80000000){
 			return EXIT_SUCCESS;
 		}else{
-			printf("Could not download FPGA binary: osThreadFlagsSet returned 0x%08lx.\r\n", result);
+			ERR("Could not download FPGA binary: osThreadFlagsSet returned 0x%08lx.\r\n", result);
 		}
 	}else{
-		printf("Could not download FPGA binary file: Thread ID not set.\r\n");
+		ERR("Could not download FPGA binary file: Thread ID not set.\r\n");
 	}
 
 	return EXIT_FAILURE;
