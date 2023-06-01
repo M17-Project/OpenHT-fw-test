@@ -32,7 +32,6 @@ void StartTaskFPGA(void *argument);
  *
  * @return bool		EXIT_SUCCESS in case of success, EXIT_FAILURE in case of failure
  */
-bool load_binary_file(const char *filename, uint16_t index);
-
+bool download_fpga_binary_file();
 
 #endif /* INC_TASK_FPGA_H_ */

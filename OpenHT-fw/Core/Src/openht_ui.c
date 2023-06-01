@@ -37,7 +37,7 @@
 #include "lvht_qwertypad.h"
 
 #include "task_microphone.h"
-
+#include "task_fpga.h"
 
 #define EMPTY_FREQ "_.___.___.___"
 #define END_POS 13
@@ -227,7 +227,7 @@ void on_settings_erase_usr_clicked(lv_event_t *e)
 
 void on_settings_load_fpga_clicked(lv_event_t *e)
 {
-	// TODO: add load fpga to NOR
+	download_fpga_binary_file();
 }
 
 void on_settings_erase_fpga_clicked(lv_event_t *e)

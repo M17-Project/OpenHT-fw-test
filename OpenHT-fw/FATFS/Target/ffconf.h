@@ -75,7 +75,7 @@
 /* This option switches volume label functions, f_getlabel() and f_setlabel().
 /  (0:Disable or 1:Enable) */
 
-#define _USE_FORWARD         0
+#define _USE_FORWARD         1
 /* This option switches f_forward() function. (0:Disable or 1:Enable) */
 
 /*-----------------------------------------------------------------------------/
