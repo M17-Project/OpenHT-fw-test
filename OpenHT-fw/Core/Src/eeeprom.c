@@ -114,25 +114,24 @@ bool EEEPROM_init(EEEPROMHandle_t *handle){
 
 	// For resilience we can check that the previous page is empty.
 	// If it is not, it means that the previous page move was interrupted and should be re-done
-	uint8_t prev_page = handle->priv->active_page-1;
 	bool prev_page_corrupted = false;
-	if(prev_page>=handle->number_pages){
-		prev_page = handle->number_pages-1;
-	}
-	if(handle->read){
-		uint32_t data = 0;
-		handle->read((uint8_t *)(&data), handle->start_address + (prev_page * handle->page_size), 4);
-		if(data != 0xFFFFFFFF){
-			prev_page_corrupted = true;
-			handle->priv->active_page--;
+	if(handle->priv->active_page == 0){
+		if(handle->read){
+			uint32_t data = 0;
+			handle->read((uint8_t *)(&data), handle->start_address + (handle->page_size * (handle->number_pages - 1)), 4);
+			if(data != 0xFFFFFFFF){
+				prev_page_corrupted = true;
+				handle->priv->active_page = handle->number_pages-1;
+			}
+		}else{
+			uint32_t *data = (uint32_t *)(handle->start_address + (handle->page_size * (handle->number_pages - 1)));
+			if(*data != 0xFFFFFFFF){
+				prev_page_corrupted = true;
+				handle->priv->active_page = handle->number_pages-1;
+			}
 		}
-	}else{
-		uint32_t *data = (uint32_t *)(handle->start_address + prev_page * handle->page_size);
-		if(*data != 0xFFFFFFFF){
-			prev_page_corrupted = true;
-			handle->priv->active_page--;
-		}
 	}
+
 
 	// Find the last entry
 	uint32_t mask = 0xFFFFFFFF;
@@ -167,8 +166,6 @@ bool EEEPROM_init(EEEPROMHandle_t *handle){
 	// if the previous page (which is now the current page) is corrupted, we have to re-do the move
 	if(prev_page_corrupted){
 		_move_active_page(handle);
-	}else{
-
 	}
 
 	return EXIT_SUCCESS;
