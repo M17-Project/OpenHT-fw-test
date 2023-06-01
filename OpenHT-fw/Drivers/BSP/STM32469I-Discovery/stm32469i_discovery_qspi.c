@@ -738,6 +738,49 @@ static uint8_t QSPI_AutoPollingMemReady(QSPI_HandleTypeDef *hqspi, uint32_t Time
 
   return QSPI_OK;
 }
+
+/*
+ * Erase a full sector of 64kB
+ *
+ * Address should be any address in the sector
+ */
+uint8_t CUSTOM_QSPI_Erase_Sector(uint32_t address){
+	QSPI_CommandTypeDef s_command;
+
+	/* Initialize the erase command */
+	s_command.InstructionMode   = QSPI_INSTRUCTION_4_LINES;
+	s_command.Instruction       = SUBSECTOR_ERASE_CMD;
+	s_command.AddressMode       = QSPI_ADDRESS_1_LINE;
+	s_command.AddressSize       = QSPI_ADDRESS_24_BITS;
+	s_command.Address           = address;
+	s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
+	s_command.DataMode          = QSPI_DATA_NONE;
+	s_command.DummyCycles       = 0;
+	s_command.DdrMode           = QSPI_DDR_MODE_DISABLE;
+	s_command.DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
+	s_command.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
+
+	/* Enable write operations */
+	if (QSPI_WriteEnable(&QSPIHandle) != QSPI_OK)
+	{
+		return QSPI_ERROR;
+	}
+
+	/* Send the command */
+	if (HAL_QSPI_Command(&QSPIHandle, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
+	{
+		return QSPI_ERROR;
+	}
+
+	/* Configure automatic polling mode to wait for end of erase */
+	if (QSPI_AutoPollingMemReady(&QSPIHandle, N25Q128A_SUBSECTOR_ERASE_MAX_TIME) != QSPI_OK)
+	{
+		return QSPI_ERROR;
+	}
+
+	return QSPI_OK;
+}
+
 /**
   * @}
   */

@@ -123,6 +123,9 @@ uint8_t BSP_QSPI_EnableMemoryMappedMode(void);
 void BSP_QSPI_MspInit(QSPI_HandleTypeDef *hqspi, void *Params);
 void BSP_QSPI_MspDeInit(QSPI_HandleTypeDef *hqspi, void *Params);
 
+// Custom function to erase full sector
+uint8_t CUSTOM_QSPI_Erase_Sector(uint32_t address);
+
 /**
   * @}
   */
