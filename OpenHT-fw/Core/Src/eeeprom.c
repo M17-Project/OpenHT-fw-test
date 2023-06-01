@@ -113,7 +113,7 @@ bool EEEPROM_init(EEEPROMHandle_t *handle){
 
 	if(handle->priv->active_page >= handle->number_pages){
 		//Randomly pick a page to get started
-		LOG(CLI_LOG_EEEPROM, "No active page set. Picking one randomly.");
+		LOG(CLI_LOG_EEEPROM, "No active page set. Picking one randomly.\r\n");
 		handle->priv->active_page = HAL_RNG_GetRandomNumber(&hrng)%handle->number_pages;
 	}
 
@@ -224,7 +224,7 @@ bool EEEPROM_read_data(EEEPROMHandle_t *handle, uint32_t address, void *data){
 	int32_t index = handle->priv->current_address - handle->priv->actual_entry_size;
 
 	// Go backward in the active page until we find the requested address
-	while(index >= handle->priv->active_page * handle->page_size){
+	while( (index > 0) && (index >= handle->start_address + (handle->priv->active_page * handle->page_size) ) ){
 		uint32_t temp = 0;
 		if(handle->read){
 			handle->read((uint8_t *)&temp, index, handle->address_size);
