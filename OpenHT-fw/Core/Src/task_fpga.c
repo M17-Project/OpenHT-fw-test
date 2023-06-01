@@ -42,7 +42,8 @@ UINT 			fatfs_bitstream_stream(const BYTE *p, UINT btf);
 #define FPGA_UPLOAD_BIN		(1 << 2)
 #define FPGA_DOWNLOAD_BIN	(1 << 3)
 #define FPGA_RESET			(1 << 4)
-#define FPGA_ALL_FLAGS		(FPGA_SEND_SAMPLES | FPGA_FETCH_IQ | FPGA_UPLOAD_BIN | FPGA_DOWNLOAD_BIN | FPGA_RESET)
+#define FPGA_ERASE_STORAGE	(1 << 5)
+#define FPGA_ALL_FLAGS		(FPGA_SEND_SAMPLES | FPGA_FETCH_IQ | FPGA_UPLOAD_BIN | FPGA_DOWNLOAD_BIN | FPGA_RESET | FPGA_ERASE_STORAGE)
 
 void StartTaskFPGA(void *argument) {
 
@@ -63,34 +64,8 @@ void StartTaskFPGA(void *argument) {
 	};
 
 	if(EEEPROM_init(&eeeprom) == EXIT_FAILURE){
-		ERR("Error initializing fpga binaries EEEPROM.");
+		ERR("Error initializing fpga binaries EEEPROM.\r\n");
 	}
-
-	fpga_bin_entry_t e;
-
-	if(EEEPROM_read_data(&eeeprom, 0, &e) == EXIT_SUCCESS){
-		uint32_t prev_bin_size = e.size;
-		uint32_t nb_sectors = (prev_bin_size/SUBSECTOR_SIZE) + 1*(prev_bin_size%SUBSECTOR_SIZE);
-		LOG(CLI_LOG_FPGA, "An image is already stored in memory. It occupies %lu sectors.\r\n", nb_sectors);
-	}else{
-		LOG(CLI_LOG_FPGA, "No previous image found.\r\n");
-	}
-
-	/*fpga_bin_entry_t e;
-	for(size_t i = 1; i <= 600; i++){
-		e.start_sector = FPGA_BIN_STORAGE_START_SECTOR + i*10;
-		e.size = i + i * i;
-
-		EEEPROM_write_data(&eeeprom, (i%5), (void *)(&e));
-		if(!(i%16)){
-			BSP_QSPI_EnableMemoryMappedMode();
-			__NOP();
-			BSP_QSPI_Init();
-		}
-	}
-
-	EEEPROM_read_data(&eeeprom, 3, &e);
-	BSP_QSPI_MemoryMappedMode();*/
 
 	FPGA_thread_id = osThreadGetId();
 
@@ -168,10 +143,33 @@ void StartTaskFPGA(void *argument) {
 			bitstream_load_offset = 0;
 			f_forward(&bin_file, fatfs_bitstream_stream, file_size, &btf);
 			LOG(CLI_LOG_FPGA, "Written %u/%lu bytes of the FPGA bitstream.\r\n", btf, file_size);
-			f_close(&bin_file);
-			osThreadSetPriority(NULL, prev_prio);
-		}else if(flag & FPGA_RESET){
 
+			f_close(&bin_file);						// Close file
+			osThreadSetPriority(NULL, prev_prio);	// Restore previous priority
+		}else if(flag & FPGA_RESET){
+			osThreadFlagsClear(FPGA_RESET);
+			LOG(CLI_LOG_FPGA, "Soft-reset FPGA.\r\n");
+
+			// Set the FPGA RST pin low for 1ms then high
+			HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_RESET);
+			osDelay(1);
+			HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
+		}else if(flag & FPGA_ERASE_STORAGE){
+			osThreadFlagsClear(FPGA_ERASE_STORAGE);				// Clear the flag
+			osPriority_t prev_prio = osThreadGetPriority(NULL); // Lower task's priority
+			osThreadSetPriority(NULL, osPriorityBelowNormal);
+
+			// Erase the EEEPROM and the binary file storage
+			LOG(CLI_LOG_FPGA, "Erasing FPGA storage...\r\n");
+			LOG(CLI_LOG_FPGA, "Erasing EEEPROM...\r\n");
+			EEEPROM_erase(&eeeprom);
+			LOG(CLI_LOG_FPGA, "Erasing bin storage...\r\n");
+			for(size_t i = FPGA_BIN_STORAGE_START_SECTOR; i < FPGA_BIN_STORAGE_END_SECTOR; i += 16){
+				CUSTOM_QSPI_Erase_Sector(i*SUBSECTOR_SIZE);
+			}
+			LOG(CLI_LOG_FPGA, "Done!\r\n");
+
+			osThreadSetPriority(FPGA_thread_id, prev_prio);	// Restore the task's previous priority
 		}
 	}
 
@@ -187,6 +185,36 @@ bool download_fpga_binary_file(){
 		}
 	}else{
 		ERR("Could not download FPGA binary file: Thread ID not set.\r\n");
+	}
+
+	return EXIT_FAILURE;
+}
+
+bool erase_fpga_storage(){
+	if(FPGA_thread_id){
+		uint32_t result = osThreadFlagsSet(FPGA_thread_id, FPGA_ERASE_STORAGE);
+		if(result < 0x80000000){
+			return EXIT_SUCCESS;
+		}else{
+			ERR("Could not erase FPGA storage: osThreadFlagsSet returned 0x%08lx.\r\n", result);
+		}
+	}else{
+		ERR("Could not erase FPGA storage: Thread ID not set.\r\n");
+	}
+
+	return EXIT_FAILURE;
+}
+
+bool fpga_soft_reset(){
+	if(FPGA_thread_id){
+		uint32_t result = osThreadFlagsSet(FPGA_thread_id, FPGA_RESET);
+		if(result < 0x80000000){
+			return EXIT_SUCCESS;
+		}else{
+			ERR("Could not soft reset FPGA: osThreadFlagsSet returned 0x%08lx.\r\n", result);
+		}
+	}else{
+		ERR("Could not soft reset FPGA: Thread ID not set.\r\n");
 	}
 
 	return EXIT_FAILURE;

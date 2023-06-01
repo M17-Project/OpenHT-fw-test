@@ -232,7 +232,7 @@ void on_settings_load_fpga_clicked(lv_event_t *e)
 
 void on_settings_erase_fpga_clicked(lv_event_t *e)
 {
-	// TODO: add erase fpga to NOR
+	erase_fpga_storage();
 }
 
 void on_settings_a_clicked(lv_event_t *e)

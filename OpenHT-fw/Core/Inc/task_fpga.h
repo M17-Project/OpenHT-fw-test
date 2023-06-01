@@ -25,13 +25,28 @@
 void StartTaskFPGA(void *argument);
 
 /**
- * Loads a binary image from the SD card to the NOR flash. Image will be stored as index index.
- *
- * @param filename 	Null-terminated string containing the filename to load as an FPGA binary image
- * @param index		The index used to store the file.
+ * Loads a binary image from the SD card to the NOR flash.
  *
  * @return bool		EXIT_SUCCESS in case of success, EXIT_FAILURE in case of failure
  */
 bool download_fpga_binary_file();
+
+/**
+ * Erase the FPGA binary storage
+ *
+ * @return bool		EXIT_SUCCESS in case of success, EXIT_FAILURE in case of failure
+ */
+bool erase_fpga_storage();
+
+/**
+ * Soft-reset the FPGA (i.e. return the internal state of the FPGA to default)
+ *
+ * @note 	All the internal registers of the FPGA are reset to their default value meaning that
+ * 			the configurations must be sent again
+ *
+ * @return bool		EXIT_SUCCESS in case of success, EXIT_FAILURE in case of failure
+ */
+bool fpga_soft_reset();
+
 
 #endif /* INC_TASK_FPGA_H_ */
