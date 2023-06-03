@@ -18,7 +18,8 @@
 
 // LVGL version: 8.3.4
 // Project name: OpenHT_UI
-#include "openht_ui.h"
+
+#include <ui/openht_ui.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
@@ -33,8 +34,8 @@
 #include "openht_hwconfig.h"
 #include "openht_types.h"
 #include <../../Drivers/BSP/Components/nt35510/nt35510.h>
-#include "lvht_numpad.h"
-#include "lvht_qwertypad.h"
+#include <ui/lvht_numpad.h>
+#include <ui/lvht_qwertypad.h>
 
 #include "task_microphone.h"
 #include "task_fpga.h"

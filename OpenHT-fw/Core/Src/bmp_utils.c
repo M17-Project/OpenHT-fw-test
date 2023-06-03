@@ -17,7 +17,7 @@
  */
 
 #include "bmp_utils.h"
-#include "openht_ui.h"
+#include "ui/openht_ui.h"
 #include <stdlib.h>
 #include <stdio.h>
 

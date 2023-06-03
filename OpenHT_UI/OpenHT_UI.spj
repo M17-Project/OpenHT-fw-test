@@ -6439,7 +6439,7 @@
                     "InheritedType": 7
                   },
                   {
-                    "nid": 2017669581,
+                    "nid": 884431644,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -6452,7 +6452,7 @@
                 "strval": "CHECKED",
                 "childs": [
                   {
-                    "nid": 959863002,
+                    "nid": 1517862096,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -6465,7 +6465,7 @@
                 "strval": "PRESSED",
                 "childs": [
                   {
-                    "nid": 1831169193,
+                    "nid": 1783134818,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -6478,7 +6478,7 @@
                 "strval": "CHECKED|PRESSED",
                 "childs": [
                   {
-                    "nid": 1887106039,
+                    "nid": 422043879,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -6491,7 +6491,7 @@
                 "strval": "DISABLED",
                 "childs": [
                   {
-                    "nid": -644361060,
+                    "nid": 1593211580,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -21181,7 +21181,7 @@
     "theme_dark": false,
     "theme_color1": 5,
     "theme_color2": 0,
-    "exportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/lvgl_ui",
+    "exportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/ui/lvgl_ui",
     "backup_cnt": 127,
     "autosave_cnt": 0,
     "lvgl_version": "8.3.4",

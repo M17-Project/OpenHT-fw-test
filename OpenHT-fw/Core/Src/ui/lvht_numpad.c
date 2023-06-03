@@ -16,21 +16,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <ui/lvht_numpad.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
 #include <lvgl.h>
-#include <lvht_qwertypad.h>
 
 #include "lvgl_ui/ui.h"
 
 // array matrix of buttons
-static const char *btnm_map[] = { "1", "2", "3", "4", "5","6", "7", "8", "9","0", "\n",
-								  "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "\n",
-								  "A", "S", "D", "F", "G", "H", "J", "K", "L", LV_SYMBOL_BACKSPACE, "\n",
-								  "Z", "X", "C", "V", "B", "N", "M", "-", ".", "/", ""
-//								  "Z", "X", "C", "V", "B", "N", "M", LV_SYMBOL_LEFT, LV_SYMBOL_RIGHT, LV_SYMBOL_OK, ""
+static const char *btnm_map[] = { "7", "8", "9", "\n",
+								  "4", "5", "6", "\n",
+								  "1", "2", "3", "\n",
+								//"*", "0", ".", "#", "\n",
+								  "0", LV_SYMBOL_LEFT, LV_SYMBOL_RIGHT, LV_SYMBOL_OK, ""
 								};
+
 static lv_obj_t *panel = NULL;
 static lv_obj_t *this_obj = NULL;
 
@@ -38,27 +39,34 @@ static lv_obj_t *this_obj = NULL;
 static lv_coord_t panel_visible_y = 0;
 static lv_coord_t panel_invsible_y = 800;
 
-lv_obj_t * create_qwerty_pad(lv_obj_t *lv_obj)
+lv_obj_t * create_number_pad(lv_obj_t *lv_obj)
 {
 	panel_invsible_y = LV_VER_RES;
 
 	panel = lv_obj;
-
     lv_obj_set_y(panel, panel_invsible_y);
 	lv_obj_move_foreground(panel);
 
 	// create button matrix and assign as parent: lv_obj
-	lv_obj_t *this_obj = lv_btnmatrix_create(panel);
+	this_obj = lv_btnmatrix_create(panel);
 	lv_btnmatrix_set_map(this_obj, btnm_map);
+	lv_btnmatrix_set_btn_width(this_obj, 9, 7);
+	lv_btnmatrix_set_btn_width(this_obj, 10, 4);
+	lv_btnmatrix_set_btn_width(this_obj, 11, 4);
+	lv_btnmatrix_set_btn_width(this_obj, 12, 5);
 
 	// get the style width/height of the parent.
 	// Using this because actual width and height are not defined yet since not visible
+
+	lv_coord_t freq_bump_h = lv_obj_get_style_height(ui_panel_freq_bump, LV_PART_MAIN);
 
 	lv_coord_t w = lv_obj_get_style_width(lv_obj, LV_PART_MAIN);
 	lv_coord_t h = lv_obj_get_style_height(lv_obj, LV_PART_MAIN);
 	panel_visible_y = panel_invsible_y - h;
 
-	lv_obj_align(this_obj, LV_ALIGN_DEFAULT, 0, 0);
+	h -= freq_bump_h;
+
+	lv_obj_align(this_obj, LV_ALIGN_DEFAULT, 0, freq_bump_h);
 	lv_obj_set_width(this_obj, w);
 	lv_obj_set_height(this_obj, h);
 
@@ -74,7 +82,7 @@ lv_obj_t * create_qwerty_pad(lv_obj_t *lv_obj)
 	lv_obj_set_style_bg_color(this_obj, lv_color_hex(0x37B9F5),
 			LV_PART_ITEMS | LV_STATE_PRESSED);
 
-	lv_obj_set_style_text_font(this_obj, &lv_font_montserrat_20,
+	lv_obj_set_style_text_font(this_obj, &lv_font_montserrat_42,
 			LV_PART_ITEMS | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(this_obj, lv_color_hex(0xFFFFFF),
 			LV_PART_ITEMS | LV_STATE_DEFAULT);
@@ -87,7 +95,7 @@ static void anim_x_cb(void * var, int32_t v)
     lv_obj_set_y(var, v);
 }
 
-void set_qwertypad_visibility(bool visible)
+void set_numpad_visibility(bool visible)
 {
 	int32_t start = panel_invsible_y;
 	int32_t end = panel_visible_y;
