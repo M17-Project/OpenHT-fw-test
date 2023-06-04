@@ -2,7 +2,7 @@
 // OpenHT's FPGA register #defines set
 //
 // W. Kaczmarski SP5WWP
-// M17 Project, May 2023
+// M17 Project, June 2023
 //----------------------------------------------------
 
 #ifndef FPGA_REG_DEFS
@@ -33,6 +33,9 @@
 
 //Register 1 - Control Register 2
 #define CR_2						((uint16_t)1)
+#define CH_RX_6_25					((uint16_t)0<<9)
+#define CH_RX_12_5					((uint16_t)1<<9)
+#define CH_RX_25					((uint16_t)2<<9)
 #define FM_TX_N						((uint16_t)0<<8)
 #define FM_TX_W						((uint16_t)1<<8)
 #define CTCSS_TX_NONE				((uint16_t)0<<2)
@@ -84,10 +87,16 @@
 //Register 16 - RSSI Register
 #define RSSI						((uint16_t)16)
 
-//Register 17 - I branch raw readout
+//Register 17 - Raw I branch readout
 #define I_RAW						((uint16_t)17)
 
-//Register 18 - Q branch raw readout
+//Register 18 - Raw Q branch readout
 #define Q_RAW						((uint16_t)18)
+
+//Register 19 - Filtered I branch readout
+#define I_FLT						((uint16_t)19)
+
+//Register 20 - Filtered Q branch readout
+#define Q_FLT						((uint16_t)20)
 
 #endif
