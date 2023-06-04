@@ -119,6 +119,7 @@ void AT86_RX09(uint32_t freq, float ppm, uint8_t agc_en, uint8_t agc_tgt)
 	
 	AT86_SetFreq(freq*(1.0f+ppm*1e-6));
 	
+	AT86_Write(0x0109, 0);				//f_BW=160kHz, f_IF=250kHz
 	AT86_Write(0x010A,(4<<5)| 0xA);		//RF09: sample rate 400kHz, f_cut at 1x f_s/2
 	HAL_Delay(5);
 	AT86_Write(0x0103, 0x05);			//RF09: set mode to RX; CMD=RX
@@ -151,6 +152,7 @@ void AT86_RX24(uint32_t freq, float ppm, uint8_t agc_en, uint8_t agc_tgt)
 
 	AT86_SetFreq(freq*(1.0f+ppm*1e-6));
 
+	AT86_Write(0x0209, 0);				//f_BW=160kHz, f_IF=250kHz
 	AT86_Write(0x020A,(4<<5)| 0xA);		//RF24: sample rate 400kHz, f_cut at 1x f_s/2
 
 	HAL_Delay(5);
