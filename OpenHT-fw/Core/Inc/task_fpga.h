@@ -48,5 +48,10 @@ bool erase_fpga_storage();
  */
 bool fpga_soft_reset();
 
+/**
+ *
+ */
+bool upload_fpga_binary();
+
 
 #endif /* INC_TASK_FPGA_H_ */

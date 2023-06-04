@@ -59,6 +59,7 @@ void on_settings_erase_fpga_clicked(lv_event_t *e)
 void on_settings_a_clicked(lv_event_t *e)
 {
 	// TODO: add button a
+	upload_fpga_binary();
 
 }
 

@@ -100,6 +100,7 @@ SD_HandleTypeDef hsd;
 DMA_HandleTypeDef hdma_sdio;
 
 SPI_HandleTypeDef hspi1;
+DMA_HandleTypeDef hdma_spi1_tx;
 
 TIM_HandleTypeDef htim4;
 
@@ -135,6 +136,16 @@ const osThreadAttr_t fpga_attributes = {
   .name = "fpga",
   .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal1,
+};
+/* Definitions for SPI1Access */
+osMutexId_t SPI1AccessHandle;
+const osMutexAttr_t SPI1Access_attributes = {
+  .name = "SPI1Access"
+};
+/* Definitions for NORAccess */
+osMutexId_t NORAccessHandle;
+const osMutexAttr_t NORAccess_attributes = {
+  .name = "NORAccess"
 };
 /* Definitions for microphoneEvents */
 osEventFlagsId_t microphoneEventsHandle;
@@ -302,6 +313,12 @@ int main(void)
 
   /* Init scheduler */
   osKernelInitialize();
+  /* Create the mutex(es) */
+  /* creation of SPI1Access */
+  SPI1AccessHandle = osMutexNew(&SPI1Access_attributes);
+
+  /* creation of NORAccess */
+  NORAccessHandle = osMutexNew(&NORAccess_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -336,7 +353,6 @@ int main(void)
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
-  /* Create the event(s) */
   /* creation of microphoneEvents */
   microphoneEventsHandle = osEventFlagsNew(&microphoneEvents_attributes);
 
@@ -1007,6 +1023,9 @@ static void MX_DMA_Init(void)
   /* DMA2_Stream3_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
+  /* DMA2_Stream5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream5_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream5_IRQn);
 
 }
 
@@ -1153,16 +1172,22 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, SW_CTL1_Pin|FPGA_PROGRAMN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(SW_CTL1_GPIO_Port, SW_CTL1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, SW_CTL2_Pin|RF_RST_Pin|OTG_FS1_PowerSwitchOn_Pin|EXT_RESET_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOH, GPIO_PIN_7|FPGA_RST_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(FPGA_PROGRAMN_GPIO_Port, FPGA_PROGRAMN_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOH, GPIO_PIN_7, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pins : SPKR_HP_Pin audio_rst_Pin */
   GPIO_InitStruct.Pin = SPKR_HP_Pin|audio_rst_Pin;
@@ -1262,7 +1287,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pin = FPGA_NSS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(FPGA_NSS_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PGOOD_Pin */

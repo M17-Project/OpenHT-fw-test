@@ -30,11 +30,16 @@ typedef struct __attribute((__packed__)){
 	uint32_t size;
 }fpga_bin_entry_t;
 
-osThreadId_t 	FPGA_thread_id 			= NULL;
-uint32_t 		bitstream_load_address 	= 0x80000000;
-uint32_t 		bitstream_load_offset 	= 0;
+osThreadId_t 				FPGA_thread_id 			= NULL;
+uint32_t 					bitstream_load_address 	= 0x80000000;
+uint32_t 					bitstream_load_offset 	= 0;
+extern SPI_HandleTypeDef 	hspi1;
+extern osMutexId_t 			SPI1AccessHandle;
+extern osMutexId_t 			NORAccessHandle;
 
-UINT 			fatfs_bitstream_stream(const BYTE *p, UINT btf);
+
+UINT 			fatfs_bitstream_stream		(const BYTE *p, UINT btf);
+void 			_fpga_spi_complete_callback	(SPI_HandleTypeDef *hspi);
 
 /* Event flags */
 #define FPGA_SEND_SAMPLES	(1 << 0)
@@ -44,6 +49,10 @@ UINT 			fatfs_bitstream_stream(const BYTE *p, UINT btf);
 #define FPGA_RESET			(1 << 4)
 #define FPGA_ERASE_STORAGE	(1 << 5)
 #define FPGA_ALL_FLAGS		(FPGA_SEND_SAMPLES | FPGA_FETCH_IQ | FPGA_UPLOAD_BIN | FPGA_DOWNLOAD_BIN | FPGA_RESET | FPGA_ERASE_STORAGE)
+
+#define FPGA_SPI_ISR_DONE	(1 << 30)
+
+#define SPI_PORT_ACTIVATION_KEY	0x8AF4C6A4 // Swapped for endianness
 
 void StartTaskFPGA(void *argument) {
 
@@ -69,6 +78,11 @@ void StartTaskFPGA(void *argument) {
 
 	FPGA_thread_id = osThreadGetId();
 
+	// Init GPIOs
+	HAL_GPIO_WritePin(FPGA_PROGRAMN_GPIO_Port, 	FPGA_PROGRAMN_Pin, 	GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, 		FPGA_NSS_Pin, 		GPIO_PIN_SET);
+	HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, 		FPGA_RST_Pin, 		GPIO_PIN_SET);
+
 	for(;;){
 		uint32_t flag = osThreadFlagsWait(FPGA_ALL_FLAGS, osFlagsNoClear, osWaitForever);
 
@@ -77,7 +91,128 @@ void StartTaskFPGA(void *argument) {
 		}else if(flag & FPGA_FETCH_IQ){
 
 		}else if(flag & FPGA_UPLOAD_BIN){
+			osThreadFlagsClear(FPGA_UPLOAD_BIN);				// Clear the flag
+			osPriority_t prev_prio = osThreadGetPriority(NULL); // Lower task's priority
+			osThreadSetPriority(NULL, osPriorityBelowNormal);
+			LOG(CLI_LOG_FPGA, "Started FPGA bitstream upload\r\n");
 
+			uint8_t bufferTX[16];	// Used for data to TX
+			uint8_t bufferRX[16];
+
+			// First set PROGRAMN low
+			HAL_GPIO_WritePin(FPGA_PROGRAMN_GPIO_Port, FPGA_PROGRAMN_Pin, GPIO_PIN_RESET);
+			osDelay(1); // Must wait for at least 50ns
+
+			// Drive SCSN low then clock in the key
+			osMutexAcquire(SPI1AccessHandle, osWaitForever);						// Exclusive access to SPI1
+			hspi1.TxCpltCallback 	= _fpga_spi_complete_callback;					// Set SPI callbacks
+			hspi1.RxCpltCallback 	= _fpga_spi_complete_callback;
+			hspi1.TxRxCpltCallback 	= _fpga_spi_complete_callback;
+			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);	// Slave select lines
+			HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_SET);
+			bufferTX[0] = 0;
+			*(uint32_t *)(bufferTX+1) = SPI_PORT_ACTIVATION_KEY;
+			HAL_SPI_Transmit_IT(&hspi1, bufferTX, 5);
+			osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);					// Wait for TX to be done
+			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+
+			osDelay(50);
+
+			// Clock in READ-ID cmd and read 32 bits IDCODE
+			memset(bufferTX, 0, 8);
+			bufferTX[0] = 0xE0;
+			LOG(CLI_LOG_FPGA, "Reading IDCODE.\r\n");
+			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
+			HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 8);
+			osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
+			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+			LOG(CLI_LOG_FPGA, "FPGA IDCODE is 0x%08lx.\r\n", *(uint32_t *)(bufferRX + 4));
+
+			// ISC-Enable
+			bufferTX[0] = 0xC6;
+			LOG(CLI_LOG_FPGA, "Sending ISC_ENABLE.\r\n");
+			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
+			HAL_SPI_Transmit_IT(&hspi1, bufferTX, 4);
+			osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
+			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+
+			// ISC-Erase
+			bufferTX[0] = 0x0E;
+			LOG(CLI_LOG_FPGA, "Sending ISC_ERASE.\r\n");
+			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
+			HAL_SPI_Transmit_IT(&hspi1, bufferTX, 4);
+			osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
+			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+
+
+			// LSC-CHECK-BUSY (5 bits)
+			bufferTX[0] = 0xF0;
+			LOG(CLI_LOG_FPGA, "Waiting until FPGA is not busy.\r\n");
+			while(true){ // Wait for device to not be busy anymore
+				HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
+				HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 5);
+				osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
+				HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+				break;
+				if(bufferRX[4] == 1){
+					LOG(CLI_LOG_FPGA, "FPGA not busy anymore.\r\n");
+					break;
+				}else{
+					osDelay(1);
+				}
+			}
+
+			// LSC-Bitstream-burst followed by bitstream
+			fpga_bin_entry_t e;
+			EEEPROM_read_data(&eeeprom, 0, &e);
+			uint8_t *bitstream = (uint8_t *)(e.start_sector*SUBSECTOR_SIZE);
+			bufferTX[0] = 0x7A;
+			LOG(CLI_LOG_FPGA, "Sending LSC_BITSTREAM_BURST.\r\n");
+			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
+			HAL_SPI_Transmit_IT(&hspi1, bufferTX, 4);
+			osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
+
+			osMutexAcquire(NORAccessHandle, 150);
+			BSP_QSPI_EnableMemoryMappedMode();	// Enable memory mapped mode to read the bitstream
+
+			uint32_t sent = 0;
+			while(sent < e.size){
+				uint32_t bytes_left = e.size - sent;
+				uint16_t to_send = (UINT16_MAX < bytes_left)?UINT16_MAX:bytes_left;
+				HAL_SPI_Transmit_DMA(&hspi1, bitstream + sent, to_send);
+				LOG(CLI_LOG_FPGA, "Sent %lu bitstream bytes.\r\n", sent);
+				osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
+				sent += to_send;
+			}
+			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+			BSP_QSPI_Init();					// set the NOR flash back in indirect access mode
+			osMutexRelease(NORAccessHandle);
+
+			// Check status register
+			bufferTX[0] = 0x3C;
+			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
+			HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 12);
+			osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
+			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+			LOG(CLI_LOG_FPGA, "Status register is 0x%08lx%08lx.\r\n",
+					*(uint32_t *)bufferRX + 4, *(uint32_t *)bufferRX + 8);
+
+			// ISC-Disable
+			bufferTX[0] = 0x26;
+			LOG(CLI_LOG_FPGA, "Sending ISC_DISABLE.\r\n");
+			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
+			HAL_SPI_Transmit_IT(&hspi1, bufferTX, 4);
+			osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
+			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+
+			LOG(CLI_LOG_FPGA, "FPGA upload done.\r\n");
+
+			// Release SPI mutex and restore thread priority
+			hspi1.TxCpltCallback 	= NULL;					// Set SPI callbacks
+			hspi1.RxCpltCallback 	= NULL;
+			hspi1.TxRxCpltCallback 	= NULL;
+			osMutexRelease(SPI1AccessHandle);
+			osThreadSetPriority(FPGA_thread_id, prev_prio);
 		}else if(flag & FPGA_DOWNLOAD_BIN){
 			osThreadFlagsClear(FPGA_DOWNLOAD_BIN);				// Clear the flag
 			osPriority_t prev_prio = osThreadGetPriority(NULL); // Lower task's priority
@@ -175,6 +310,21 @@ void StartTaskFPGA(void *argument) {
 
 }
 
+bool upload_fpga_binary(){
+	if(FPGA_thread_id){
+		uint32_t result = osThreadFlagsSet(FPGA_thread_id, FPGA_UPLOAD_BIN);
+		if(result < 0x80000000){
+			return EXIT_SUCCESS;
+		}else{
+			ERR("Could not upload FPGA binary: osThreadFlagsSet returned 0x%08lx.\r\n", result);
+		}
+	}else{
+		ERR("Could not upload FPGA binary file: Thread ID not set.\r\n");
+	}
+
+	return EXIT_FAILURE;
+}
+
 bool download_fpga_binary_file(){
 	if(FPGA_thread_id){
 		uint32_t result = osThreadFlagsSet(FPGA_thread_id, FPGA_DOWNLOAD_BIN);
@@ -236,4 +386,15 @@ UINT fatfs_bitstream_stream(const BYTE *p, UINT btf){
 	}
 
 	return 0;
+}
+
+void _fpga_spi_complete_callback(SPI_HandleTypeDef *hspi){
+	if(FPGA_thread_id){
+		uint32_t result = osThreadFlagsSet(FPGA_thread_id, FPGA_SPI_ISR_DONE);
+		if(result > 0x80000000){
+			ERR("Could not soft reset FPGA: osThreadFlagsSet returned 0x%08lx.\r\n", result);
+		}
+	}else{
+		ERR("Could not soft reset FPGA: Thread ID not set.\r\n");
+	}
 }
