@@ -26,11 +26,12 @@
 #include <lvgl.h>
 
 #include "lvgl_ui/ui.h"
+#include <ui/ui_about_panel.h>
+#include <ui/ui_mode_change_panel.h>
 
 #include "disk_mgr.h"
 #include "fatfs.h"
 #include "bmp_utils.h"
-#include "user_settings.h"
 #include "openht_hwconfig.h"
 #include "openht_types.h"
 #include <../../Drivers/BSP/Components/nt35510/nt35510.h>
@@ -46,25 +47,23 @@
 #define MEG_POS 5
 #define GIG_POS 1
 
-static char callsign_str[10] = ""; // 9 digits for callsign
+char callsign_str[10] = ""; // 9 digits for callsign
 
 static char current_freq_str[] = EMPTY_FREQ;
 static lv_obj_t *current_freq_ta = NULL;
 static uint32_t *current_freq = NULL;
 
-static settings_t user_settings;
+settings_t user_settings;
 
 static void change_vfo_frequency(bool move_up);
 static bool validate_freq(uint32_t *freq);
 static int32_t move_cursor(int32_t curs_pos, int32_t movement);
 static void update_cursor_pos(lv_obj_t *textAreaFreq);
-static void end_input_callsign_ta();
+
 static void update_active_freq_ta(lv_obj_t *new_freq_ta, uint32_t *freq);
 static void end_input_freq_ta(bool finished_input);
 
 static void screen_capture(void);
-
-static lv_obj_t *about_tabview = NULL;
 
 void custom_ui_init(void)
 {
@@ -76,77 +75,23 @@ void custom_ui_init(void)
 	// squareline designer clean up code...
 	lv_obj_set_parent(ui_about_panel, lv_layer_top());
 	lv_obj_add_flag(ui_about_panel, LV_OBJ_FLAG_HIDDEN);
+	init_about_panel();
+
 //    lv_obj_set_y(ui_about_panel, 800);
 	//lv_obj_move_foreground(ui_about_panel);
 
 	lv_obj_set_parent(ui_mode_change_panel, lv_layer_top());
 	lv_obj_add_flag(ui_mode_change_panel, LV_OBJ_FLAG_HIDDEN);
+	init_mode_change_panel();
 
 	lv_obj_set_parent(ui_settings_panel, lv_layer_top());
 	lv_obj_add_flag(ui_settings_panel, LV_OBJ_FLAG_HIDDEN);
 
+	lv_obj_set_parent(ui_callsign_change_panel, lv_layer_top());
+	lv_obj_add_flag(ui_callsign_change_panel, LV_OBJ_FLAG_HIDDEN);
 
-    // BEGIN ABOUT TABVIEW UI INIT
-
-	about_tabview = lv_tabview_create(ui_about_tab_panel, LV_DIR_TOP, 40);
-    lv_obj_set_style_bg_color(about_tabview, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    lv_obj_t * tab_btns = lv_tabview_get_tab_btns(about_tabview);
-//    lv_obj_set_style_bg_color(tab_btns, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
-//    lv_obj_set_style_text_color(tab_btns, lv_palette_lighten(LV_PALETTE_GREY, 5), 0);
-    lv_obj_set_style_text_font(tab_btns, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(tab_btns, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(tab_btns, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(tab_btns, lv_color_hex(0x37B9F5), LV_PART_ITEMS | LV_STATE_CHECKED);
-    lv_obj_set_style_border_side(tab_btns, LV_BORDER_SIDE_BOTTOM, LV_PART_ITEMS | LV_STATE_CHECKED);
-
-
-    lv_obj_set_width(about_tabview, lv_pct(100));
-    lv_obj_set_height(about_tabview, lv_pct(100));
-    lv_obj_set_style_pad_left(about_tabview, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(about_tabview, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(about_tabview, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(about_tabview, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-	lv_obj_t *about_tab = lv_tabview_add_tab(about_tabview, "About");
-    lv_obj_set_style_pad_left(about_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(about_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(about_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(about_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-	lv_obj_set_parent(ui_about_text_area, about_tab);
-	lv_obj_clear_flag(ui_about_text_area, LV_OBJ_FLAG_HIDDEN);
-
-	lv_obj_t *capes_tab = lv_tabview_add_tab(about_tabview, "HW Info");
-    lv_obj_set_style_pad_left(capes_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(capes_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(capes_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(capes_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-	lv_obj_set_parent(ui_about_hw_text_area, capes_tab);
-	lv_obj_clear_flag(ui_about_hw_text_area, LV_OBJ_FLAG_HIDDEN);
-
-	// END ABOUT TABVIEW UI INIT
-
-	// BEGIN MODE CHANGE UI INIT
-
-	char labels[128];
-	char *label = labels;
-
-	for (int i = 0; i < openht_mode_count; i++) {
-		if (i > 0) {
-			*label++ = '\n';
-		}
-		int mode_str_len = strlen(openht_mode_data[i].mode_name);
-		strlcpy(label, openht_mode_data[i].mode_name, sizeof(labels) - (label - labels));
-
-		label += mode_str_len;
-	}
-
-    lv_roller_set_options(ui_mode_roller, labels, LV_ROLLER_MODE_NORMAL);
-
-
-	// END MODE CHANGE UI INIT
+	lv_obj_set_parent(ui_panel_qwerty_pad, lv_layer_top());
+	lv_obj_add_flag(ui_panel_qwerty_pad, LV_OBJ_FLAG_HIDDEN);
 
 
 	// remove the border for the UI placeholder
@@ -161,13 +106,13 @@ void custom_ui_init(void)
 	lv_dropdown_set_selected(ui_freq_dropdown, 1);
 
 
-
 	lv_obj_t * qwerty_pad = create_qwerty_pad(ui_panel_qwerty_pad);
+	init_callsign_change_panel(qwerty_pad);
+
 	lv_obj_t * num_pad = create_number_pad(ui_panel_num_pad);
 
 	// callback handler
 	lv_obj_add_event_cb(num_pad, numpad_btnmatrix_event_cb, LV_EVENT_ALL, NULL);
-	lv_obj_add_event_cb(qwerty_pad, qwertypad_btnmatrix_event_cb, LV_EVENT_ALL, NULL);
 
 
 	// GET STORED SETTINGS AND UPDATE UI
@@ -188,109 +133,14 @@ void custom_ui_init(void)
 	lv_textarea_set_text(ui_text_area_callsign, callsign_str);
 	lv_label_set_text_fmt(ui_header_callsign_label, "Call: %s", callsign_str);
 
-	lv_roller_set_selected(ui_mode_roller, user_settings.mode, LV_ANIM_OFF);
 
 	lv_label_set_text_fmt(ui_header_mode_label, "Mode: %s", openht_get_mode_str(user_settings.mode));
 }
 
-void on_about_clicked(lv_event_t *e)
-{
-	if (about_tabview != NULL) {
-    //lv_obj_set_y(ui_about_panel, 0);
-	lv_tabview_set_act(about_tabview, 0, LV_ANIM_OFF);
-	lv_obj_clear_flag(ui_about_panel, LV_OBJ_FLAG_HIDDEN);
-	lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
-	}
-}
-
-void on_about_ok_clicked(lv_event_t *e)
-{
-	lv_obj_add_flag(ui_about_panel, LV_OBJ_FLAG_HIDDEN);
-	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
-}
-
-void on_settings_clicked(lv_event_t *e)
-{
-	lv_obj_clear_flag(ui_settings_panel, LV_OBJ_FLAG_HIDDEN);
-	lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
-}
-
-void on_settings_ok_clicked(lv_event_t *e)
-{
-	lv_obj_add_flag(ui_settings_panel, LV_OBJ_FLAG_HIDDEN);
-	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
-}
-
-void on_settings_erase_usr_clicked(lv_event_t *e)
-{
-	user_settings_reset();
-}
-
-void on_settings_load_fpga_clicked(lv_event_t *e)
-{
-	download_fpga_binary_file();
-}
-
-void on_settings_erase_fpga_clicked(lv_event_t *e)
-{
-	erase_fpga_storage();
-}
-
-void on_settings_a_clicked(lv_event_t *e)
-{
-	// TODO: add button a
-
-}
-
-void on_settings_b_clicked(lv_event_t *e)
-{
-	// TODO: add button b
-}
-
-void on_settings_c_clicked(lv_event_t *e)
-{
-	// TODO: add button c
-}
-
-void on_settings_d_clicked(lv_event_t *e)
-{
-	// TODO: add button d
-}
-
-void on_callsign_clicked(lv_event_t *e)
-{
-}
-
-void on_mode_clicked(lv_event_t *e)
-{
-	lv_obj_clear_flag(ui_mode_change_panel, LV_OBJ_FLAG_HIDDEN);
-	lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
-
-}
-
-void on_mode_cancel_clicked(lv_event_t *e)
-{
-	lv_obj_add_flag(ui_mode_change_panel, LV_OBJ_FLAG_HIDDEN);
-	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
-}
-
-void on_mode_ok_clicked(lv_event_t *e)
-{
-	lv_obj_add_flag(ui_mode_change_panel, LV_OBJ_FLAG_HIDDEN);
-	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
-
-	char roller_str[15];
-
-	lv_roller_get_selected_str(ui_mode_roller, roller_str, sizeof(roller_str));
-	lv_label_set_text_fmt(ui_header_mode_label, "Mode: %s", roller_str);
-
-	user_settings.mode = lv_roller_get_selected(ui_mode_roller);
-	user_settings_save(&user_settings);
-}
 
 void on_screen_pressed(lv_event_t *e)
 {
-	end_input_callsign_ta();
+	//end_input_callsign_ta();
 	end_input_freq_ta(true);
 }
 
@@ -304,16 +154,7 @@ void on_freq_button_up_press(lv_event_t * e)
 	change_vfo_frequency(true);
 }
 
-void on_callsign_ta_click(lv_event_t *e)
-{
-	end_input_freq_ta(true);
 
-	lv_obj_set_style_border_side(ui_text_area_callsign, LV_BORDER_SIDE_FULL,
-			LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_text_area_callsign, 150, LV_PART_CURSOR | LV_STATE_DEFAULT);
-
-	set_qwertypad_visibility(true);
-}
 
 void on_rx_freq_ta_click(lv_event_t *e)
 {
@@ -441,38 +282,6 @@ void numpad_btnmatrix_event_cb(lv_event_t *e)
 	}
 }
 
-void qwertypad_btnmatrix_event_cb(lv_event_t *e)
-{
-	lv_event_code_t code = lv_event_get_code(e);
-	lv_obj_t *obj = lv_event_get_target(e);
-	if (code == LV_EVENT_VALUE_CHANGED) {
-		uint32_t id = lv_btnmatrix_get_selected_btn(obj);
-		const char *txt = lv_btnmatrix_get_btn_text(obj, id);
-
-		LV_LOG_USER("%s was pressed\n", txt);
-
-		// get current cursor position
-		uint32_t curs_pos = lv_textarea_get_cursor_pos(ui_text_area_callsign);
-
-		if (strcmp(txt, LV_SYMBOL_BACKSPACE) == 0) {
-			if (curs_pos > 0) {
-				curs_pos--;
-				memmove(&callsign_str[curs_pos], &callsign_str[curs_pos + 1], strlen(callsign_str) - curs_pos);
-			}
-		} else if (curs_pos < sizeof(callsign_str) - 1){
-			memmove(&callsign_str[curs_pos + 1], &callsign_str[curs_pos], sizeof(callsign_str) - 1 - curs_pos);
-			callsign_str[curs_pos] = *txt;
-			curs_pos++;
-		}
-
-		// update the text
-		lv_textarea_set_text(ui_text_area_callsign, callsign_str);
-
-		// update cursor position
-		lv_textarea_set_cursor_pos(ui_text_area_callsign, curs_pos);
-
-	}
-}
 
 static bool validate_freq(uint32_t *freq)
 {
@@ -508,6 +317,14 @@ static bool validate_freq(uint32_t *freq)
 	//config.set_frequency_cb(freq);
 
 	return found_band;
+}
+
+void update_callsign()
+{
+	lv_label_set_text_fmt(ui_header_callsign_label, "Call: %s", callsign_str);
+
+    strcpy(user_settings.callsign, callsign_str);
+	user_settings_save(&user_settings);
 }
 
 static void change_freq(int32_t freq_shift)
@@ -548,20 +365,7 @@ static void change_vfo_frequency(bool move_up)
 	change_freq(move_up ? freq_shift : -freq_shift);
 }
 
-static void end_input_callsign_ta()
-{
-	set_qwertypad_visibility(false);
 
-	lv_textarea_set_cursor_pos(ui_text_area_callsign, LV_TEXTAREA_CURSOR_LAST);
-	lv_obj_set_style_border_side(ui_text_area_callsign, LV_BORDER_SIDE_NONE,
-			LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_text_area_callsign, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
-
-	lv_label_set_text_fmt(ui_header_callsign_label, "Call: %s", callsign_str);
-
-    strcpy(user_settings.callsign, callsign_str);
-	user_settings_save(&user_settings);
-}
 
 static void update_active_freq_ta(lv_obj_t *new_freq_ta, uint32_t *freq)
 {
@@ -569,7 +373,7 @@ static void update_active_freq_ta(lv_obj_t *new_freq_ta, uint32_t *freq)
 		return;
 
 	end_input_freq_ta(false);
-	end_input_callsign_ta();
+//	end_input_callsign_ta();
 	set_numpad_visibility(true);
 
 	current_freq_ta = new_freq_ta;
