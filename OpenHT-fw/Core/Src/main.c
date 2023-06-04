@@ -36,6 +36,7 @@
 #include "task_microphone.h"
 #include "task_fpga.h"
 #include "../shell/inc/sys_command_line.h"
+#include "ui/lvgl_ui/ui.h"
 
 /* USER CODE END Includes */
 

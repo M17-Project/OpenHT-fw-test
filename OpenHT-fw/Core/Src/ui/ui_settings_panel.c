@@ -26,6 +26,7 @@
 #include <lvgl.h>
 
 #include "lvgl_ui/ui.h"
+#include "task_fpga.h"
 
 
 void on_settings_clicked(lv_event_t *e)

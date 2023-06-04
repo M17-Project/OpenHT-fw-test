@@ -28,6 +28,7 @@
 #include "lvgl_ui/ui.h"
 #include <ui/ui_about_panel.h>
 #include <ui/ui_mode_change_panel.h>
+#include "ui/ui_callsign_change_panel.h"
 
 #include "disk_mgr.h"
 #include "fatfs.h"

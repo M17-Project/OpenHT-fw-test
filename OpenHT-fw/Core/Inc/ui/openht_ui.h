@@ -50,6 +50,7 @@ void numpad_btnmatrix_event_cb(lv_event_t *e);
 void qwertypad_btnmatrix_event_cb(lv_event_t *e);
 uint32_t get_freq_from_str(const char *str);
 void get_str_from_freq(uint32_t i, char b[], bool prepend_blank);
+void update_callsign();
 
 void on_userbutton_press(void);
 void on_userbutton_release(void);

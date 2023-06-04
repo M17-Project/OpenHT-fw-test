@@ -26,6 +26,8 @@
 #include <lvgl.h>
 
 #include "lvgl_ui/ui.h"
+#include "ui/lvht_qwertypad.h"
+#include "ui/openht_ui.h"
 
 static char work_str[10] = ""; // 9 digits for callsign
 
