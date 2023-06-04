@@ -8,6 +8,7 @@
 #include "main.h"
 #include <stdlib.h>
 #include "nor_map.h"
+#include <cmsis_os2.h>
 #include "eeeprom_hal.h"
 
 extern QSPI_HandleTypeDef QSPIHandle;
