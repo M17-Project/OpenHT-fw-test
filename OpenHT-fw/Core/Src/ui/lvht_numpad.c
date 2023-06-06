@@ -59,14 +59,16 @@ lv_obj_t * create_number_pad(lv_obj_t *lv_obj)
 	// Using this because actual width and height are not defined yet since not visible
 
 	lv_coord_t freq_bump_h = lv_obj_get_style_height(ui_panel_freq_bump, LV_PART_MAIN);
+	lv_coord_t freq_bump_y = lv_obj_get_style_y(ui_panel_freq_bump, LV_PART_MAIN);
 
 	lv_coord_t w = lv_obj_get_style_width(lv_obj, LV_PART_MAIN);
 	lv_coord_t h = lv_obj_get_style_height(lv_obj, LV_PART_MAIN);
 	panel_visible_y = panel_invsible_y - h;
 
-	h -= freq_bump_h;
+	int y_loc = freq_bump_h + freq_bump_y;
+	h -= y_loc;
 
-	lv_obj_align(this_obj, LV_ALIGN_DEFAULT, 0, freq_bump_h);
+	lv_obj_align(this_obj, LV_ALIGN_DEFAULT, 0, y_loc);
 	lv_obj_set_width(this_obj, w);
 	lv_obj_set_height(this_obj, h);
 

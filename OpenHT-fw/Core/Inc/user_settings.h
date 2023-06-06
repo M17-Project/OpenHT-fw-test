@@ -35,6 +35,7 @@ typedef struct
 	char callsign[10];
 	openht_mode_t mode;
 	uint8_t audio_vol;
+	bool use_freq_offset;
 } settings_t;
 
 void user_settings_reset();
