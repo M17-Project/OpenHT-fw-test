@@ -28,7 +28,8 @@
 #include "lvgl_ui/ui.h"
 #include <ui/ui_about_panel.h>
 #include <ui/ui_mode_change_panel.h>
-#include "ui/ui_callsign_change_panel.h"
+#include <ui/ui_callsign_change_panel.h>
+#include <ui/ui_freq_change_panel.h>
 
 #include "disk_mgr.h"
 #include "fatfs.h"
@@ -44,23 +45,20 @@
 
 char callsign_str[10] = ""; // 9 digits for callsign
 settings_t user_settings;
+char * callsign_prefix = NULL;
+char * mode_prefix = NULL;
 
 static void screen_capture(void);
+static int num_places (uint32_t n);
 
 void custom_ui_init(void)
 {
-	// test inputs...
-	//uint32_t test = get_freq_from_str("_39.123.___");
-	//get_str_from_freq(test, rxfreqstr);
-	//get_str_from_freq(0, rxfreqstr);
-
-	// squareline designer clean up code...
+	// SquareLine designer add widgets to screens, however, we want to use
+	// these as top layer widgets. So we can still use the designer
+	// but then need to set the parent to the top layer for each widget
 	lv_obj_set_parent(ui_about_panel, lv_layer_top());
 	lv_obj_add_flag(ui_about_panel, LV_OBJ_FLAG_HIDDEN);
 	init_about_panel();
-
-//    lv_obj_set_y(ui_about_panel, 800);
-	//lv_obj_move_foreground(ui_about_panel);
 
 	lv_obj_set_parent(ui_mode_change_panel, lv_layer_top());
 	lv_obj_add_flag(ui_mode_change_panel, LV_OBJ_FLAG_HIDDEN);
@@ -72,29 +70,33 @@ void custom_ui_init(void)
 	lv_obj_set_parent(ui_callsign_change_panel, lv_layer_top());
 	lv_obj_add_flag(ui_callsign_change_panel, LV_OBJ_FLAG_HIDDEN);
 
-	lv_obj_set_parent(ui_panel_qwerty_pad, lv_layer_top());
-	lv_obj_add_flag(ui_panel_qwerty_pad, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_set_parent(ui_freq_change_panel, lv_layer_top());
+	lv_obj_add_flag(ui_freq_change_panel, LV_OBJ_FLAG_HIDDEN);
 
-	lv_obj_set_parent(ui_freq_panel, lv_layer_top());
-	lv_obj_add_flag(ui_freq_panel, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_set_parent(ui_qwerty_key_panel, lv_layer_top());
+	lv_obj_add_flag(ui_qwerty_key_panel, LV_OBJ_FLAG_HIDDEN);
+
+	// no need to hide this panel since it sits below the screen
+	// when it is time to be visible it "slides" up from the bottom.
+	lv_obj_set_parent(ui_freq_key_panel, lv_layer_top());
 
 
 	// remove the border for the UI placeholder
 	// Hint: using border in SquareLine Studio allows visibility while moving
 	// things around, then set border to none at runtime...
-	lv_obj_set_style_border_side(ui_panel_qwerty_pad, LV_BORDER_SIDE_NONE,
+	lv_obj_set_style_border_side(ui_qwerty_key_panel, LV_BORDER_SIDE_NONE,
 			LV_PART_MAIN);
-	lv_obj_set_style_border_side(ui_freq_panel, LV_BORDER_SIDE_NONE,
+	lv_obj_set_style_border_side(ui_freq_key_panel, LV_BORDER_SIDE_NONE,
 			LV_PART_MAIN);
 	lv_obj_set_style_border_side(ui_panel_freq_bump, LV_BORDER_SIDE_NONE,
 			LV_PART_MAIN);
 	lv_dropdown_set_selected(ui_freq_dropdown, 1);
 
 
-	lv_obj_t * qwerty_pad = create_qwerty_pad(ui_panel_qwerty_pad);
-	init_callsign_change_panel(qwerty_pad);
+	lv_obj_t * qwerty_key = create_qwerty_pad(ui_qwerty_key_panel);
+	init_callsign_change_panel(qwerty_key);
 
-	lv_obj_t * num_pad = create_number_pad(ui_freq_panel);
+	lv_obj_t * num_pad = create_number_pad(ui_freq_key_panel);
 	//init_num_change_panel(qwerty_pad);
 
 	// callback handler
@@ -104,49 +106,52 @@ void custom_ui_init(void)
 	// GET STORED SETTINGS AND UPDATE UI
 	user_settings_get(&user_settings);
 
-	char buffer[15];
-	snprintf(buffer, 15, "%lu", user_settings.rx_freq);
-	lv_label_set_text(ui_label_test_rx, buffer);
-//	get_str_from_freq(user_settings.rx_freq, current_freq_str, true);
-//	lv_textarea_set_text(ui_text_area_rx_freq, current_freq_str);
+	char rx_buffer[] = EMPTY_FREQ;
+	get_str_from_freq(user_settings.rx_freq, rx_buffer, -1);
+	lv_label_set_text_fmt(ui_label_test_rx, "Rx:%s", rx_buffer);
 
-	snprintf(buffer, 15, "%lu", user_settings.tx_freq);
-	lv_label_set_text(ui_label_test_tx, buffer);
-//	get_str_from_freq(user_settings.tx_freq, current_freq_str, true);
-//	lv_textarea_set_text(ui_text_area_tx_freq, current_freq_str);
+	char tx_buffer[] = EMPTY_FREQ;
+	get_str_from_freq(user_settings.tx_freq, tx_buffer, -1);
+	lv_label_set_text_fmt(ui_label_test_tx, "Tx:%s", tx_buffer);
 
 	strcpy(callsign_str, user_settings.callsign);
 	lv_textarea_set_text(ui_text_area_callsign, callsign_str);
-	lv_label_set_text_fmt(ui_header_callsign_label, "Call: %s", callsign_str);
 
+	if (user_settings.use_freq_offset) {
+		lv_obj_add_state(ui_use_freq_offset_cb, LV_STATE_CHECKED);
+	} else {
+		lv_obj_clear_state(ui_use_freq_offset_cb, LV_STATE_CHECKED);
+	}
 
-	lv_label_set_text_fmt(ui_header_mode_label, "Mode: %s", openht_get_mode_str(user_settings.mode));
+	char * label_str = lv_label_get_text(ui_header_callsign_label);
+
+	callsign_prefix = malloc(strlen(label_str) + 1);
+	strcpy(callsign_prefix, label_str);
+
+	lv_label_set_text_fmt(ui_header_callsign_label, "%s%s", callsign_prefix, callsign_str);
+
+	label_str = lv_label_get_text(ui_header_mode_label);
+	mode_prefix = malloc(strlen(label_str) + 1);
+	strcpy(mode_prefix, label_str);
+
+	lv_label_set_text_fmt(ui_header_mode_label, "%s%s", mode_prefix, openht_get_mode_str(user_settings.mode));
 }
-
-
 
 void on_screen_pressed(lv_event_t *e)
 {
-	//end_input_callsign_ta();
-//	end_input_freq_ta(true);
+	// TBD
 }
-
 
 void on_use_tx_offset_clicked(lv_event_t *e)
 {
 	if (lv_obj_has_state(ui_use_freq_offset_cb, LV_STATE_CHECKED)) {
 		user_settings.use_freq_offset = true;
-		lv_obj_clear_flag(ui_offset_tx_panel, LV_OBJ_FLAG_HIDDEN);
-		lv_obj_add_flag(ui_tx_freq_panel, LV_OBJ_FLAG_HIDDEN);
 	} else {
 		user_settings.use_freq_offset = false;
-		lv_obj_add_flag(ui_offset_tx_panel, LV_OBJ_FLAG_HIDDEN);
-		lv_obj_clear_flag(ui_tx_freq_panel, LV_OBJ_FLAG_HIDDEN);
-
 	}
 
+	user_settings_save(&user_settings);
 }
-
 
 void on_xmit_button_press(lv_event_t *e)
 {
@@ -169,7 +174,6 @@ void on_disp_brightness_changed(lv_event_t *e)
     lv_obj_t * slider = lv_event_get_target(e);
     NT35510_Set_Backlight((uint8_t)lv_slider_get_value(slider));
 }
-
 
 bool display_toggle = false;
 void on_userbutton_press()
@@ -199,7 +203,6 @@ void on_userbutton_release()
 {
 	BSP_LED_Off(LED_BLUE);
 }
-
 
 bool validate_freq(uint32_t *freq)
 {
@@ -232,14 +235,12 @@ bool validate_freq(uint32_t *freq)
 		*freq = band_edge;
 	}
 
-	//config.set_frequency_cb(freq);
-
 	return found_band;
 }
 
 void update_callsign()
 {
-	lv_label_set_text_fmt(ui_header_callsign_label, "Call: %s", callsign_str);
+	lv_label_set_text_fmt(ui_header_callsign_label, "%s%s", callsign_prefix, callsign_str);
 
     strcpy(user_settings.callsign, callsign_str);
 	user_settings_save(&user_settings);
@@ -279,7 +280,11 @@ uint32_t get_freq_from_str(const char *str)
 	return num;
 }
 
-void get_str_from_freq(uint32_t i, char b[], bool prepend_blank)
+// formats a str from a numeric freq
+// if prepend_blank is 0 - output includes leading underscores and thous separators
+// if prepend_blank is 1 - output includes spaces instead of underscores and thous separators
+// if prepend_blank is -1 - output does not include any padding to the left most number
+void get_str_from_freq(uint32_t i, char b[], int prepend_blank)
 {
 	char const digit[] = "0123456789";
 	char *p = b;
@@ -295,10 +300,24 @@ void get_str_from_freq(uint32_t i, char b[], bool prepend_blank)
 		;
 	p = p + str_i;
 
+	if (prepend_blank == -1) {
+		int nums = num_places(i);
+		int mod = nums % 3;
+		int thous = (nums / 3);
+		if (mod == 0) thous--;
+
+		int discard_len = str_i - (nums + thous);
+
+		for (int idx = 0; idx < discard_len; idx++)
+		{
+			*--p = '\0';
+		}
+	}
+
 	int thousands = 0;
 	do { // add digits backwards, inserting thousands separator
 		if (thousands == 3) {
-			if (i == 0 && prepend_blank) {
+			if (i == 0 && prepend_blank == 1) {
 				*--p = ' ';
 			} else {
 				*--p = '.';
@@ -308,7 +327,7 @@ void get_str_from_freq(uint32_t i, char b[], bool prepend_blank)
 			if (i) {
 				*--p = digit[i % 10];
 				i = i / 10;
-			} else if (prepend_blank){
+			} else if (prepend_blank == 1){
 				*--p = ' ';
 			} else { // prepend underscores
 				*--p = '_';
@@ -316,6 +335,12 @@ void get_str_from_freq(uint32_t i, char b[], bool prepend_blank)
 			thousands++;
 		}
 	} while (p > b);
+}
+
+static int num_places (uint32_t n)
+{
+    if (n < 10) return 1;
+    return 1 + num_places (n / 10);
 }
 
 // assign buffer to SDRAM since we are limited on SRAM

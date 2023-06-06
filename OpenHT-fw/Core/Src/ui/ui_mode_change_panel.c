@@ -69,7 +69,7 @@ void on_mode_ok_clicked(lv_event_t *e)
 	char roller_str[15];
 
 	lv_roller_get_selected_str(ui_mode_roller, roller_str, sizeof(roller_str));
-	lv_label_set_text_fmt(ui_header_mode_label, "Mode: %s", roller_str);
+	lv_label_set_text_fmt(ui_header_mode_label, "%s%s", mode_prefix, roller_str);
 
 	user_settings.mode = lv_roller_get_selected(ui_mode_roller);
 	user_settings_save(&user_settings);

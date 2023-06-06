@@ -41,6 +41,7 @@
 #define TX_FREQ_EEEPROM_ADDR		0x03	// Tx frequency (in Hz)
 #define RX_FREQ_EEEPROM_ADDR		0x04	// Rx frequency (in Hz)
 #define AV_MODE_EEEPROM_ADDR		0x05	// Contains Audio volume and mode
+#define CONFIG_BITS_EEEPROM_ADDR	0x06	// Configuration bool values
 
 
 
@@ -126,6 +127,15 @@ void user_settings_init()
 		cached_settings.mode = FM;
 	}
 
+	// config bits
+	if(EEEPROM_read_data(&user_settings_eeeprom, CONFIG_BITS_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
+		cached_settings.use_freq_offset = buffer & 0x01;
+		cached_settings.split_mode = buffer & 0x02;
+	}else{
+		cached_settings.use_freq_offset = false;
+		cached_settings.split_mode = false;
+	}
+
 	init_done = true;
 }
 
@@ -147,12 +157,21 @@ void user_settings_save(const settings_t *settings)
 		}
 		memcpy(cached_settings.callsign, settings->callsign, 10);
 	}
+
 	if( (cached_settings.audio_vol != settings->audio_vol)
 			|| (cached_settings.mode != settings->mode) ){
 		buffer = settings->audio_vol + ( ( (uint16_t)settings->mode ) << 8 );
 		EEEPROM_write_data(&user_settings_eeeprom, AV_MODE_EEEPROM_ADDR, (void *)(&buffer));
 		cached_settings.audio_vol = settings->audio_vol;
 		cached_settings.mode = settings->mode;
+	}
+
+	if( (cached_settings.use_freq_offset != settings->use_freq_offset)
+			|| (cached_settings.split_mode != settings->split_mode) ){
+		buffer = (settings->use_freq_offset << 0) + (settings->split_mode << 1);
+		EEEPROM_write_data(&user_settings_eeeprom, CONFIG_BITS_EEEPROM_ADDR, (void *)(&buffer));
+		cached_settings.use_freq_offset = settings->use_freq_offset;
+		cached_settings.split_mode = settings->split_mode;
 	}
 
 	if(cached_settings.rx_freq != settings->rx_freq){

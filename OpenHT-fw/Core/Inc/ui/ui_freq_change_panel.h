@@ -16,35 +16,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef INC_USER_SETTINGS_H_
-#define INC_USER_SETTINGS_H_
+// LVGL version: 8.3.4
+// Project name: OpenHT_UI
+
+#ifndef __UI_FREQ_CHANGE_PANEL_H
+#define __UI_FREQ_CHANGE_PANEL_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "openht_types.h"
-#include "stm32469i_discovery.h" /* DISCOVERY includes component */
-#include "stm32469i_discovery_qspi.h"
+#include <lvgl.h>
 
-
-typedef struct
-{
-	uint32_t tx_freq;
-	uint32_t rx_freq;
-	char callsign[10];
-	openht_mode_t mode;
-	uint8_t audio_vol;
-	bool use_freq_offset;  // using eeeprom bits for settings
-	bool split_mode;
-} settings_t;
-
-void user_settings_reset();
-void user_settings_save(const settings_t *settings);
-void user_settings_get(settings_t *settings);
+void init_freq_change_panel(void);
+bool update_split_mode(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* INC_USER_SETTINGS_H_ */
+#endif /* __UI_FREQ_CHANGE_PANEL_H */

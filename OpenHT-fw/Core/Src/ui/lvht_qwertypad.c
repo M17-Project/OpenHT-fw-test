@@ -32,7 +32,7 @@ static const char *btnm_map[] = { "1", "2", "3", "4", "5","6", "7", "8", "9","0"
 //								  "Z", "X", "C", "V", "B", "N", "M", LV_SYMBOL_LEFT, LV_SYMBOL_RIGHT, LV_SYMBOL_OK, ""
 								};
 static lv_obj_t *panel = NULL;
-static lv_obj_t *this_obj = NULL;
+//static lv_obj_t *this_obj = NULL;
 
 // top y of the panel
 static lv_coord_t panel_visible_y = 0;

@@ -26,57 +26,159 @@
 #include <lvgl.h>
 
 #include "lvgl_ui/ui.h"
-#include "task_fpga.h"
-
+#include <ui/ui_freq_change_panel.h>
+#include <ui/lvht_numpad.h>
 
 static char current_freq_str[] = EMPTY_FREQ;
 static uint32_t *current_freq = NULL;
 static lv_obj_t *current_freq_ta = NULL;
 
+static uint32_t rx_freq = 0;
+static uint32_t tx_freq = 0;
+static bool split_mode = false;
+
 static int32_t move_cursor(int32_t curs_pos, int32_t movement);
-static void update_cursor_pos(lv_obj_t *textAreaFreq);
+static void update_cursor_pos(lv_obj_t *freq_ta);
 
 static void update_active_freq_ta(lv_obj_t *new_freq_ta, uint32_t *freq);
 static void end_input_freq_ta(bool finished_input);
 static void change_vfo_frequency(bool move_up);
 static void change_freq(int32_t freq_shift);
+static void update_freq_text(void);
+
+void init_freq_change_panel()
+{
+	rx_freq = user_settings.rx_freq;
+
+	if (user_settings.split_mode) {
+		split_mode = true;
+		tx_freq = user_settings.tx_freq;
+		lv_obj_add_state(ui_split_freq_cb, LV_STATE_CHECKED);
+	} else {
+		split_mode = false;
+		tx_freq = user_settings.rx_freq;
+		lv_obj_clear_state(ui_split_freq_cb, LV_STATE_CHECKED);
+	}
+
+	update_split_mode();
+
+	if (user_settings.use_freq_offset) {
+		lv_obj_clear_flag(ui_offset_tx_panel, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_add_flag(ui_tx_freq_panel, LV_OBJ_FLAG_HIDDEN);
+	} else {
+		lv_obj_add_flag(ui_offset_tx_panel, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_clear_flag(ui_tx_freq_panel, LV_OBJ_FLAG_HIDDEN);
+	}
+
+
+	char freq_str[] = EMPTY_FREQ;
+	get_str_from_freq(rx_freq, freq_str, 1);
+	lv_textarea_set_text(ui_rx_freq_ta, freq_str);
+
+	get_str_from_freq(tx_freq, freq_str, 1);
+	lv_textarea_set_text(ui_tx_freq_ta, freq_str);
+}
 
 void on_freq_click(lv_event_t *e)
 {
-	update_active_freq_ta(ui_text_area_rx_freq, &user_settings.rx_freq);
+	// init data
+	init_freq_change_panel();
 
-	lv_obj_clear_flag(ui_freq_panel, LV_OBJ_FLAG_HIDDEN);
+	// unhide the panel and make the top layer clickable
+	lv_obj_clear_flag(ui_freq_change_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
 }
 
+// save all changes from the frequency change
+void on_freq_ok_clicked(lv_event_t *e)
+{
+	end_input_freq_ta(true);
+	lv_obj_add_flag(ui_freq_change_panel, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
+
+	user_settings.rx_freq = rx_freq;
+	user_settings.tx_freq = tx_freq;
+	user_settings.split_mode = split_mode;
+
+	user_settings_save(&user_settings);
+
+	char rx_buffer[] = EMPTY_FREQ;
+	get_str_from_freq(rx_freq, rx_buffer, -1);
+//	lv_label_set_text(ui_label_test_rx, rx_buffer);
+	lv_label_set_text_fmt(ui_label_test_rx, "Rx:%s", rx_buffer);
+
+	char tx_buffer[] = EMPTY_FREQ;
+	get_str_from_freq(tx_freq, tx_buffer, -1);
+//	lv_label_set_text(ui_label_test_tx, tx_buffer);
+	lv_label_set_text_fmt(ui_label_test_tx, "Tx:%s", tx_buffer);
+
+}
+
+// cancel all changes
+void on_freq_cancel_clicked(lv_event_t *e)
+{
+	end_input_freq_ta(true);
+	lv_obj_add_flag(ui_freq_change_panel, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
+
+}
+
+// when the user touches somewhere on the panel
+void on_freq_change_panel_click(lv_event_t *e)
+{
+	// end the input
+	end_input_freq_ta(true);
+}
+
+// when the user touches the split check box
+void on_split_txrx_clicked(lv_event_t *e)
+{
+	end_input_freq_ta(true);
+	split_mode = update_split_mode();
+
+	if (!split_mode) {
+		// set freq the same
+		tx_freq = rx_freq;
+		char freq_str[] = EMPTY_FREQ;
+		get_str_from_freq(tx_freq, freq_str, 1);
+		lv_textarea_set_text(ui_tx_freq_ta, freq_str);
+
+	}
+}
+
+// when the user touches the freq down of the panel freq bump
 void on_freq_button_down_press(lv_event_t * e)
 {
 	change_vfo_frequency(false);
 }
 
+// when the user touches the freq up of the panel freq bump
 void on_freq_button_up_press(lv_event_t * e)
 {
 	change_vfo_frequency(true);
 }
 
+// when the user touches the rx frequency text area
 void on_rx_freq_ta_click(lv_event_t *e)
 {
-	if (current_freq_ta == ui_text_area_rx_freq) {
-		update_cursor_pos(ui_text_area_rx_freq);
+	if (current_freq_ta == ui_rx_freq_ta) {
+		update_cursor_pos(ui_rx_freq_ta);
 		return;
 	}
-	update_active_freq_ta(ui_text_area_rx_freq, &user_settings.rx_freq);
+	update_active_freq_ta(ui_rx_freq_ta, &rx_freq);
 }
 
+// when the user touches the tx frequency text area
 void on_tx_freq_ta_click(lv_event_t *e)
 {
-	if (current_freq_ta == ui_text_area_tx_freq) {
-		update_cursor_pos(ui_text_area_tx_freq);
+	if (current_freq_ta == ui_tx_freq_ta) {
+		update_cursor_pos(ui_tx_freq_ta);
 		return;
 	}
-	update_active_freq_ta(ui_text_area_tx_freq, &user_settings.tx_freq);
+	update_active_freq_ta(ui_tx_freq_ta, &tx_freq);
 }
 
+// this callback does the handling of user touches for the keypad
 void numpad_btnmatrix_event_cb(lv_event_t *e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
@@ -113,8 +215,9 @@ void numpad_btnmatrix_event_cb(lv_event_t *e)
 		} else {
 			current_freq_str[curs_pos] = *txt;
 
-			// update the text
-			lv_textarea_set_text(current_freq_ta, current_freq_str);
+			*current_freq = get_freq_from_str(current_freq_str);
+			// update the freq text areas
+			update_freq_text();
 
 			if (curs_pos == END_POS - 1) {
 				curs_pos = END_POS;
@@ -133,6 +236,40 @@ void numpad_btnmatrix_event_cb(lv_event_t *e)
 	}
 }
 
+// based on the split mode the tx text area is either active or inactive
+bool update_split_mode()
+{
+	bool split = false;
+	if (lv_obj_has_state(ui_split_freq_cb, LV_STATE_CHECKED)) {
+		split = true;
+		lv_obj_add_flag(ui_tx_freq_ta, LV_OBJ_FLAG_CLICKABLE);
+	    lv_obj_set_style_text_color(ui_tx_freq_ta, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+	    lv_obj_set_style_text_color(ui_label_tx, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+	} else {
+		lv_obj_clear_flag(ui_tx_freq_ta, LV_OBJ_FLAG_CLICKABLE);
+	    lv_obj_set_style_text_color(ui_tx_freq_ta, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
+	    lv_obj_set_style_text_color(ui_label_tx, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
+	}
+
+	return split;
+}
+
+// update the frequency text areas with the valid frequencies
+static void update_freq_text()
+{
+	if (current_freq_ta != NULL && current_freq != NULL) {
+		get_str_from_freq(*current_freq, current_freq_str, 0);
+		lv_textarea_set_text(current_freq_ta, current_freq_str);
+
+		if (!split_mode) {
+			char str[] = EMPTY_FREQ;
+			get_str_from_freq(*current_freq, str, 1);
+			lv_textarea_set_text(ui_tx_freq_ta, str);
+		}
+	}
+}
+
+// move the vfo up or down based on the selected freq shift
 static void change_vfo_frequency(bool move_up)
 {
 	uint16_t selected_item = lv_dropdown_get_selected(ui_freq_dropdown);
@@ -157,6 +294,7 @@ static void change_vfo_frequency(bool move_up)
 	change_freq(move_up ? freq_shift : -freq_shift);
 }
 
+// change the frequency and update the text areas
 static void change_freq(int32_t freq_shift)
 {
 	if (current_freq_ta != NULL && current_freq != NULL) {
@@ -165,8 +303,8 @@ static void change_freq(int32_t freq_shift)
 
 		validate_freq(current_freq);
 
-		get_str_from_freq(*current_freq, current_freq_str, false);
-		lv_textarea_set_text(current_freq_ta, current_freq_str);
+		update_freq_text();
+
 		lv_textarea_set_cursor_pos(current_freq_ta, curs_pos);
 	}
 }
@@ -177,7 +315,7 @@ static void update_active_freq_ta(lv_obj_t *new_freq_ta, uint32_t *freq)
 		return;
 
 	end_input_freq_ta(false);
-//	end_input_callsign_ta();
+	// show the number keypad
 	set_numpad_visibility(true);
 
 	current_freq_ta = new_freq_ta;
@@ -185,7 +323,7 @@ static void update_active_freq_ta(lv_obj_t *new_freq_ta, uint32_t *freq)
 	// store the ptr for the freq so val can be updated
 	current_freq = freq;
 
-	get_str_from_freq(*current_freq, current_freq_str, false);
+	get_str_from_freq(*current_freq, current_freq_str, 0);
 	uint32_t curs_pos = lv_textarea_get_cursor_pos(current_freq_ta);
 	lv_textarea_set_text(current_freq_ta, current_freq_str);
 	lv_textarea_set_cursor_pos(current_freq_ta, curs_pos);
@@ -204,9 +342,8 @@ static void end_input_freq_ta(bool finished_input)
 	}
 
 	if (finished_input) {
+		// hide the number keypad
 		set_numpad_visibility(false);
-		lv_obj_add_flag(ui_freq_panel, LV_OBJ_FLAG_HIDDEN);
-		lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
 	}
 
 	lv_textarea_set_cursor_pos(current_freq_ta, END_POS);
@@ -219,22 +356,17 @@ static void end_input_freq_ta(bool finished_input)
 	// validate input to ensure within bands
 	validate_freq(current_freq);
 
-	get_str_from_freq(*current_freq, current_freq_str, true);
+	get_str_from_freq(*current_freq, current_freq_str, 1);
 	lv_textarea_set_text(current_freq_ta, current_freq_str);
+
+	// if not in split tx/rx mode, set tx freq to same as rx
+	if (!split_mode) {
+		lv_textarea_set_text(ui_tx_freq_ta, current_freq_str);
+		tx_freq = *current_freq;
+	}
+
 	current_freq = NULL;
 	current_freq_ta = NULL;
-
-	/* log output... */
-	char buffer[15];
-//	user_settings.rx_freq = get_freq_from_str(rxfreqstr);
-	snprintf(buffer, 15, "%lu", user_settings.rx_freq);
-	lv_label_set_text(ui_label_test_rx, buffer);
-
-//	user_settings.tx_freq = get_freq_from_str(txfreqstr);
-	snprintf(buffer, 15, "%lu", user_settings.tx_freq);
-	lv_label_set_text(ui_label_test_tx, buffer);
-
-	user_settings_save(&user_settings);
 }
 
 static int32_t move_cursor(int32_t curs_pos, int32_t movement)

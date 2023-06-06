@@ -35,23 +35,17 @@ extern lv_obj_t * ui_vol_slider;
 void ui_event_transmit_button(lv_event_t * e);
 extern lv_obj_t * ui_transmit_button;
 extern lv_obj_t * ui_Label3;
-void ui_event_label_test_rx(lv_event_t * e);
-extern lv_obj_t * ui_label_test_rx;
 void ui_event_about_button(lv_event_t * e);
 extern lv_obj_t * ui_about_button;
 extern lv_obj_t * ui_Label5;
+void ui_event_vfo_panel(lv_event_t * e);
+extern lv_obj_t * ui_vfo_panel;
+extern lv_obj_t * ui_label_test_rx;
 extern lv_obj_t * ui_label_test_tx;
 void ui_event_screen_num_freq_pads(lv_event_t * e);
 extern lv_obj_t * ui_screen_num_freq_pads;
-extern lv_obj_t * ui_panel_qwerty_pad;
-extern lv_obj_t * ui_freq_panel;
-extern lv_obj_t * ui_label_rx;
-void ui_event_text_area_rx_freq(lv_event_t * e);
-extern lv_obj_t * ui_text_area_rx_freq;
-extern lv_obj_t * ui_tx_freq_panel;
-extern lv_obj_t * ui_label_tx;
-void ui_event_text_area_tx_freq(lv_event_t * e);
-extern lv_obj_t * ui_text_area_tx_freq;
+extern lv_obj_t * ui_qwerty_key_panel;
+extern lv_obj_t * ui_freq_key_panel;
 extern lv_obj_t * ui_panel_freq_bump;
 void ui_event_freq_button_down(lv_event_t * e);
 extern lv_obj_t * ui_freq_button_down;
@@ -60,9 +54,6 @@ void ui_event_freq_button_up(lv_event_t * e);
 extern lv_obj_t * ui_freq_button_up;
 extern lv_obj_t * ui_Label1;
 extern lv_obj_t * ui_freq_dropdown;
-extern lv_obj_t * ui_offset_tx_panel;
-extern lv_obj_t * ui_label_tx1;
-extern lv_obj_t * ui_tx_offset_ta;
 extern lv_obj_t * ui_screen_scratchpad_1;
 extern lv_obj_t * ui_about_panel;
 extern lv_obj_t * ui_about_tab_panel;
@@ -116,14 +107,36 @@ extern lv_obj_t * ui_settings_ok_btn;
 extern lv_obj_t * ui_Label10;
 extern lv_obj_t * ui_screen_scratchpad_4;
 extern lv_obj_t * ui_callsign_change_panel;
-void ui_event_callsign_ok_button(lv_event_t * e);
-extern lv_obj_t * ui_callsign_ok_button;
+void ui_event_callsign_ok_btn(lv_event_t * e);
+extern lv_obj_t * ui_callsign_ok_btn;
 extern lv_obj_t * ui_Label19;
-void ui_event_callsign_cancel_button(lv_event_t * e);
-extern lv_obj_t * ui_callsign_cancel_button;
+void ui_event_callsign_cancel_btn(lv_event_t * e);
+extern lv_obj_t * ui_callsign_cancel_btn;
 extern lv_obj_t * ui_Label20;
 void ui_event_text_area_callsign(lv_event_t * e);
 extern lv_obj_t * ui_text_area_callsign;
+extern lv_obj_t * ui_screen_scratchpad_5;
+void ui_event_freq_change_panel(lv_event_t * e);
+extern lv_obj_t * ui_freq_change_panel;
+void ui_event_freq_ok_btn(lv_event_t * e);
+extern lv_obj_t * ui_freq_ok_btn;
+extern lv_obj_t * ui_Label21;
+void ui_event_freq_cancel_btn(lv_event_t * e);
+extern lv_obj_t * ui_freq_cancel_btn;
+extern lv_obj_t * ui_Label22;
+extern lv_obj_t * ui_rx_freq_panel;
+extern lv_obj_t * ui_label_rx;
+void ui_event_rx_freq_ta(lv_event_t * e);
+extern lv_obj_t * ui_rx_freq_ta;
+extern lv_obj_t * ui_tx_freq_panel;
+extern lv_obj_t * ui_label_tx;
+void ui_event_tx_freq_ta(lv_event_t * e);
+extern lv_obj_t * ui_tx_freq_ta;
+extern lv_obj_t * ui_offset_tx_panel;
+extern lv_obj_t * ui_label_tx1;
+extern lv_obj_t * ui_tx_offset_ta;
+void ui_event_split_freq_cb(lv_event_t * e);
+extern lv_obj_t * ui_split_freq_cb;
 extern lv_obj_t * ui____initial_actions0;
 
 
@@ -135,6 +148,7 @@ LV_IMG_DECLARE(ui_img_m17_logo_sm_png);    // assets/m17_logo_sm.png
 LV_IMG_DECLARE(ui_img_openht_logo_png);    // assets/openht_logo.png
 
 
+LV_FONT_DECLARE(ui_font_number_50);
 LV_FONT_DECLARE(ui_font_number_60);
 
 

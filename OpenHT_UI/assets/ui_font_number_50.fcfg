@@ -1,0 +1,16 @@
+{
+  "codename": "number_50",
+  "ttf_path": "/assets/number_font.ttf",
+  "bin_path": "/assets/ui_font_number_50.bin",
+  "c_path": "/assets/ui_font_number_50.c",
+  "cfg_path": "/assets/ui_font_number_50.fcfg",
+  "size": 50,
+  "bpp": 8,
+  "letters": 0,
+  "ranges": [
+    "0x20-0x7f"
+  ],
+  "symbols": "",
+  "customparams": "--no-compress --no-prefilter",
+  "uploaded": false
+}

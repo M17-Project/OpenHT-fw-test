@@ -43,7 +43,7 @@ void on_callsign_clicked(lv_event_t *e)
 	lv_textarea_set_text(ui_text_area_callsign, callsign_str);
 
 	lv_obj_clear_flag(ui_callsign_change_panel, LV_OBJ_FLAG_HIDDEN);
-	lv_obj_clear_flag(ui_panel_qwerty_pad, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_clear_flag(ui_qwerty_key_panel, LV_OBJ_FLAG_HIDDEN);
 
 	lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
 
@@ -66,7 +66,7 @@ void on_callsign_ok_clicked(lv_event_t *e)
     lv_obj_set_style_bg_opa(ui_text_area_callsign, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
 
 	lv_obj_add_flag(ui_callsign_change_panel, LV_OBJ_FLAG_HIDDEN);
-	lv_obj_add_flag(ui_panel_qwerty_pad, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_add_flag(ui_qwerty_key_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
 
 	// save callsign
@@ -84,7 +84,7 @@ void on_callsign_cancel_clicked(lv_event_t *e)
     lv_obj_set_style_bg_opa(ui_text_area_callsign, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
 
 	lv_obj_add_flag(ui_callsign_change_panel, LV_OBJ_FLAG_HIDDEN);
-	lv_obj_add_flag(ui_panel_qwerty_pad, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_add_flag(ui_qwerty_key_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
 }
 

@@ -17,11 +17,9 @@ void on_settings_clicked(lv_event_t * e);
 void on_vol_changed(lv_event_t * e);
 void on_xmit_button_press(lv_event_t * e);
 void on_xmit_button_release(lv_event_t * e);
-void on_freq_click(lv_event_t * e);
 void on_about_clicked(lv_event_t * e);
+void on_freq_click(lv_event_t * e);
 void on_screen_pressed(lv_event_t * e);
-void on_rx_freq_ta_click(lv_event_t * e);
-void on_tx_freq_ta_click(lv_event_t * e);
 void on_freq_button_down_press(lv_event_t * e);
 void on_freq_button_down_press(lv_event_t * e);
 void on_freq_button_up_press(lv_event_t * e);
@@ -42,6 +40,12 @@ void on_settings_ok_clicked(lv_event_t * e);
 void on_callsign_ok_clicked(lv_event_t * e);
 void on_callsign_cancel_clicked(lv_event_t * e);
 void on_callsign_ta_click(lv_event_t * e);
+void on_freq_change_panel_click(lv_event_t * e);
+void on_freq_ok_clicked(lv_event_t * e);
+void on_freq_cancel_clicked(lv_event_t * e);
+void on_rx_freq_ta_click(lv_event_t * e);
+void on_tx_freq_ta_click(lv_event_t * e);
+void on_split_txrx_clicked(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/
