@@ -24,7 +24,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <datatypes.h>
-#include <rtx.h>
+//#include <rtx.h>
 
 // Magic number to identify the binary file
 #define CPS_MAGIC 0x43585452
