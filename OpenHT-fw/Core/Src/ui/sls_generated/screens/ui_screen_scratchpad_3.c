@@ -190,7 +190,6 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_x(ui_display_brightness_slider, -1);
     lv_obj_set_y(ui_display_brightness_slider, -105);
     lv_obj_set_align(ui_display_brightness_slider, LV_ALIGN_BOTTOM_MID);
-    lv_obj_clear_flag(ui_display_brightness_slider, LV_OBJ_FLAG_GESTURE_BUBBLE);      /// Flags
     lv_obj_set_style_bg_color(ui_display_brightness_slider, lv_color_hex(0x0F1215), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_display_brightness_slider, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_outline_color(ui_display_brightness_slider, lv_color_hex(0x1E242D), LV_PART_MAIN | LV_STATE_DEFAULT);

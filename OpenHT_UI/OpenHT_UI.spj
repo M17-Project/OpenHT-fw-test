@@ -2938,7 +2938,6 @@
               },
               {
                 "nid": -2007079,
-                "flags": 1048576,
                 "strtype": "OBJECT/Flags",
                 "InheritedType": 1
               },
@@ -3916,7 +3915,7 @@
               {
                 "nid": -255885961,
                 "strtype": "OBJECT/Gesture_bubble",
-                "strval": "False",
+                "strval": "True",
                 "InheritedType": 2
               },
               {
@@ -4695,7 +4694,7 @@
               {
                 "nid": -733462333,
                 "strtype": "OBJECT/Gesture_bubble",
-                "strval": "False",
+                "strval": "True",
                 "InheritedType": 2
               },
               {
@@ -6825,7 +6824,7 @@
                     "InheritedType": 7
                   },
                   {
-                    "nid": 1095377030,
+                    "nid": -726301613,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -6838,7 +6837,7 @@
                 "strval": "CHECKED",
                 "childs": [
                   {
-                    "nid": 1720476611,
+                    "nid": -1767865636,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -6851,7 +6850,7 @@
                 "strval": "PRESSED",
                 "childs": [
                   {
-                    "nid": -1987151546,
+                    "nid": -1350280285,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -6864,7 +6863,7 @@
                 "strval": "CHECKED|PRESSED",
                 "childs": [
                   {
-                    "nid": -2090153931,
+                    "nid": 1491239583,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -6877,7 +6876,7 @@
                 "strval": "DISABLED",
                 "childs": [
                   {
-                    "nid": -872048254,
+                    "nid": 71617319,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -6890,7 +6889,7 @@
                 "strval": "USER_1",
                 "childs": [
                   {
-                    "nid": -968851787,
+                    "nid": -1352333962,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -6903,7 +6902,7 @@
                 "strval": "USER_2",
                 "childs": [
                   {
-                    "nid": 584515103,
+                    "nid": 1769606830,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -6916,7 +6915,7 @@
                 "strval": "USER_3",
                 "childs": [
                   {
-                    "nid": -1028087664,
+                    "nid": -1650638493,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -6929,7 +6928,7 @@
                 "strval": "USER_4",
                 "childs": [
                   {
-                    "nid": 914798477,
+                    "nid": -1859919502,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -11382,7 +11381,6 @@
                   },
                   {
                     "nid": 1280454690,
-                    "flags": 1048576,
                     "strtype": "OBJECT/Flags",
                     "InheritedType": 1
                   },
@@ -12987,8 +12985,7 @@
             "InheritedType": 11
           }
         ],
-        "saved_objtypeKey": "SCREEN",
-        "tree_closed": true
+        "saved_objtypeKey": "SCREEN"
       },
       {
         "guid": "GUID68144515-481194S3452104",
@@ -20342,7 +20339,7 @@
                   {
                     "nid": -1565215251,
                     "strtype": "OBJECT/Gesture_bubble",
-                    "strval": "False",
+                    "strval": "True",
                     "InheritedType": 2
                   },
                   {
@@ -22185,7 +22182,6 @@
                   },
                   {
                     "nid": -1524258217,
-                    "flags": 1048576,
                     "strtype": "OBJECT/Flags",
                     "InheritedType": 1
                   },
@@ -23646,7 +23642,6 @@
               },
               {
                 "nid": -444553295,
-                "flags": 1048576,
                 "strtype": "OBJECT/Flags",
                 "InheritedType": 1
               },
@@ -24056,8 +24051,7 @@
             "InheritedType": 11
           }
         ],
-        "saved_objtypeKey": "SCREEN",
-        "tree_closed": true
+        "saved_objtypeKey": "SCREEN"
       },
       {
         "guid": "GUID91992622-81721S9442157",
@@ -30314,7 +30308,7 @@
     "theme_color2": 0,
     "exportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/ui/sls_generated",
     "projectExportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/ui/sls_generated",
-    "backup_cnt": 171,
+    "backup_cnt": 175,
     "autosave_cnt": 0,
     "lvgl_version": "8.3.6",
     "callfuncsexport": "C_FILE",
