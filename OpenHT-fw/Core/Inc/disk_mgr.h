@@ -29,7 +29,7 @@ extern "C" {
 #include "fatfs.h"
 
 void test_fat(void);
-FRESULT save_image(uint8_t *bmp_header, size_t bmp_headersize,
+int32_t save_image(const char * in_filename, uint8_t *bmp_header, size_t bmp_headersize,
 		uint8_t *img_buffer, size_t img_buffersize);
 
 #ifdef __cplusplus

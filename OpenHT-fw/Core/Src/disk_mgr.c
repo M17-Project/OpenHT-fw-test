@@ -24,46 +24,52 @@
 #include "openht_types.h"
 #include <stm32469i_discovery.h>
 
-
-static openht_res_t fat_error_handler(void);
-static FRESULT scan_files(char *path);
-static void capture_name(const char *fname);
-static uint32_t num_from_str(const char *str, uint32_t start, uint32_t end);
-
 static uint16_t screen_capture_num = 0;
 
-FRESULT save_image(uint8_t *bmp_header, size_t bmp_headersize,
+static openht_res_t _fat_error_handler(void);
+static FRESULT _scan_files(char *path);
+static void _capture_name(const char *fname);
+static uint32_t _num_from_str(const char *str, uint32_t start, uint32_t end);
+
+int32_t save_image(const char * in_filename, uint8_t *bmp_header, size_t bmp_headersize,
 		uint8_t *img_buffer, size_t img_buffersize)
 {
+	int32_t ret_val = 0;
 	FRESULT res;
 	uint32_t byteswritten;
-
-	// get next filename
-	char buff[256];
-	strcpy(buff, "/");
-	res = scan_files(buff);
-
 	FIL the_file;
 	char filename[13];
 
-	sprintf(filename, "SCREEN%02d.BMP", screen_capture_num + 1);
+	// if the input filename is empty string, grab the next "SCREEN" filename sequence
+	// else use the input name as the filename
+	if (strcmp(in_filename, "") == 0) {
+		// get next filename
+		char buff[256];
+		strcpy(buff, "/");
+		res = _scan_files(buff);
+		sprintf(filename, "SCREEN%02d.BMP", screen_capture_num + 1);
+		ret_val = screen_capture_num + 1;
+	} else {
+		sprintf(filename, "%s.BMP", in_filename);
+		ret_val = 0;
+	}
 
 	if (f_open(&the_file, filename, FA_CREATE_ALWAYS | FA_WRITE)
 			!= FR_OK) {
-		res = fat_error_handler();
+		res = _fat_error_handler();
 	} else {
 		bool write_ok = true;
 		res = f_write(&the_file, bmp_header, bmp_headersize,
 				(void*) &byteswritten);
 
 		if ((byteswritten == 0) || (res != FR_OK)) {
-			res = fat_error_handler();
+			res = _fat_error_handler();
 			write_ok = false;
 		} else {
 			res = f_write(&the_file, img_buffer, img_buffersize,
 					(void*) &byteswritten);
 			if ((byteswritten == 0) || (res != FR_OK)) {
-				res = fat_error_handler();
+				res = _fat_error_handler();
 				write_ok = false;
 			}
 		}
@@ -75,13 +81,13 @@ FRESULT save_image(uint8_t *bmp_header, size_t bmp_headersize,
 			//res = f_unlink(filename);
 			BSP_LED_On(LED_RED);
 		}
-
 	}
 
-	// Unmount FS
-	f_mount(NULL, "0:", 1);
+	if (res != FR_OK) {
+		ret_val = -1;
+	}
 
-	return res;
+	return ret_val;
 }
 
 static int max(int a, int b)
@@ -89,18 +95,18 @@ static int max(int a, int b)
 	return a > b ? a : b;
 }
 
-static void capture_name(const char *fname)
+static void _capture_name(const char *fname)
 {
 	// if the filename has a BMP extension
 	if (strstr(fname, ".BMP") != NULL) {
 		if (strncmp(fname, "SCREEN", 6) == 0) {
 			screen_capture_num = max(screen_capture_num,
-					num_from_str(fname, 6, 7));
+					_num_from_str(fname, 6, 7));
 		}
 	}
 }
 
-static uint32_t num_from_str(const char *str, uint32_t start, uint32_t end)
+static uint32_t _num_from_str(const char *str, uint32_t start, uint32_t end)
 {
 	uint32_t num = 0;
 
@@ -117,7 +123,7 @@ static uint32_t num_from_str(const char *str, uint32_t start, uint32_t end)
 	return num;
 }
 
-static FRESULT scan_files(char *path) /* Start node to be scanned (***also used as work area***) */
+static FRESULT _scan_files(char *path) /* Start node to be scanned (***also used as work area***) */
 {
 	FRESULT res;
 	DIR dir;
@@ -133,13 +139,13 @@ static FRESULT scan_files(char *path) /* Start node to be scanned (***also used 
 			if (fno.fattrib & AM_DIR) { /* It is a directory */
 				i = strlen(path);
 				sprintf(&path[i], "/%s", fno.fname);
-				res = scan_files(path); /* Enter the directory */
+				res = _scan_files(path); /* Enter the directory */
 				if (res != FR_OK)
 					break;
 				path[i] = 0;
 			} else { /* It is a file. */
 				printf("%s/%s\n", path, fno.fname);
-				capture_name(fno.fname);
+				_capture_name(fno.fname);
 			}
 		}
 		f_closedir(&dir);
@@ -148,7 +154,7 @@ static FRESULT scan_files(char *path) /* Start node to be scanned (***also used 
 	return res;
 }
 
-static openht_res_t fat_error_handler(void)
+static openht_res_t _fat_error_handler(void)
 {
 	//BSP_LED_On(LED_ORANGE);
 	return OPENHT_ERR;

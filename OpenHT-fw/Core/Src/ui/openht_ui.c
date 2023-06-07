@@ -48,7 +48,7 @@ char * callsign_prefix = NULL;
 char * mode_prefix = NULL;
 char * ctcss_options_str;
 
-static void _screen_capture(void);
+static int32_t _screen_capture(lv_obj_t *scr, const char * filename);
 static int _num_places(uint32_t n);
 
 void custom_ui_init(void)
@@ -209,7 +209,19 @@ void on_userbutton_press()
 	BSP_LED_Off(LED_ORANGE);
 	BSP_LED_Off(LED_RED);
 
-	_screen_capture();
+	// a bit convoluted in it's current form... To take a screenshot
+	// of the display, we must capture both the active screen and the top
+	// layer. For now we just create two bitmap images and save them
+	// to the microsd card... use whatever image editor you want
+	// to combine them!
+
+	int32_t image_num = _screen_capture(lv_scr_act(), "");
+
+	if (image_num != -1) {
+		char filename[13];
+		sprintf(filename, "OVERLY%02d", image_num);
+		_screen_capture(lv_layer_top(), filename);
+	}
 
 //	if (display_toggle) {
 //		NT35510_BacklightOn();
@@ -370,9 +382,9 @@ static int _num_places (freq_t n)
 // assign buffer to SDRAM since we are limited on SRAM
 __attribute__((section(".sdram")))  static uint8_t img_buffer[480 * 800 * 3]; // 480px * 800px * 3 bytes per pixel
 
-static void _screen_capture(void)
+static int32_t _screen_capture(lv_obj_t *scr, const char * filename)
 {
-	lv_obj_t *scr = lv_scr_act();
+//	lv_obj_t *scr = lv_scr_act();
 	lv_img_dsc_t snapshot_img;
 	lv_res_t snap = lv_snapshot_take_to_buf(scr, LV_IMG_CF_TRUE_COLOR_ALPHA,
 			&snapshot_img, &img_buffer, sizeof(img_buffer));
@@ -391,13 +403,16 @@ static void _screen_capture(void)
 		get_bitmap_header(width, height, LV_COLOR_DEPTH, header,
 				sizeof(header));
 
-		if (save_image(header, sizeof(header), img_buffer, sizeof(img_buffer))
-				!= FR_OK) {
+		int32_t ret = save_image(filename, header, sizeof(header), img_buffer, sizeof(img_buffer));
+
+		if (ret == -1) {
 			// error
 			BSP_LED_On(LED_ORANGE);
 		} else {
 			BSP_LED_On(LED_GREEN);
 		}
+
+		return ret;
 	}
 }
 
