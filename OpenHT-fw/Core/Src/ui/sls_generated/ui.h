@@ -14,10 +14,11 @@ extern "C" {
 
 #include "ui_helpers.h"
 #include "ui_events.h"
-// SCREEN: ui_home_screen
-void ui_home_screen_screen_init(void);
-extern lv_obj_t * ui_home_screen;
-extern lv_obj_t * ui_home_screen_header_panel;
+// SCREEN: ui_main_screen
+void ui_main_screen_screen_init(void);
+extern lv_obj_t * ui_main_screen;
+extern lv_obj_t * ui_main_panel;
+extern lv_obj_t * ui_header_panel;
 void ui_event_title_image(lv_event_t * e);
 extern lv_obj_t * ui_title_image;
 extern lv_obj_t * ui_battery_image;
@@ -31,20 +32,20 @@ extern lv_obj_t * ui_header_mode_label;
 void ui_event_header_settings_button(lv_event_t * e);
 extern lv_obj_t * ui_header_settings_button;
 extern lv_obj_t * ui_Image1;
-extern lv_obj_t * ui_Label2;
-extern lv_obj_t * ui_Label_Slider;
-void ui_event_vol_slider(lv_event_t * e);
-extern lv_obj_t * ui_vol_slider;
-void ui_event_transmit_button(lv_event_t * e);
-extern lv_obj_t * ui_transmit_button;
-extern lv_obj_t * ui_Label3;
-void ui_event_about_button(lv_event_t * e);
-extern lv_obj_t * ui_about_button;
+extern lv_obj_t * ui_vfo_label;
+void ui_event_about_btn(lv_event_t * e);
+extern lv_obj_t * ui_about_btn;
 extern lv_obj_t * ui_Label5;
 void ui_event_vfo_panel(lv_event_t * e);
 extern lv_obj_t * ui_vfo_panel;
 extern lv_obj_t * ui_label_test_rx;
 extern lv_obj_t * ui_label_test_tx;
+void ui_event_ptt_btn(lv_event_t * e);
+extern lv_obj_t * ui_ptt_btn;
+extern lv_obj_t * ui_Label3;
+extern lv_obj_t * ui_vol_label;
+void ui_event_vol_slider(lv_event_t * e);
+extern lv_obj_t * ui_vol_slider;
 // SCREEN: ui_screen_num_freq_pads
 void ui_screen_num_freq_pads_screen_init(void);
 void ui_event_screen_num_freq_pads(lv_event_t * e);

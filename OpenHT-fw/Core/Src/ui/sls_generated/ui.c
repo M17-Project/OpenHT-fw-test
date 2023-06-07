@@ -8,10 +8,11 @@
 
 ///////////////////// VARIABLES ////////////////////
 
-// SCREEN: ui_home_screen
-void ui_home_screen_screen_init(void);
-lv_obj_t * ui_home_screen;
-lv_obj_t * ui_home_screen_header_panel;
+// SCREEN: ui_main_screen
+void ui_main_screen_screen_init(void);
+lv_obj_t * ui_main_screen;
+lv_obj_t * ui_main_panel;
+lv_obj_t * ui_header_panel;
 void ui_event_title_image(lv_event_t * e);
 lv_obj_t * ui_title_image;
 lv_obj_t * ui_battery_image;
@@ -25,20 +26,20 @@ lv_obj_t * ui_header_mode_label;
 void ui_event_header_settings_button(lv_event_t * e);
 lv_obj_t * ui_header_settings_button;
 lv_obj_t * ui_Image1;
-lv_obj_t * ui_Label2;
-lv_obj_t * ui_Label_Slider;
-void ui_event_vol_slider(lv_event_t * e);
-lv_obj_t * ui_vol_slider;
-void ui_event_transmit_button(lv_event_t * e);
-lv_obj_t * ui_transmit_button;
-lv_obj_t * ui_Label3;
-void ui_event_about_button(lv_event_t * e);
-lv_obj_t * ui_about_button;
+lv_obj_t * ui_vfo_label;
+void ui_event_about_btn(lv_event_t * e);
+lv_obj_t * ui_about_btn;
 lv_obj_t * ui_Label5;
 void ui_event_vfo_panel(lv_event_t * e);
 lv_obj_t * ui_vfo_panel;
 lv_obj_t * ui_label_test_rx;
 lv_obj_t * ui_label_test_tx;
+void ui_event_ptt_btn(lv_event_t * e);
+lv_obj_t * ui_ptt_btn;
+lv_obj_t * ui_Label3;
+lv_obj_t * ui_vol_label;
+void ui_event_vol_slider(lv_event_t * e);
+lv_obj_t * ui_vol_slider;
 
 // SCREEN: ui_screen_num_freq_pads
 void ui_screen_num_freq_pads_screen_init(void);
@@ -200,26 +201,7 @@ void ui_event_header_settings_button(lv_event_t * e)
         on_settings_clicked(e);
     }
 }
-void ui_event_vol_slider(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_VALUE_CHANGED) {
-        on_vol_changed(e);
-    }
-}
-void ui_event_transmit_button(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_PRESSED) {
-        on_xmit_button_press(e);
-    }
-    if(event_code == LV_EVENT_RELEASED) {
-        on_xmit_button_release(e);
-    }
-}
-void ui_event_about_button(lv_event_t * e)
+void ui_event_about_btn(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
@@ -235,13 +217,32 @@ void ui_event_vfo_panel(lv_event_t * e)
         on_freq_click(e);
     }
 }
+void ui_event_ptt_btn(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_PRESSED) {
+        on_xmit_button_press(e);
+    }
+    if(event_code == LV_EVENT_RELEASED) {
+        on_xmit_button_release(e);
+    }
+}
+void ui_event_vol_slider(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_VALUE_CHANGED) {
+        on_vol_changed(e);
+    }
+}
 void ui_event_screen_num_freq_pads(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(ui_home_screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0);
+        _ui_screen_change(ui_main_screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0);
     }
     if(event_code == LV_EVENT_PRESSED) {
         on_screen_pressed(e);
@@ -454,7 +455,7 @@ void ui_init(void)
     lv_theme_t * theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED),
                                                false, LV_FONT_DEFAULT);
     lv_disp_set_theme(dispp, theme);
-    ui_home_screen_screen_init();
+    ui_main_screen_screen_init();
     ui_screen_num_freq_pads_screen_init();
     ui_screen_scratchpad_1_screen_init();
     ui_screen_scratchpad_2_screen_init();
@@ -462,5 +463,5 @@ void ui_init(void)
     ui_screen_scratchpad_4_screen_init();
     ui_screen_scratchpad_5_screen_init();
     ui____initial_actions0 = lv_obj_create(NULL);
-    lv_disp_load_scr(ui_home_screen);
+    lv_disp_load_scr(ui_main_screen);
 }

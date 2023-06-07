@@ -19,7 +19,7 @@ void ui_screen_scratchpad_4_screen_init(void)
     lv_obj_clear_flag(ui_callsign_change_panel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_callsign_change_panel, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_callsign_change_panel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_color(ui_callsign_change_panel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_callsign_change_panel, lv_color_hex(0x191C26), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_callsign_change_panel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_callsign_ok_btn = lv_btn_create(ui_callsign_change_panel);

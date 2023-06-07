@@ -19,7 +19,7 @@ void ui_screen_scratchpad_5_screen_init(void)
     lv_obj_clear_flag(ui_freq_change_panel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_freq_change_panel, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_freq_change_panel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_color(ui_freq_change_panel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_freq_change_panel, lv_color_hex(0x191C26), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_freq_change_panel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui_freq_change_panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_freq_change_panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -246,7 +246,7 @@ void ui_screen_scratchpad_5_screen_init(void)
     lv_obj_set_style_bg_color(lv_dropdown_get_list(ui_ctcss_dropdown), lv_color_hex(0x464B55),
                               LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(lv_dropdown_get_list(ui_ctcss_dropdown), 255,  LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_color(lv_dropdown_get_list(ui_ctcss_dropdown), lv_color_hex(0x000000),
+    lv_obj_set_style_border_color(lv_dropdown_get_list(ui_ctcss_dropdown), lv_color_hex(0x191C26),
                                   LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(lv_dropdown_get_list(ui_ctcss_dropdown), 255,  LV_PART_MAIN | LV_STATE_DEFAULT);
 
