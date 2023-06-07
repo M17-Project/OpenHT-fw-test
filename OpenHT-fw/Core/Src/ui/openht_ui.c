@@ -31,6 +31,9 @@
 #include <ui/ui_callsign_change_panel.h>
 #include <ui/ui_freq_change_panel.h>
 
+#include "utils/str_builder.h"
+
+#include "cps.h"
 #include "disk_mgr.h"
 #include "fatfs.h"
 #include "bmp_utils.h"
@@ -47,6 +50,7 @@ char callsign_str[10] = ""; // 9 digits for callsign
 settings_t user_settings;
 char * callsign_prefix = NULL;
 char * mode_prefix = NULL;
+char * ctcss_options_str;
 
 static void screen_capture(void);
 static int num_places (uint32_t n);
@@ -56,6 +60,10 @@ void custom_ui_init(void)
 	// SquareLine designer add widgets to screens, however, we want to use
 	// these as top layer widgets. So we can still use the designer
 	// but then need to set the parent to the top layer for each widget
+
+	// top layer is scrollable by default, so this will keep our hidden keyboards hidden!
+	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_SCROLLABLE);
+
 	lv_obj_set_parent(ui_about_panel, lv_layer_top());
 	lv_obj_add_flag(ui_about_panel, LV_OBJ_FLAG_HIDDEN);
 	init_about_panel();
@@ -101,6 +109,26 @@ void custom_ui_init(void)
 
 	// callback handler
 	lv_obj_add_event_cb(num_pad, numpad_btnmatrix_event_cb, LV_EVENT_ALL, NULL);
+
+	//ctcss_tone
+	//lv_dropdown_set_options_static(obj, options)
+
+//	for (int index = 0; index < MAX_TONE_INDEX; index++) {
+//    lv_dropdown_set_options(ui_ctcss_dropdown,
+//                            "Option 1\nOption 2\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\n");
+//	}
+
+    str_builder_t * sb = str_builder_create();
+
+    for (int index = 0; index < MAX_TONE_INDEX; index++) {
+		str_builder_add_mag_val_decimal(sb, ctcss_tone[index], 10);
+		str_builder_add_char(sb, '\n');
+    }
+
+    ctcss_options_str = str_builder_dump(sb, NULL);
+    str_builder_destroy(sb);
+
+    lv_dropdown_set_options_static(ui_ctcss_dropdown, ctcss_options_str);
 
 
 	// GET STORED SETTINGS AND UPDATE UI

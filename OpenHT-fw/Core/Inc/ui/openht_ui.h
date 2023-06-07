@@ -51,6 +51,7 @@ extern char callsign_str[10];
 extern settings_t user_settings;
 extern char * callsign_prefix;
 extern char * mode_prefix;
+extern char * ctcss_options_str;
 
 void custom_ui_init(void);
 

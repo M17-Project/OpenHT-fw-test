@@ -137,6 +137,9 @@ extern lv_obj_t * ui_label_tx1;
 extern lv_obj_t * ui_tx_offset_ta;
 void ui_event_split_freq_cb(lv_event_t * e);
 extern lv_obj_t * ui_split_freq_cb;
+extern lv_obj_t * ui_Panel2;
+extern lv_obj_t * ui_ctcss_dropdown;
+extern lv_obj_t * ui_Label23;
 extern lv_obj_t * ui____initial_actions0;
 
 
