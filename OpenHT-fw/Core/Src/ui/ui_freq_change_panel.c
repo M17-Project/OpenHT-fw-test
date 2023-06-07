@@ -16,16 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-// LVGL version: 8.3.4
-// Project name: OpenHT_UI
-
-#include <ui/openht_ui.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
-#include <lvgl.h>
-
-#include "lvgl_ui/ui.h"
+#include <ui/openht_ui.h>
 #include <ui/ui_freq_change_panel.h>
 #include <ui/lvht_numpad.h>
 
@@ -37,14 +31,13 @@ static uint32_t rx_freq = 0;
 static uint32_t tx_freq = 0;
 static bool split_mode = false;
 
-static int32_t move_cursor(int32_t curs_pos, int32_t movement);
-static void update_cursor_pos(lv_obj_t *freq_ta);
-
-static void update_active_freq_ta(lv_obj_t *new_freq_ta, uint32_t *freq);
-static void end_input_freq_ta(bool finished_input);
-static void change_vfo_frequency(bool move_up);
-static void change_freq(int32_t freq_shift);
-static void update_freq_text(void);
+static int32_t _move_cursor(int32_t curs_pos, int32_t movement);
+static void _update_cursor_pos(lv_obj_t *freq_ta);
+static void _update_active_freq_ta(lv_obj_t *new_freq_ta, uint32_t *freq);
+static void _end_input_freq_ta(bool finished_input);
+static void _change_vfo_frequency(bool move_up);
+static void _change_freq(int32_t freq_shift);
+static void _update_freq_text(void);
 
 void init_freq_change_panel()
 {
@@ -92,7 +85,7 @@ void on_freq_click(lv_event_t *e)
 // save all changes from the frequency change
 void on_freq_ok_clicked(lv_event_t *e)
 {
-	end_input_freq_ta(true);
+	_end_input_freq_ta(true);
 	lv_obj_add_flag(ui_freq_change_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
 
@@ -117,7 +110,7 @@ void on_freq_ok_clicked(lv_event_t *e)
 // cancel all changes
 void on_freq_cancel_clicked(lv_event_t *e)
 {
-	end_input_freq_ta(true);
+	_end_input_freq_ta(true);
 	lv_obj_add_flag(ui_freq_change_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
 
@@ -127,13 +120,13 @@ void on_freq_cancel_clicked(lv_event_t *e)
 void on_freq_change_panel_click(lv_event_t *e)
 {
 	// end the input
-	end_input_freq_ta(true);
+	_end_input_freq_ta(true);
 }
 
 // when the user touches the split check box
 void on_split_txrx_clicked(lv_event_t *e)
 {
-	end_input_freq_ta(true);
+	_end_input_freq_ta(true);
 	split_mode = update_split_mode();
 
 	if (!split_mode) {
@@ -149,33 +142,33 @@ void on_split_txrx_clicked(lv_event_t *e)
 // when the user touches the freq down of the panel freq bump
 void on_freq_button_down_press(lv_event_t * e)
 {
-	change_vfo_frequency(false);
+	_change_vfo_frequency(false);
 }
 
 // when the user touches the freq up of the panel freq bump
 void on_freq_button_up_press(lv_event_t * e)
 {
-	change_vfo_frequency(true);
+	_change_vfo_frequency(true);
 }
 
 // when the user touches the rx frequency text area
 void on_rx_freq_ta_click(lv_event_t *e)
 {
 	if (current_freq_ta == ui_rx_freq_ta) {
-		update_cursor_pos(ui_rx_freq_ta);
+		_update_cursor_pos(ui_rx_freq_ta);
 		return;
 	}
-	update_active_freq_ta(ui_rx_freq_ta, &rx_freq);
+	_update_active_freq_ta(ui_rx_freq_ta, &rx_freq);
 }
 
 // when the user touches the tx frequency text area
 void on_tx_freq_ta_click(lv_event_t *e)
 {
 	if (current_freq_ta == ui_tx_freq_ta) {
-		update_cursor_pos(ui_tx_freq_ta);
+		_update_cursor_pos(ui_tx_freq_ta);
 		return;
 	}
-	update_active_freq_ta(ui_tx_freq_ta, &tx_freq);
+	_update_active_freq_ta(ui_tx_freq_ta, &tx_freq);
 }
 
 // this callback does the handling of user touches for the keypad
@@ -203,11 +196,11 @@ void numpad_btnmatrix_event_cb(lv_event_t *e)
 
 		// move cursor left
 		if (strcmp(txt, LV_SYMBOL_LEFT) == 0) {
-			curs_pos = move_cursor(curs_pos, -1);
+			curs_pos = _move_cursor(curs_pos, -1);
 		}
 		// move cursor right
 		else if (strcmp(txt, LV_SYMBOL_RIGHT) == 0) {
-			curs_pos = move_cursor(curs_pos, +1);
+			curs_pos = _move_cursor(curs_pos, +1);
 		}
 		// end input
 		else if (strcmp(txt, LV_SYMBOL_OK) == 0) {
@@ -217,13 +210,13 @@ void numpad_btnmatrix_event_cb(lv_event_t *e)
 
 			*current_freq = get_freq_from_str(current_freq_str);
 			// update the freq text areas
-			update_freq_text();
+			_update_freq_text();
 
 			if (curs_pos == END_POS - 1) {
 				curs_pos = END_POS;
 			} else {
 				// update cursor position...
-				curs_pos = move_cursor(curs_pos, +1);
+				curs_pos = _move_cursor(curs_pos, +1);
 			}
 		}
 
@@ -231,7 +224,7 @@ void numpad_btnmatrix_event_cb(lv_event_t *e)
 		lv_textarea_set_cursor_pos(current_freq_ta, curs_pos);
 
 		if (curs_pos == END_POS) {
-			end_input_freq_ta(true);
+			_end_input_freq_ta(true);
 		}
 	}
 }
@@ -255,7 +248,7 @@ bool update_split_mode()
 }
 
 // update the frequency text areas with the valid frequencies
-static void update_freq_text()
+static void _update_freq_text()
 {
 	if (current_freq_ta != NULL && current_freq != NULL) {
 		get_str_from_freq(*current_freq, current_freq_str, 0);
@@ -270,7 +263,7 @@ static void update_freq_text()
 }
 
 // move the vfo up or down based on the selected freq shift
-static void change_vfo_frequency(bool move_up)
+static void _change_vfo_frequency(bool move_up)
 {
 	uint16_t selected_item = lv_dropdown_get_selected(ui_freq_dropdown);
 
@@ -291,11 +284,11 @@ static void change_vfo_frequency(bool move_up)
 			break;
 	}
 
-	change_freq(move_up ? freq_shift : -freq_shift);
+	_change_freq(move_up ? freq_shift : -freq_shift);
 }
 
 // change the frequency and update the text areas
-static void change_freq(int32_t freq_shift)
+static void _change_freq(int32_t freq_shift)
 {
 	if (current_freq_ta != NULL && current_freq != NULL) {
 		uint32_t curs_pos = lv_textarea_get_cursor_pos(current_freq_ta);
@@ -303,18 +296,18 @@ static void change_freq(int32_t freq_shift)
 
 		validate_freq(current_freq);
 
-		update_freq_text();
+		_update_freq_text();
 
 		lv_textarea_set_cursor_pos(current_freq_ta, curs_pos);
 	}
 }
 
-static void update_active_freq_ta(lv_obj_t *new_freq_ta, uint32_t *freq)
+static void _update_active_freq_ta(lv_obj_t *new_freq_ta, uint32_t *freq)
 {
 	if (new_freq_ta == NULL)
 		return;
 
-	end_input_freq_ta(false);
+	_end_input_freq_ta(false);
 	// show the number keypad
 	set_numpad_visibility(true);
 
@@ -332,10 +325,10 @@ static void update_active_freq_ta(lv_obj_t *new_freq_ta, uint32_t *freq)
 			LV_PART_MAIN | LV_STATE_DEFAULT);
 	//lv_obj_set_style_anim_time(currentActiveTextAreaFreq, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
 
-	update_cursor_pos(current_freq_ta);
+	_update_cursor_pos(current_freq_ta);
 }
 
-static void end_input_freq_ta(bool finished_input)
+static void _end_input_freq_ta(bool finished_input)
 {
 	if (current_freq_ta == NULL) {
 		return;
@@ -369,7 +362,7 @@ static void end_input_freq_ta(bool finished_input)
 	current_freq_ta = NULL;
 }
 
-static int32_t move_cursor(int32_t curs_pos, int32_t movement)
+static int32_t _move_cursor(int32_t curs_pos, int32_t movement)
 {
 	curs_pos = curs_pos + movement;
 
@@ -384,7 +377,7 @@ static int32_t move_cursor(int32_t curs_pos, int32_t movement)
 	return curs_pos;
 }
 
-static void update_cursor_pos(lv_obj_t *textAreaFreq)
+static void _update_cursor_pos(lv_obj_t *textAreaFreq)
 {
 	uint32_t curs_pos = lv_textarea_get_cursor_pos((lv_obj_t*) textAreaFreq);
 	if ((curs_pos == GIG_POS) || (curs_pos == MEG_POS) || (curs_pos == THOU_POS)) {

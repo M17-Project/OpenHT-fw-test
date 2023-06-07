@@ -4,7 +4,7 @@
  * Opts: --bpp 8 --size 60 --font /home/jae/Devel/ham/OpenHT-fw-test/OpenHT_UI/assets/number_font.ttf -o /home/jae/Devel/ham/OpenHT-fw-test/OpenHT_UI/assets/ui_font_number_60.c --format lvgl -r 0x20-0x7f --no-compress --no-prefilter
  ******************************************************************************/
 
-#include "ui.h"
+#include "../ui.h"
 
 #ifndef UI_FONT_NUMBER_60
 #define UI_FONT_NUMBER_60 1

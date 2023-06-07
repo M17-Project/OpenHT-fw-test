@@ -16,9 +16,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-// LVGL version: 8.3.4
-// Project name: OpenHT_UI
-
 #ifndef __OPENHT_UI_H
 #define __OPENHT_UI_H
 
@@ -28,8 +25,9 @@ extern "C" {
 
 #include "stm32469i_discovery.h"
 #include "stm32f4xx_hal.h"
-#include <lvgl.h>
 #include "user_settings.h"
+#include <lvgl.h>
+#include "../../Src/ui/sls_generated/ui.h"
 
 #define max(a,b) \
   ({ __typeof__ (a) _a = (a); \

@@ -16,16 +16,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-// LVGL version: 8.3.4
-// Project name: OpenHT_UI
-
 #include <ui/openht_ui.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
 #include <lvgl.h>
 
-#include "lvgl_ui/ui.h"
 #include <ui/ui_about_panel.h>
 #include <ui/ui_mode_change_panel.h>
 #include <ui/ui_callsign_change_panel.h>
@@ -52,8 +48,8 @@ char * callsign_prefix = NULL;
 char * mode_prefix = NULL;
 char * ctcss_options_str;
 
-static void screen_capture(void);
-static int num_places (uint32_t n);
+static void _screen_capture(void);
+static int _num_places(uint32_t n);
 
 void custom_ui_init(void)
 {
@@ -213,7 +209,7 @@ void on_userbutton_press()
 	BSP_LED_Off(LED_ORANGE);
 	BSP_LED_Off(LED_RED);
 
-	screen_capture();
+	_screen_capture();
 
 //	if (display_toggle) {
 //		NT35510_BacklightOn();
@@ -329,7 +325,7 @@ void get_str_from_freq(freq_t i, char b[], int prepend_blank)
 	p = p + str_i;
 
 	if (prepend_blank == -1) {
-		int nums = num_places(i);
+		int nums = _num_places(i);
 		int mod = nums % 3;
 		int thous = (nums / 3);
 		if (mod == 0) thous--;
@@ -365,16 +361,16 @@ void get_str_from_freq(freq_t i, char b[], int prepend_blank)
 	} while (p > b);
 }
 
-static int num_places (freq_t n)
+static int _num_places (freq_t n)
 {
     if (n < 10) return 1;
-    return 1 + num_places (n / 10);
+    return 1 + _num_places (n / 10);
 }
 
 // assign buffer to SDRAM since we are limited on SRAM
 __attribute__((section(".sdram")))  static uint8_t img_buffer[480 * 800 * 3]; // 480px * 800px * 3 bytes per pixel
 
-static void screen_capture(void)
+static void _screen_capture(void)
 {
 	lv_obj_t *scr = lv_scr_act();
 	lv_img_dsc_t snapshot_img;

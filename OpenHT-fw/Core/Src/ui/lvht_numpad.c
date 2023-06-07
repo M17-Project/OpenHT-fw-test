@@ -16,13 +16,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <ui/lvht_numpad.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
 #include <lvgl.h>
 
-#include "lvgl_ui/ui.h"
+#include "sls_generated/ui.h"
+#include <ui/lvht_numpad.h>
 
 // array matrix of buttons
 static const char *btnm_map[] = { "7", "8", "9", "\n",

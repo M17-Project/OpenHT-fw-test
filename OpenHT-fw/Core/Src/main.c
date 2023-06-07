@@ -30,13 +30,11 @@
 #include <screen_driver.h>
 #include <touch_sensor_driver.h>
 #include "ui/openht_ui.h"
-//#include "lvgl_ui/ui.h"
 #include "disk_mgr.h"
 #include "openht_hwconfig.h"
 #include "task_microphone.h"
 #include "task_fpga.h"
 #include "../shell/inc/sys_command_line.h"
-#include "ui/lvgl_ui/ui.h"
 
 /* USER CODE END Includes */
 

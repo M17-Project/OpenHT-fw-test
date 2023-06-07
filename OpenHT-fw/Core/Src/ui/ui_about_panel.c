@@ -16,17 +16,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-// LVGL version: 8.3.4
-// Project name: OpenHT_UI
-
-#include <ui/ui_about_panel.h>
-#include <ui/openht_ui.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
 #include <lvgl.h>
-
-#include "lvgl_ui/ui.h"
+#include <ui/openht_ui.h>
+#include <ui/ui_about_panel.h>
 
 static lv_obj_t *about_tabview = NULL;
 

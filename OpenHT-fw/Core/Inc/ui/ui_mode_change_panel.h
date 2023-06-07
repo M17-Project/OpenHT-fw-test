@@ -16,9 +16,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-// LVGL version: 8.3.4
-// Project name: OpenHT_UI
-
 #ifndef __UI_CALLSIGN_CHANGE_PANEL_H
 #define __UI_CALLSIGN_CHANGE_PANEL_H
 
