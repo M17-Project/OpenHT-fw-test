@@ -153,11 +153,11 @@ void StartTaskFPGA(void *argument) {
 				HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 5);
 				osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
 				HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
-				break;
-				if(bufferRX[4] == 1){
+				if(bufferRX[4] == 0){
 					LOG(CLI_LOG_FPGA, "FPGA not busy anymore.\r\n");
 					break;
 				}else{
+					printf(".");
 					osDelay(1);
 				}
 			}
