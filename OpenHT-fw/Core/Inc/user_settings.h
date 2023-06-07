@@ -30,8 +30,8 @@ extern "C" {
 
 typedef struct
 {
-	uint32_t tx_freq;
-	uint32_t rx_freq;
+	freq_t tx_freq;
+	freq_t rx_freq;
 	char callsign[10];
 	openht_mode_t mode;
 	uint8_t audio_vol;

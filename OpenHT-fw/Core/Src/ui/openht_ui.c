@@ -247,13 +247,13 @@ void update_callsign()
 }
 
 
-uint32_t get_freq_from_str(const char *str)
+freq_t get_freq_from_str(const char *str)
 {
-	uint32_t num = 0;  // uint32 max: 4294967295
+	freq_t num = 0;  // uint32 max: 4294967295
 
 	// converting string to number
 	for (int i = 0; str[i] != '\0'; i++) {
-		uint32_t digit = str[i] - 48;
+		freq_t digit = str[i] - 48;
 
 		// if it is a "_" treat as a 0
 		if (digit == 47) {
@@ -284,7 +284,7 @@ uint32_t get_freq_from_str(const char *str)
 // if prepend_blank is 0 - output includes leading underscores and thous separators
 // if prepend_blank is 1 - output includes spaces instead of underscores and thous separators
 // if prepend_blank is -1 - output does not include any padding to the left most number
-void get_str_from_freq(uint32_t i, char b[], int prepend_blank)
+void get_str_from_freq(freq_t i, char b[], int prepend_blank)
 {
 	char const digit[] = "0123456789";
 	char *p = b;
@@ -337,7 +337,7 @@ void get_str_from_freq(uint32_t i, char b[], int prepend_blank)
 	} while (p > b);
 }
 
-static int num_places (uint32_t n)
+static int num_places (freq_t n)
 {
     if (n < 10) return 1;
     return 1 + num_places (n / 10);

@@ -23,6 +23,8 @@
 extern "C" {
 #endif
 
+#include "openht_types.h"
+
 #define NUM_BANDS 3  // number of bands supported by hardware
 
 //typedef enum
@@ -33,13 +35,13 @@ extern "C" {
 
 typedef struct
 {
-	uint32_t start_freq;
-	uint32_t end_freq;
+	freq_t start_freq;
+	freq_t end_freq;
 } openht_bandrange_t;
 
 typedef struct
 {
-	void (*set_frequency_cb)(uint32_t);
+	void (*set_frequency_cb)(freq_t);
 	void (*tx_start_cb)(void);
 	void (*tx_end_cb)(void);
 

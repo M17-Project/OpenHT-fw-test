@@ -56,7 +56,7 @@ void custom_ui_init(void);
 
 void numpad_btnmatrix_event_cb(lv_event_t *e);
 void qwertypad_btnmatrix_event_cb(lv_event_t *e);
-uint32_t get_freq_from_str(const char *str);
+freq_t get_freq_from_str(const char *str);
 void get_str_from_freq(uint32_t i, char b[], int prepend_blank);
 void update_callsign();
 bool validate_freq(uint32_t *freq);
