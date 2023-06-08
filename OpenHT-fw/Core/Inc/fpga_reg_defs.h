@@ -11,8 +11,10 @@
 #include <stdint.h>
 
 //Read/Write
-#define REG_WR						((uint16_t)1<<15)
 #define REG_RD						((uint16_t)0<<15)
+#define REG_WR						((uint16_t)1<<15)
+#define ADDR_NORM					((uint16_t)0<<14)
+#define ADDR_INCR					((uint16_t)1<<14)
 
 //Register 0 - Control Register 1
 #define CR_1						((uint16_t)0)
