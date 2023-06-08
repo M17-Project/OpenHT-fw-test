@@ -64,14 +64,14 @@ void ui_main_screen_screen_init(void)
     lv_img_set_src(ui_signal_strenth_image, &ui_img_492966190);
     lv_obj_set_width(ui_signal_strenth_image, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_signal_strenth_image, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_signal_strenth_image, 15);
-    lv_obj_set_y(ui_signal_strenth_image, 5);
+    lv_obj_set_x(ui_signal_strenth_image, 385);
+    lv_obj_set_y(ui_signal_strenth_image, 2);
     lv_obj_add_flag(ui_signal_strenth_image, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_signal_strenth_image, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
     ui_header_callsign_button = lv_btn_create(ui_header_panel);
-    lv_obj_set_width(ui_header_callsign_button, 200);
     lv_obj_set_height(ui_header_callsign_button, 50);
+    lv_obj_set_width(ui_header_callsign_button, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_align(ui_header_callsign_button, LV_ALIGN_BOTTOM_LEFT);
     lv_obj_add_flag(ui_header_callsign_button, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_header_callsign_button, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -114,11 +114,8 @@ void ui_main_screen_screen_init(void)
     lv_obj_set_style_text_font(ui_header_mode_label, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_header_settings_button = lv_btn_create(ui_header_panel);
-    lv_obj_set_width(ui_header_settings_button, 50);
+    lv_obj_set_width(ui_header_settings_button, 60);
     lv_obj_set_height(ui_header_settings_button, 50);
-    lv_obj_set_x(ui_header_settings_button, -60);
-    lv_obj_set_y(ui_header_settings_button, 1);
-    lv_obj_set_align(ui_header_settings_button, LV_ALIGN_TOP_RIGHT);
     lv_obj_add_flag(ui_header_settings_button, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_header_settings_button, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_radius(ui_header_settings_button, 0, LV_PART_MAIN | LV_STATE_DEFAULT);

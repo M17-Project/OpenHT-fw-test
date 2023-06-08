@@ -684,8 +684,8 @@
                         "flags": 17,
                         "strtype": "OBJECT/Position",
                         "intarray": [
-                          15,
-                          5
+                          385,
+                          2
                         ],
                         "InheritedType": 7
                       },
@@ -1276,10 +1276,10 @@
                       },
                       {
                         "nid": 842738487,
-                        "flags": 17,
+                        "flags": 19,
                         "strtype": "OBJECT/Size",
                         "intarray": [
-                          200,
+                          1,
                           50
                         ],
                         "InheritedType": 7
@@ -2566,8 +2566,8 @@
                         "flags": 17,
                         "strtype": "OBJECT/Position",
                         "intarray": [
-                          -60,
-                          1
+                          0,
+                          0
                         ],
                         "InheritedType": 7
                       },
@@ -2576,7 +2576,7 @@
                         "flags": 17,
                         "strtype": "OBJECT/Size",
                         "intarray": [
-                          50,
+                          60,
                           50
                         ],
                         "InheritedType": 7
@@ -2584,7 +2584,7 @@
                       {
                         "nid": -694937741,
                         "strtype": "OBJECT/Align",
-                        "strval": "TOP_RIGHT",
+                        "strval": "TOP_LEFT",
                         "InheritedType": 3
                       },
                       {
@@ -3177,8 +3177,7 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "PANEL",
-                "tree_closed": true
+                "saved_objtypeKey": "PANEL"
               },
               {
                 "guid": "GUID50538390-886638S672170",
@@ -7125,7 +7124,7 @@
                     "InheritedType": 7
                   },
                   {
-                    "nid": 1884484283,
+                    "nid": 615905678,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7138,7 +7137,7 @@
                 "strval": "CHECKED",
                 "childs": [
                   {
-                    "nid": -582828500,
+                    "nid": 1483215583,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7151,7 +7150,7 @@
                 "strval": "PRESSED",
                 "childs": [
                   {
-                    "nid": -843133802,
+                    "nid": 1211851522,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7164,7 +7163,7 @@
                 "strval": "CHECKED|PRESSED",
                 "childs": [
                   {
-                    "nid": -1457967761,
+                    "nid": -376450139,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7177,7 +7176,7 @@
                 "strval": "DISABLED",
                 "childs": [
                   {
-                    "nid": 1923067076,
+                    "nid": 843068570,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7190,7 +7189,7 @@
                 "strval": "USER_1",
                 "childs": [
                   {
-                    "nid": 1652573741,
+                    "nid": 1679665619,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7203,7 +7202,7 @@
                 "strval": "USER_2",
                 "childs": [
                   {
-                    "nid": -1205811502,
+                    "nid": -163405480,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7216,7 +7215,7 @@
                 "strval": "USER_3",
                 "childs": [
                   {
-                    "nid": -262669974,
+                    "nid": -1007477102,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7229,7 +7228,7 @@
                 "strval": "USER_4",
                 "childs": [
                   {
-                    "nid": -1535338710,
+                    "nid": 717036311,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -10925,7 +10924,7 @@
                       {
                         "nid": -1973309189,
                         "strtype": "TEXTAREA/Text",
-                        "strval": "MCU: STM32F469I\\nFPGA: Lattice LIFCL-40\\n\\nBands Supported:\\n1: 389.5-510 MHz\\n2: 779-1020 MHz\\n3: 2400- 2483.5 MHz\\n\\nModes Supported:\\n1: M17 (http://m17project.org)\\n2: FreeDV (http://freedv.org)\\n3: NFM/FM\\n4: AM/SSB\\n5: TBD",
+                        "strval": "MCU: STM32F469I\\nFPGA: Lattice LIFCL-40\\nRF: AT86RF215\\n\\nBands Supported:\\n1: 389.5 - 450 MHz\\n2: 2400 - 2483.5 MHz\\n\\nModes Supported:\\n1: M17 (http://m17project.org)\\n2: FreeDV (http://freedv.org)\\n3: NFM/FM/WFM\\n4: AM/SSB\\n5: ...and more!",
                         "InheritedType": 10
                       },
                       {
@@ -13288,8 +13287,7 @@
             "InheritedType": 11
           }
         ],
-        "saved_objtypeKey": "SCREEN",
-        "tree_closed": true
+        "saved_objtypeKey": "SCREEN"
       },
       {
         "guid": "GUID68144515-481194S3452104",
@@ -30617,7 +30615,7 @@
     "theme_color2": 0,
     "exportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/ui/sls_generated",
     "projectExportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/ui/sls_generated",
-    "backup_cnt": 182,
+    "backup_cnt": 189,
     "autosave_cnt": 0,
     "lvgl_version": "8.3.6",
     "callfuncsexport": "C_FILE",

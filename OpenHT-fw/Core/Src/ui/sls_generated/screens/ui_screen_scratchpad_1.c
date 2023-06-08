@@ -56,7 +56,7 @@ void ui_screen_scratchpad_1_screen_init(void)
     lv_obj_set_width(ui_about_hw_text_area, lv_pct(100));
     lv_obj_set_height(ui_about_hw_text_area, lv_pct(100));
     lv_textarea_set_text(ui_about_hw_text_area,
-                         "MCU: STM32F469I\nFPGA: Lattice LIFCL-40\n\nBands Supported:\n1: 389.5-510 MHz\n2: 779-1020 MHz\n3: 2400- 2483.5 MHz\n\nModes Supported:\n1: M17 (http://m17project.org)\n2: FreeDV (http://freedv.org)\n3: NFM/FM\n4: AM/SSB\n5: TBD");
+                         "MCU: STM32F469I\nFPGA: Lattice LIFCL-40\nRF: AT86RF215\n\nBands Supported:\n1: 389.5 - 450 MHz\n2: 2400 - 2483.5 MHz\n\nModes Supported:\n1: M17 (http://m17project.org)\n2: FreeDV (http://freedv.org)\n3: NFM/FM/WFM\n4: AM/SSB\n5: ...and more!");
     lv_obj_add_flag(ui_about_hw_text_area, LV_OBJ_FLAG_HIDDEN);     /// Flags
     lv_obj_clear_flag(ui_about_hw_text_area,
                       LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
