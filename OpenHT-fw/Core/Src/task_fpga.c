@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "main.h"
 #include "task_fpga.h"
 #include <stdlib.h>
 #include <fatfs.h>
@@ -37,9 +38,15 @@ extern SPI_HandleTypeDef 	hspi1;
 extern osMutexId_t 			SPI1AccessHandle;
 extern osMutexId_t 			NORAccessHandle;
 
-
 UINT 			fatfs_bitstream_stream		(const BYTE *p, UINT btf);
+uint32_t 		_fpga_check_status_register(uint8_t *reg);
 void 			_fpga_spi_complete_callback	(SPI_HandleTypeDef *hspi);
+void 			_fpga_wait_busy();
+uint32_t 		_fpga_sspi_classA(uint32_t length, uint8_t *tx, uint8_t *rx);
+uint32_t 		_fpga_sspi_classB(uint32_t length, uint8_t *tx);
+uint32_t 		_fpga_sspi_classC(uint8_t cmd);
+void 			_select_chip();
+void 			_release_chip();
 
 /* Event flags */
 #define FPGA_SEND_SAMPLES	(1 << 0)
@@ -96,12 +103,15 @@ void StartTaskFPGA(void *argument) {
 			osThreadSetPriority(NULL, osPriorityBelowNormal);
 			LOG(CLI_LOG_FPGA, "Started FPGA bitstream upload\r\n");
 
-			uint8_t bufferTX[16];	// Used for data to TX
-			uint8_t bufferRX[16];
+			uint8_t bufferTX[16] = {0};	// Used for data to TX
+			uint8_t bufferRX[16] = {0};
+			uint32_t res = 0;
 
+			HAL_GPIO_WritePin(FPGA_PROGRAMN_GPIO_Port, FPGA_PROGRAMN_Pin, GPIO_PIN_SET);
+			osDelay(2);
 			// First set PROGRAMN low
 			HAL_GPIO_WritePin(FPGA_PROGRAMN_GPIO_Port, FPGA_PROGRAMN_Pin, GPIO_PIN_RESET);
-			osDelay(1); // Must wait for at least 50ns
+			osDelay(2); // Must wait for at least 50ns
 
 			// Drive SCSN low then clock in the key
 			osMutexAcquire(SPI1AccessHandle, osWaitForever);						// Exclusive access to SPI1
@@ -110,67 +120,54 @@ void StartTaskFPGA(void *argument) {
 			hspi1.TxRxCpltCallback 	= _fpga_spi_complete_callback;
 			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);	// Slave select lines
 			HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_SET);
-			bufferTX[0] = 0;
+
 			*(uint32_t *)(bufferTX+1) = SPI_PORT_ACTIVATION_KEY;
 			HAL_SPI_Transmit_IT(&hspi1, bufferTX, 5);
-			osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);					// Wait for TX to be done
+			res = osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, 2500);					// Wait for TX to be done
+			if(res != osOK){
+				LOG(CLI_LOG_FPGA, "osThreadFlagsWait returned %ld.\r\n", (int32_t)res);
+			}
 			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
 
 			osDelay(50);
 
-			// Clock in READ-ID cmd and read 32 bits IDCODE
-			memset(bufferTX, 0, 8);
+			// Check status register
+			_fpga_check_status_register(NULL);
+
+			// Clock in READ_ID cmd and read 32 bits IDCODE
+			memset(bufferTX, 0, sizeof(bufferTX));
+			memset(bufferRX, 0, sizeof(bufferRX));
 			bufferTX[0] = 0xE0;
-			LOG(CLI_LOG_FPGA, "Reading IDCODE.\r\n");
-			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
-			HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 8);
-			osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
-			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
-			LOG(CLI_LOG_FPGA, "FPGA IDCODE is 0x%08lx.\r\n", *(uint32_t *)(bufferRX + 4));
+			_fpga_sspi_classA(8, bufferTX, bufferRX);
+			LOG(CLI_LOG_FPGA, "FPGA IDCODE is 0x%02x%02x%02x%02x.\r\n", bufferRX[4], bufferRX[5], bufferRX[6], bufferRX[7]);
 
 			// ISC-Enable
-			bufferTX[0] = 0xC6;
 			LOG(CLI_LOG_FPGA, "Sending ISC_ENABLE.\r\n");
-			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
-			HAL_SPI_Transmit_IT(&hspi1, bufferTX, 4);
-			osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
-			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+			_fpga_sspi_classC(0xC6);
 
 			// ISC-Erase
-			bufferTX[0] = 0x0E;
-			LOG(CLI_LOG_FPGA, "Sending ISC_ERASE.\r\n");
-			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
-			HAL_SPI_Transmit_IT(&hspi1, bufferTX, 4);
-			osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
-			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+			memset(bufferTX, 0, sizeof(bufferTX));
+			memset(bufferRX, 0, sizeof(bufferRX));
+			_fpga_sspi_classC(0x0E);
+			osDelay(1000);
+			_fpga_wait_busy();
 
-
-			// LSC-CHECK-BUSY (5 bits)
-			bufferTX[0] = 0xF0;
-			LOG(CLI_LOG_FPGA, "Waiting until FPGA is not busy.\r\n");
-			while(true){ // Wait for device to not be busy anymore
-				HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
-				HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 5);
-				osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
-				HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
-				if(bufferRX[4] == 0){
-					LOG(CLI_LOG_FPGA, "FPGA not busy anymore.\r\n");
-					break;
-				}else{
-					printf(".");
-					osDelay(1);
-				}
-			}
+			// Check status register
+			_fpga_check_status_register(NULL);
 
 			// LSC-Bitstream-burst followed by bitstream
 			fpga_bin_entry_t e;
 			EEEPROM_read_data(&eeeprom, 0, &e);
 			uint8_t *bitstream = (uint8_t *)(e.start_sector*SUBSECTOR_SIZE);
+			memset(bufferTX, 0, sizeof(bufferTX));
 			bufferTX[0] = 0x7A;
 			LOG(CLI_LOG_FPGA, "Sending LSC_BITSTREAM_BURST.\r\n");
 			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
 			HAL_SPI_Transmit_IT(&hspi1, bufferTX, 4);
-			osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
+			res = osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, 2500);					// Wait for TX to be done
+			if(res >= (1<<31)){
+				LOG(CLI_LOG_FPGA, "osThreadFlagsWait returned %ld.\r\n", (int32_t)res);
+			}
 
 			osMutexAcquire(NORAccessHandle, 150);
 			BSP_QSPI_EnableMemoryMappedMode();	// Enable memory mapped mode to read the bitstream
@@ -181,29 +178,41 @@ void StartTaskFPGA(void *argument) {
 				uint16_t to_send = (UINT16_MAX < bytes_left)?UINT16_MAX:bytes_left;
 				HAL_SPI_Transmit_DMA(&hspi1, bitstream + sent, to_send);
 				LOG(CLI_LOG_FPGA, "Sent %lu bitstream bytes.\r\n", sent);
-				osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
+				res = osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, 2500);					// Wait for TX to be done
+				if(res >= (1<<31)){
+					LOG(CLI_LOG_FPGA, "osThreadFlagsWait returned %ld.\r\n", (int32_t)res);
+				}
 				sent += to_send;
 			}
+			LOG(CLI_LOG_FPGA, "Sent %lu bitstream bytes.\r\n", sent);
 			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+			LOG(CLI_LOG_FPGA, "Bitstream sent, reconfiguring NOR flash.\r\n");
 			BSP_QSPI_Init();					// set the NOR flash back in indirect access mode
 			osMutexRelease(NORAccessHandle);
 
 			// Check status register
-			bufferTX[0] = 0x3C;
+			_fpga_check_status_register(NULL);
+
+			// ISC_PROGRAM_DONE
+			/*bufferTX[0] = 0x5E;
+			LOG(CLI_LOG_FPGA, "Sending ISC_PROGRAM_DONE.\r\n");
 			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
-			HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 12);
-			osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
+			HAL_SPI_Transmit_IT(&hspi1, bufferTX, 4);
+			res = osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, 2500);					// Wait for TX to be done
+			if(res >= (1<<31)){
+				LOG(CLI_LOG_FPGA, "osThreadFlagsWait returned %ld.\r\n", (int32_t)res);
+			}
 			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
-			LOG(CLI_LOG_FPGA, "Status register is 0x%08lx%08lx.\r\n",
-					*(uint32_t *)bufferRX + 4, *(uint32_t *)bufferRX + 8);
+
+			_fpga_wait_busy();*/
+
+			// Check status register
+			_fpga_check_status_register(NULL);
 
 			// ISC-Disable
 			bufferTX[0] = 0x26;
-			LOG(CLI_LOG_FPGA, "Sending ISC_DISABLE.\r\n");
-			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
-			HAL_SPI_Transmit_IT(&hspi1, bufferTX, 4);
-			osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, osWaitForever);
-			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+			_fpga_sspi_classC(0x26);
+
 
 			LOG(CLI_LOG_FPGA, "FPGA upload done.\r\n");
 
@@ -397,4 +406,91 @@ void _fpga_spi_complete_callback(SPI_HandleTypeDef *hspi){
 	}else{
 		ERR("Could not soft reset FPGA: Thread ID not set.\r\n");
 	}
+}
+
+void _fpga_wait_busy(){
+	// LSC-CHECK-BUSY (5 bits)
+	uint8_t tx[5] = {0xF0, 0, 0, 0, 0};
+	uint8_t rx[5] = {0};
+
+	while(true){ // Wait for device to not be busy anymore
+		_fpga_sspi_classA(5, tx, rx);
+		if(rx[4] == 0){
+			LOG(CLI_LOG_FPGA, "FPGA not busy anymore.\r\n");
+			break;
+		}else{
+			printf(".");
+			osDelay(2);
+		}
+	}
+}
+
+uint32_t _fpga_check_status_register(uint8_t *reg){
+	uint8_t rx[12] = {0};
+	uint8_t tx[12] = {0x3C, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+	_fpga_sspi_classA(12, tx, rx);
+
+	LOG(CLI_LOG_FPGA, "Status register is 0x%02x%02x%02x%02x%02x%02x%02x%02x.\r\n",
+			rx[4], rx[5], rx[6], rx[7], rx[8], rx[9], rx[10], rx[11]);
+
+	if(reg != NULL){
+		memcpy(reg, rx+4, 8);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+uint32_t _fpga_sspi_classA(uint32_t length, uint8_t *tx, uint8_t *rx){
+	uint32_t res = 0;
+	_select_chip();
+	res = HAL_SPI_TransmitReceive_IT(&hspi1, tx, rx, length);
+	if(res != HAL_OK){
+		LOG(CLI_LOG_FPGA, "HAL_SPI_TransmitReceive_IT returned %lu.\r\n", res);
+	}
+	res = osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, 2500);					// Wait for TX to be done
+	if(res >= (1<<31)){
+		LOG(CLI_LOG_FPGA, "osThreadFlagsWait returned %ld.\r\n", (int32_t)res);
+	}
+	_release_chip();
+	return EXIT_SUCCESS;
+}
+
+uint32_t _fpga_sspi_classB(uint32_t length, uint8_t *tx){
+	uint32_t res = 0;
+	_select_chip();
+	res = HAL_SPI_Transmit_IT(&hspi1, tx, length);
+	if(res != HAL_OK){
+		LOG(CLI_LOG_FPGA, "HAL_SPI_TransmitReceive_IT returned %lu.\r\n", res);
+	}
+	res = osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, 2500);					// Wait for TX to be done
+	if(res >= (1<<31)){
+		LOG(CLI_LOG_FPGA, "osThreadFlagsWait returned %ld.\r\n", (int32_t)res);
+	}
+	_release_chip();
+	return EXIT_SUCCESS;
+}
+
+uint32_t _fpga_sspi_classC(uint8_t cmd){
+	uint32_t res = 0;
+	uint8_t tx[4] = {cmd, 0, 0, 0};
+	_select_chip();
+	res = HAL_SPI_Transmit_IT(&hspi1, tx, 4);
+	if(res != HAL_OK){
+		LOG(CLI_LOG_FPGA, "HAL_SPI_TransmitReceive_IT returned %lu.\r\n", res);
+	}
+	res = osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, 2500);					// Wait for TX to be done
+	if(res >= (1<<31)){
+		LOG(CLI_LOG_FPGA, "osThreadFlagsWait returned %ld.\r\n", (int32_t)res);
+	}
+	_release_chip();
+	return EXIT_SUCCESS;
+}
+
+void _select_chip(){
+	HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
+}
+
+void _release_chip(){
+	HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
 }
