@@ -26,6 +26,8 @@
 #include "nor_map.h"
 #include "../shell/inc/sys_command_line.h"
 
+#include <stm32f4xx_ll_gpio.h>
+
 typedef struct __attribute((__packed__)){
 	uint32_t start_sector:24;
 	uint32_t size;
@@ -131,15 +133,23 @@ void StartTaskFPGA(void *argument) {
 
 			osDelay(50);
 
-			// Check status register
-			_fpga_check_status_register(NULL);
-
 			// Clock in READ_ID cmd and read 32 bits IDCODE
 			memset(bufferTX, 0, sizeof(bufferTX));
 			memset(bufferRX, 0, sizeof(bufferRX));
 			bufferTX[0] = 0xE0;
 			_fpga_sspi_classA(8, bufferTX, bufferRX);
 			LOG(CLI_LOG_FPGA, "FPGA IDCODE is 0x%02x%02x%02x%02x.\r\n", bufferRX[4], bufferRX[5], bufferRX[6], bufferRX[7]);
+
+			if(*(uint32_t *)(bufferRX+4) != 0x43100F11){
+				ERR("Wrong FPGA IDCODE. Aborting upload.\r\n");
+				// Release SPI mutex and restore thread priority
+				hspi1.TxCpltCallback 	= NULL;					// Set SPI callbacks
+				hspi1.RxCpltCallback 	= NULL;
+				hspi1.TxRxCpltCallback 	= NULL;
+				osMutexRelease(SPI1AccessHandle);
+				osThreadSetPriority(FPGA_thread_id, prev_prio);
+				continue;
+			}
 
 			// ISC-Enable
 			LOG(CLI_LOG_FPGA, "Sending ISC_ENABLE.\r\n");
@@ -149,7 +159,6 @@ void StartTaskFPGA(void *argument) {
 			memset(bufferTX, 0, sizeof(bufferTX));
 			memset(bufferRX, 0, sizeof(bufferRX));
 			_fpga_sspi_classC(0x0E);
-			osDelay(1000);
 			_fpga_wait_busy();
 
 			// Check status register
@@ -158,13 +167,13 @@ void StartTaskFPGA(void *argument) {
 			// LSC-Bitstream-burst followed by bitstream
 			fpga_bin_entry_t e;
 			EEEPROM_read_data(&eeeprom, 0, &e);
-			uint8_t *bitstream = (uint8_t *)(e.start_sector*SUBSECTOR_SIZE);
+			uint8_t *bitstream = (uint8_t *)(e.start_sector*SUBSECTOR_SIZE) + START_MMP_NOR_ADDR;
 			memset(bufferTX, 0, sizeof(bufferTX));
 			bufferTX[0] = 0x7A;
 			LOG(CLI_LOG_FPGA, "Sending LSC_BITSTREAM_BURST.\r\n");
 			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
 			HAL_SPI_Transmit_IT(&hspi1, bufferTX, 4);
-			res = osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, 2500);					// Wait for TX to be done
+			res = osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, 500);					// Wait for TX to be done
 			if(res >= (1<<31)){
 				LOG(CLI_LOG_FPGA, "osThreadFlagsWait returned %ld.\r\n", (int32_t)res);
 			}
@@ -178,7 +187,7 @@ void StartTaskFPGA(void *argument) {
 				uint16_t to_send = (UINT16_MAX < bytes_left)?UINT16_MAX:bytes_left;
 				HAL_SPI_Transmit_DMA(&hspi1, bitstream + sent, to_send);
 				LOG(CLI_LOG_FPGA, "Sent %lu bitstream bytes.\r\n", sent);
-				res = osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, 2500);					// Wait for TX to be done
+				res = osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, 500);					// Wait for TX to be done
 				if(res >= (1<<31)){
 					LOG(CLI_LOG_FPGA, "osThreadFlagsWait returned %ld.\r\n", (int32_t)res);
 				}
@@ -191,23 +200,20 @@ void StartTaskFPGA(void *argument) {
 			osMutexRelease(NORAccessHandle);
 
 			// Check status register
-			_fpga_check_status_register(NULL);
-
-			// ISC_PROGRAM_DONE
-			/*bufferTX[0] = 0x5E;
-			LOG(CLI_LOG_FPGA, "Sending ISC_PROGRAM_DONE.\r\n");
-			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
-			HAL_SPI_Transmit_IT(&hspi1, bufferTX, 4);
-			res = osThreadFlagsWait(FPGA_SPI_ISR_DONE, 0, 2500);					// Wait for TX to be done
-			if(res >= (1<<31)){
-				LOG(CLI_LOG_FPGA, "osThreadFlagsWait returned %ld.\r\n", (int32_t)res);
+			uint8_t status[8];
+			_fpga_check_status_register(status);
+			if( (status[2]&(1<<4)) == 0){
+				ERR("INITN flag not set!\r\n");
 			}
-			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
-
-			_fpga_wait_busy();*/
-
-			// Check status register
-			_fpga_check_status_register(NULL);
+			if(status[4] & 0xF){
+				ERR("BSE Error Code is %d!\r\n", status[4] & 0xF);
+			}
+			if( (status[6] & 1) == 0 ){
+				ERR("DONE flag not set!\r\n");
+			}
+			if( (status[6] & (1<<5)) > 0){
+				ERR("Fail flag set!\r\n");
+			}
 
 			// ISC-Disable
 			bufferTX[0] = 0x26;
@@ -308,8 +314,9 @@ void StartTaskFPGA(void *argument) {
 			LOG(CLI_LOG_FPGA, "Erasing EEEPROM...\r\n");
 			EEEPROM_erase(&eeeprom);
 			LOG(CLI_LOG_FPGA, "Erasing bin storage...\r\n");
-			for(size_t i = FPGA_BIN_STORAGE_START_SECTOR; i < FPGA_BIN_STORAGE_END_SECTOR; i += 16){
-				CUSTOM_QSPI_Erase_Sector(i*SUBSECTOR_SIZE);
+			for(size_t i = FPGA_BIN_STORAGE_START_SECTOR; i < FPGA_BIN_STORAGE_END_SECTOR; i++){
+				//CUSTOM_QSPI_Erase_Sector(i*SUBSECTOR_SIZE);
+				BSP_QSPI_Erase_Block(i*SUBSECTOR_SIZE);
 			}
 			LOG(CLI_LOG_FPGA, "Done!\r\n");
 
