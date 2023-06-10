@@ -66,8 +66,6 @@ void 			_release_chip();
 void StartTaskFPGA(void *argument) {
 
 	// Init EEEPROM
-	//BSP_QSPI_EnableMemoryMappedMode();
-	//BSP_QSPI_Init();
 	EEEPROMHandle_t eeeprom = {
 			.start_address = FPGA_BIN_TABLE_START_ADDR,
 			.erase_page = EEEPROM_HAL_erase_subsector,
@@ -86,11 +84,6 @@ void StartTaskFPGA(void *argument) {
 	}
 
 	FPGA_thread_id = osThreadGetId();
-
-	// Init GPIOs
-	HAL_GPIO_WritePin(FPGA_PROGRAMN_GPIO_Port, 	FPGA_PROGRAMN_Pin, 	GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, 		FPGA_NSS_Pin, 		GPIO_PIN_SET);
-	HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, 		FPGA_RST_Pin, 		GPIO_PIN_SET);
 
 	for(;;){
 		uint32_t flag = osThreadFlagsWait(FPGA_ALL_FLAGS, osFlagsNoClear, osWaitForever);
