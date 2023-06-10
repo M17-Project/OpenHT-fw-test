@@ -26,6 +26,7 @@
 #include <ui/ui_mode_change_panel.h>
 #include <ui/ui_callsign_change_panel.h>
 #include <ui/ui_freq_change_panel.h>
+#include <ui/ui_fpga_status_panel.h>
 
 #include "utils/str_builder.h"
 
@@ -84,6 +85,8 @@ void custom_ui_init(void)
 	// when it is time to be visible it "slides" up from the bottom.
 	lv_obj_set_parent(ui_freq_key_panel, lv_layer_top());
 
+	// initialize the color status for fpga
+	init_fpga_status_panel();
 
 	// remove the border for the UI placeholder
 	// Hint: using border in SquareLine Studio allows visibility while moving
@@ -93,6 +96,8 @@ void custom_ui_init(void)
 	lv_obj_set_style_border_side(ui_freq_key_panel, LV_BORDER_SIDE_NONE,
 			LV_PART_MAIN);
 	lv_obj_set_style_border_side(ui_panel_freq_bump, LV_BORDER_SIDE_NONE,
+			LV_PART_MAIN);
+	lv_obj_set_style_border_side(ui_fpga_status_panel, LV_BORDER_SIDE_NONE,
 			LV_PART_MAIN);
 	lv_dropdown_set_selected(ui_freq_dropdown, 1);
 
@@ -193,11 +198,7 @@ void on_vol_changed(lv_event_t *e)
 {
 }
 
-void on_disp_brightness_changed(lv_event_t *e)
-{
-    lv_obj_t * slider = lv_event_get_target(e);
-    NT35510_Set_Backlight((uint8_t)lv_slider_get_value(slider));
-}
+
 
 bool display_toggle = false;
 void on_userbutton_press()

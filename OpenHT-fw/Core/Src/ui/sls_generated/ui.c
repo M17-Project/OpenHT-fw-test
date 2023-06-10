@@ -26,6 +26,8 @@ lv_obj_t * ui_header_mode_label;
 void ui_event_header_settings_button(lv_event_t * e);
 lv_obj_t * ui_header_settings_button;
 lv_obj_t * ui_Image1;
+void ui_event_fpga_status_panel(lv_event_t * e);
+lv_obj_t * ui_fpga_status_panel;
 lv_obj_t * ui_vfo_label;
 void ui_event_about_btn(lv_event_t * e);
 lv_obj_t * ui_about_btn;
@@ -115,6 +117,12 @@ lv_obj_t * ui_display_brightness_slider;
 void ui_event_settings_ok_btn(lv_event_t * e);
 lv_obj_t * ui_settings_ok_btn;
 lv_obj_t * ui_Label10;
+void ui_event_settings_e_btn(lv_event_t * e);
+lv_obj_t * ui_settings_e_btn;
+lv_obj_t * ui_Label2;
+void ui_event_settings_f_btn(lv_event_t * e);
+lv_obj_t * ui_settings_f_btn;
+lv_obj_t * ui_Label24;
 
 // SCREEN: ui_screen_scratchpad_4
 void ui_screen_scratchpad_4_screen_init(void);
@@ -199,6 +207,14 @@ void ui_event_header_settings_button(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
         on_settings_clicked(e);
+    }
+}
+void ui_event_fpga_status_panel(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        on_fpga_status_clicked(e);
     }
 }
 void ui_event_about_btn(lv_event_t * e)
@@ -372,6 +388,22 @@ void ui_event_settings_ok_btn(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
         on_settings_ok_clicked(e);
+    }
+}
+void ui_event_settings_e_btn(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        on_settings_e_clicked(e);
+    }
+}
+void ui_event_settings_f_btn(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        on_settings_f_clicked(e);
     }
 }
 void ui_event_callsign_ok_btn(lv_event_t * e)

@@ -61,14 +61,42 @@ void on_settings_a_clicked(lv_event_t *e)
 void on_settings_b_clicked(lv_event_t *e)
 {
 	// TODO: add button b
+
 }
 
 void on_settings_c_clicked(lv_event_t *e)
 {
 	// TODO: add button c
+	set_fpga_status(FPGA_Offline);
 }
 
 void on_settings_d_clicked(lv_event_t *e)
 {
 	// TODO: add button d
+	set_fpga_status(FPGA_Error);
+
+}
+
+void on_settings_e_clicked(lv_event_t *e)
+{
+	// TODO: add button c
+	set_fpga_status(FPGA_Loading);
+}
+
+void on_settings_f_clicked(lv_event_t *e)
+{
+	// TODO: add button d
+	set_fpga_status(FPGA_Running);
+
+}
+
+void on_disp_brightness_changed(lv_event_t *e)
+{
+    lv_obj_t * slider = lv_event_get_target(e);
+    uint8_t val = (uint8_t)lv_slider_get_value(slider);
+
+    // make sure that the display doesn't go off completely
+    if (val < 25) val = 25;
+
+    NT35510_Set_Backlight(val);
 }

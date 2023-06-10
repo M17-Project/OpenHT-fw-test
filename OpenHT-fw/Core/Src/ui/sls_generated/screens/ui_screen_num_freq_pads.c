@@ -18,6 +18,8 @@ void ui_screen_num_freq_pads_screen_init(void)
     lv_obj_clear_flag(ui_qwerty_key_panel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_qwerty_key_panel, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_qwerty_key_panel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_qwerty_key_panel, lv_color_hex(0xFFFF00), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_qwerty_key_panel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui_qwerty_key_panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_qwerty_key_panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui_qwerty_key_panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -33,6 +35,8 @@ void ui_screen_num_freq_pads_screen_init(void)
     lv_obj_clear_flag(ui_freq_key_panel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_freq_key_panel, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_freq_key_panel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_freq_key_panel, lv_color_hex(0xFFFF00), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_freq_key_panel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui_freq_key_panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_freq_key_panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui_freq_key_panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -49,6 +53,8 @@ void ui_screen_num_freq_pads_screen_init(void)
     lv_obj_clear_flag(ui_panel_freq_bump, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_panel_freq_bump, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_panel_freq_bump, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_panel_freq_bump, lv_color_hex(0xFFFF00), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_panel_freq_bump, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui_panel_freq_bump, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_panel_freq_bump, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui_panel_freq_bump, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
