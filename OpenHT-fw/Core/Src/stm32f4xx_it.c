@@ -23,6 +23,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <screen_driver.h>
+#include <stm32f4xx_ll_gpio.h>
+#include "task_general.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,7 +44,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+volatile uint32_t gpio_port_a_state;
+volatile uint32_t gpio_port_g_state;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -168,6 +171,41 @@ void DebugMon_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32f4xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles EXTI line2 interrupt.
+  */
+void EXTI2_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI2_IRQn 0 */
+	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_2);
+	// Determine if the interrupt comes from
+	uint32_t gpio_a = LL_GPIO_ReadInputPort(GPIOA);
+	uint32_t gpio_g = LL_GPIO_ReadInputPort(GPIOG);
+
+	// PA2 changed (PB INT)
+	if( (gpio_port_a_state ^ gpio_a) & GPIO_PIN_2){
+		gpio_port_a_state = gpio_a;
+
+		if(gpio_a & GPIO_PIN_2){
+			// Rising edge
+			// TODO
+		}else{
+			// Falling edge
+			// TODO
+		}
+	}
+
+	// PG2 changed (uSD_Detect)
+	if( (gpio_port_g_state ^ gpio_g) & GPIO_PIN_2){
+		gpio_port_g_state = gpio_g;
+		general_uSD_Detect_it();
+	}
+
+  /* USER CODE END EXTI2_IRQn 0 */
+  /* USER CODE BEGIN EXTI2_IRQn 1 */
+  /* USER CODE END EXTI2_IRQn 1 */
+}
 
 /**
   * @brief This function handles DMA1 stream0 global interrupt.

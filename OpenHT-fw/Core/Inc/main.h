@@ -51,8 +51,9 @@ extern "C" {
 #define CLI_NAME openHT
 
 #define CLI_ADDITIONAL_LOG_CATEGORIES \
-	X(EEEPROM, true) \
+	X(EEEPROM, false) \
 	X(FPGA, true) \
+	X(GENERAL, true) \
 
 /* USER CODE END EM */
 
@@ -200,6 +201,7 @@ void Error_Handler(void);
 #define D19_GPIO_Port GPIOH
 #define PB_INT_Pin GPIO_PIN_2
 #define PB_INT_GPIO_Port GPIOA
+#define PB_INT_EXTI_IRQn EXTI2_IRQn
 #define PTT_Pin GPIO_PIN_5
 #define PTT_GPIO_Port GPIOC
 #define A8_Pin GPIO_PIN_14

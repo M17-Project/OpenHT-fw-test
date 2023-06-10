@@ -22,7 +22,7 @@
 #include "main.h"
 #include <stdlib.h>
 
-void StartTaskFPGA(void *argument);
+void StartTaskRadio(void *argument);
 
 /**
  * Loads a binary image from the SD card to the NOR flash.

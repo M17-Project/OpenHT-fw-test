@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <lvgl.h>
+#include <stm32f4xx_ll_gpio.h>
+
 //#include "./demos/lv_demos.h"
 #include <screen_driver.h>
 #include <touch_sensor_driver.h>
@@ -107,10 +109,10 @@ UART_HandleTypeDef huart3;
 DMA_HandleTypeDef hdma_memtomem_dma2_stream0;
 SDRAM_HandleTypeDef hsdram1;
 
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
+/* Definitions for generalTask */
+osThreadId_t generalTaskHandle;
+const osThreadAttr_t generalTask_attributes = {
+  .name = "generalTask",
   .stack_size = 1536 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
@@ -128,10 +130,10 @@ const osThreadAttr_t microphones_attributes = {
   .stack_size = 768 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
 };
-/* Definitions for fpga */
-osThreadId_t fpgaHandle;
-const osThreadAttr_t fpga_attributes = {
-  .name = "fpga",
+/* Definitions for radio */
+osThreadId_t radioHandle;
+const osThreadAttr_t radio_attributes = {
+  .name = "radio",
   .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal1,
 };
@@ -151,6 +153,9 @@ const osEventFlagsAttr_t microphoneEvents_attributes = {
   .name = "microphoneEvents"
 };
 /* USER CODE BEGIN PV */
+
+extern uint32_t gpio_port_a_state;
+extern uint32_t gpio_port_g_state;
 
 /* USER CODE END PV */
 
@@ -172,10 +177,10 @@ static void MX_TIM4_Init(void);
 static void MX_CRC_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_RNG_Init(void);
-void StartDefaultTask(void *argument);
+void StartGeneralTask(void *argument);
 void StartLVGLTask(void *argument);
 extern void StartMicrophonesTask(void *argument);
-extern void StartTaskFPGA(void *argument);
+extern void StartTaskRadio(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -296,8 +301,8 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  /* creation of generalTask */
+  generalTaskHandle = osThreadNew(StartGeneralTask, NULL, &generalTask_attributes);
 
   /* creation of lvgl */
   lvglHandle = osThreadNew(StartLVGLTask, NULL, &lvgl_attributes);
@@ -305,8 +310,8 @@ int main(void)
   /* creation of microphones */
   microphonesHandle = osThreadNew(StartMicrophonesTask, NULL, &microphones_attributes);
 
-  /* creation of fpga */
-  fpgaHandle = osThreadNew(StartTaskFPGA, NULL, &fpga_attributes);
+  /* creation of radio */
+  radioHandle = osThreadNew(StartTaskRadio, NULL, &radio_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -1131,22 +1136,16 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(SW_CTL1_GPIO_Port, SW_CTL1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, SW_CTL1_Pin|FPGA_PROGRAMN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, SW_CTL2_Pin|RF_RST_Pin|OTG_FS1_PowerSwitchOn_Pin|EXT_RESET_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(FPGA_PROGRAMN_GPIO_Port, FPGA_PROGRAMN_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOH, GPIO_PIN_7|FPGA_RST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOH, GPIO_PIN_7, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : SPKR_HP_Pin audio_rst_Pin */
   GPIO_InitStruct.Pin = SPKR_HP_Pin|audio_rst_Pin;
@@ -1255,6 +1254,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(PGOOD_GPIO_Port, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI2_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 
 	/* Configure PA.00 pin (Blue User button) as input floating */
@@ -1262,6 +1265,10 @@ static void MX_GPIO_Init(void)
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Pin = GPIO_PIN_0;
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+	gpio_port_a_state = LL_GPIO_ReadInputPort(GPIOA);
+	gpio_port_g_state = LL_GPIO_ReadInputPort(GPIOG);
+
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
@@ -1294,36 +1301,17 @@ void greet(void){
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
+/* USER CODE BEGIN Header_StartGeneralTask */
 /**
-  * @brief  Function implementing the defaultTask thread.
+  * @brief  Function implementing the generalTask thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
+/* USER CODE END Header_StartGeneralTask */
+__weak void StartGeneralTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
-	// Mount SD fatfs
-	FATFS fs;
-	f_mount(&fs, "0:", 1);
-  /* Infinite loop */
-  for(;;)
-  {
-	// avoid hw interrupts with lvgl ui code, this simply polls the state of the blue hw user button
-	// and calls the appropriate function in the ui code to handle the "event"
-	// this also avoids any need to de-bounce
-	if (BSP_PB_GetState(BUTTON_USER) == 1 && !user_button_pressed) {
-		user_button_pressed = true;
-		on_userbutton_press();
-	}
-	if (BSP_PB_GetState(BUTTON_USER) == 0 && user_button_pressed) {
-		user_button_pressed = false;
-		on_userbutton_release();
-	}
-	CLI_RUN();
-    osDelay(10);
-  }
+	// See task_general.c
   /* USER CODE END 5 */
 }
 

@@ -63,7 +63,7 @@ void 			_release_chip();
 
 #define SPI_PORT_ACTIVATION_KEY	0x8AF4C6A4 // Swapped for endianness
 
-void StartTaskFPGA(void *argument) {
+void StartTaskRadio(void *argument) {
 
 	// Init EEEPROM
 	EEEPROMHandle_t eeeprom = {
