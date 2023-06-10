@@ -37,6 +37,7 @@ typedef struct
 	uint8_t audio_vol;
 	bool use_freq_offset;  // using eeeprom bits for settings
 	bool split_mode;
+	bool use_soft_ptt;
 } settings_t;
 
 void user_settings_reset();

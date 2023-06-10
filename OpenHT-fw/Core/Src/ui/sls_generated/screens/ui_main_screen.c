@@ -158,26 +158,6 @@ void ui_main_screen_screen_init(void)
     lv_obj_set_style_text_align(ui_vfo_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_vfo_label, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_about_btn = lv_btn_create(ui_main_panel);
-    lv_obj_set_width(ui_about_btn, 130);
-    lv_obj_set_height(ui_about_btn, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_about_btn, 339);
-    lv_obj_set_y(ui_about_btn, -259);
-    lv_obj_set_align(ui_about_btn, LV_ALIGN_LEFT_MID);
-    lv_obj_add_flag(ui_about_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
-    lv_obj_clear_flag(ui_about_btn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_bg_color(ui_about_btn, lv_color_hex(0x191C26), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_about_btn, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_about_btn, lv_color_hex(0x37B9F5), LV_PART_MAIN | LV_STATE_PRESSED);
-    lv_obj_set_style_bg_opa(ui_about_btn, 255, LV_PART_MAIN | LV_STATE_PRESSED);
-
-    ui_Label5 = lv_label_create(ui_about_btn);
-    lv_obj_set_width(ui_Label5, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Label5, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_Label5, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label5, "About...");
-    lv_obj_set_style_text_font(ui_Label5, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
-
     ui_vfo_panel = lv_obj_create(ui_main_panel);
     lv_obj_set_width(ui_vfo_panel, 450);
     lv_obj_set_height(ui_vfo_panel, 125);
@@ -293,7 +273,6 @@ void ui_main_screen_screen_init(void)
     lv_obj_add_event_cb(ui_header_mode_button, ui_event_header_mode_button, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_header_settings_button, ui_event_header_settings_button, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_fpga_status_panel, ui_event_fpga_status_panel, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_about_btn, ui_event_about_btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_vfo_panel, ui_event_vfo_panel, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_ptt_btn, ui_event_ptt_btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_vol_slider, ui_event_vol_slider, LV_EVENT_ALL, NULL);

@@ -77,6 +77,9 @@ void on_freq_click(lv_event_t *e)
 	// init data
 	init_freq_change_panel();
 
+	// HACK WARNING: LVGL seems to render momentarily obscured widgets, so hide
+	lv_obj_add_flag(ui_vfo_panel, LV_OBJ_FLAG_HIDDEN);
+
 	// unhide the panel and make the top layer clickable
 	lv_obj_clear_flag(ui_freq_change_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
@@ -85,6 +88,9 @@ void on_freq_click(lv_event_t *e)
 // save all changes from the frequency change
 void on_freq_ok_clicked(lv_event_t *e)
 {
+	// HACK WARNING: now unhide
+	lv_obj_clear_flag(ui_vfo_panel, LV_OBJ_FLAG_HIDDEN);
+
 	_end_input_freq_ta(true);
 	lv_obj_add_flag(ui_freq_change_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
@@ -110,6 +116,9 @@ void on_freq_ok_clicked(lv_event_t *e)
 // cancel all changes
 void on_freq_cancel_clicked(lv_event_t *e)
 {
+	// HACK WARNING: now unhide
+	lv_obj_clear_flag(ui_vfo_panel, LV_OBJ_FLAG_HIDDEN);
+
 	_end_input_freq_ta(true);
 	lv_obj_add_flag(ui_freq_change_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
@@ -272,12 +281,15 @@ static void _change_vfo_frequency(bool move_up)
 
 	switch (selected_item) {
 		case 0:
-			freq_shift = 6250;
+			freq_shift = 1000;
 			break;
 		case 1:
-			freq_shift = 12500;
+			freq_shift = 6250;
 			break;
 		case 2:
+			freq_shift = 12500;
+			break;
+		case 3:
 			freq_shift = 25000;
 			break;
 		default:

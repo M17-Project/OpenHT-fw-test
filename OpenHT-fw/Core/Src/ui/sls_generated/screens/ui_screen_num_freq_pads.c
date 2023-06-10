@@ -99,7 +99,7 @@ void ui_screen_num_freq_pads_screen_init(void)
     lv_obj_set_style_text_font(ui_Label1, &lv_font_montserrat_42, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_freq_dropdown = lv_dropdown_create(ui_panel_freq_bump);
-    lv_dropdown_set_options(ui_freq_dropdown, "6.25 kHz\n12.5 kHz\n25 kHz");
+    lv_dropdown_set_options(ui_freq_dropdown, "1.00 kHz\n6.25 kHz\n12.5 kHz\n25 kHz");
     lv_obj_set_width(ui_freq_dropdown, 150);
     lv_obj_set_height(ui_freq_dropdown, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_freq_dropdown, LV_ALIGN_CENTER);

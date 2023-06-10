@@ -129,11 +129,13 @@ void user_settings_init()
 
 	// config bits
 	if(EEEPROM_read_data(&user_settings_eeeprom, CONFIG_BITS_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		cached_settings.use_freq_offset = buffer & 0x01;
-		cached_settings.split_mode = buffer & 0x02;
+		cached_settings.use_freq_offset = buffer >> 0 & 0x01;
+		cached_settings.split_mode = buffer >> 1 & 0x01;
+		cached_settings.use_soft_ptt = buffer >> 2 & 0x01;
 	}else{
 		cached_settings.use_freq_offset = false;
 		cached_settings.split_mode = false;
+		cached_settings.use_soft_ptt = false;
 	}
 
 	init_done = true;
@@ -167,11 +169,15 @@ void user_settings_save(const settings_t *settings)
 	}
 
 	if( (cached_settings.use_freq_offset != settings->use_freq_offset)
-			|| (cached_settings.split_mode != settings->split_mode) ){
-		buffer = (settings->use_freq_offset << 0) + (settings->split_mode << 1);
+			|| (cached_settings.split_mode != settings->split_mode)
+			|| (cached_settings.use_soft_ptt != settings->use_soft_ptt) ){
+		buffer = (settings->use_freq_offset << 0) +
+				 (settings->split_mode << 1) +
+				 (settings->use_soft_ptt << 2);
 		EEEPROM_write_data(&user_settings_eeeprom, CONFIG_BITS_EEEPROM_ADDR, (void *)(&buffer));
 		cached_settings.use_freq_offset = settings->use_freq_offset;
 		cached_settings.split_mode = settings->split_mode;
+		cached_settings.use_soft_ptt = settings->use_soft_ptt;
 	}
 
 	if(cached_settings.rx_freq != settings->rx_freq){

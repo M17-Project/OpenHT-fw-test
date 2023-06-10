@@ -35,9 +35,6 @@ extern lv_obj_t * ui_Image1;
 void ui_event_fpga_status_panel(lv_event_t * e);
 extern lv_obj_t * ui_fpga_status_panel;
 extern lv_obj_t * ui_vfo_label;
-void ui_event_about_btn(lv_event_t * e);
-extern lv_obj_t * ui_about_btn;
-extern lv_obj_t * ui_Label5;
 void ui_event_vfo_panel(lv_event_t * e);
 extern lv_obj_t * ui_vfo_panel;
 extern lv_obj_t * ui_label_test_rx;
@@ -125,6 +122,8 @@ extern lv_obj_t * ui_Label2;
 void ui_event_settings_f_btn(lv_event_t * e);
 extern lv_obj_t * ui_settings_f_btn;
 extern lv_obj_t * ui_Label24;
+void ui_event_use_soft_ptt_cb(lv_event_t * e);
+extern lv_obj_t * ui_use_soft_ptt_cb;
 // SCREEN: ui_screen_scratchpad_4
 void ui_screen_scratchpad_4_screen_init(void);
 extern lv_obj_t * ui_screen_scratchpad_4;

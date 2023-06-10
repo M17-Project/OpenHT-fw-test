@@ -152,6 +152,14 @@ void custom_ui_init(void)
 		lv_obj_clear_state(ui_use_freq_offset_cb, LV_STATE_CHECKED);
 	}
 
+	if (user_settings.use_soft_ptt) {
+		lv_obj_clear_flag(ui_ptt_btn, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_add_state(ui_use_soft_ptt_cb, LV_STATE_CHECKED);
+	} else {
+		lv_obj_add_flag(ui_ptt_btn, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_clear_state(ui_use_soft_ptt_cb, LV_STATE_CHECKED);
+	}
+
 	char * label_str = lv_label_get_text(ui_header_callsign_label);
 
 	callsign_prefix = malloc(strlen(label_str) + 1);
@@ -171,16 +179,6 @@ void on_screen_pressed(lv_event_t *e)
 	// TBD
 }
 
-void on_use_tx_offset_clicked(lv_event_t *e)
-{
-	if (lv_obj_has_state(ui_use_freq_offset_cb, LV_STATE_CHECKED)) {
-		user_settings.use_freq_offset = true;
-	} else {
-		user_settings.use_freq_offset = false;
-	}
-
-	user_settings_save(&user_settings);
-}
 
 void on_xmit_button_press(lv_event_t *e)
 {
