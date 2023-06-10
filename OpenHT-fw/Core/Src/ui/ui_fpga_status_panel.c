@@ -27,8 +27,9 @@ static lv_coord_t width;
 static lv_obj_t * led1 = NULL;
 static lv_timer_t * timer;
 static char * fpga_status_str = NULL;
+lv_obj_t * mbox1;
 
-void my_timer(lv_timer_t * timer)
+static void _status_timer(lv_timer_t * timer)
 {
 	uint32_t * user_data = timer->user_data;
 	*user_data += 1;
@@ -51,7 +52,7 @@ void init_fpga_status_panel()
 	// FPGA Off:		Red LED Off (no flash)
 	// FPGA Error/on:	Red LED Flashing
 	// FPGA Loading/on: Orange LED Flashing
-	// FPGA Running/on: Green LED Flashing
+	// FPGA Running/on: Green LED On (no flash)
 
 //	height = lv_obj_get_style_height(ui_fpga_status_panel, LV_PART_MAIN) * 0.6;
 //	width = lv_obj_get_style_width(ui_fpga_status_panel, LV_PART_MAIN) * 0.6;
@@ -67,7 +68,7 @@ void init_fpga_status_panel()
 
     fpga_status_str = openht_get_fpga_status_str(FPGA_Offline);
     static uint32_t user_data = 0;
-    timer = lv_timer_create(my_timer, 250,  &user_data);
+    timer = lv_timer_create(_status_timer, 250,  &user_data);
 	lv_timer_pause(timer);
 
     /*
@@ -103,9 +104,8 @@ void init_fpga_status_panel()
 //    lv_canvas_draw_text(canvas, 40, 20, 100, &label_dsc, "Some text on text canvas");
 */
 }
-lv_obj_t * mbox1;
 
-static void event_cb(lv_event_t * e)
+static void _event_cb(lv_event_t * e)
 {
     //lv_obj_t * obj = lv_event_get_current_target(e);
     //LV_LOG_USER("Button %s clicked", lv_msgbox_get_active_btn_text(obj));
@@ -117,49 +117,48 @@ void on_fpga_status_clicked(lv_event_t *e)
     static const char * btns[] ={"OK", ""};
 
     mbox1 = lv_msgbox_create(NULL, "FPGA Status", fpga_status_str, btns, false); //true);
-    lv_obj_add_event_cb(mbox1, event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_add_event_cb(mbox1, _event_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_obj_center(mbox1);
 }
 
-static void set_offline(void)
+static void _set_offline(void)
 {
 	lv_timer_pause(timer);
     lv_led_set_color(led1, lv_palette_main(LV_PALETTE_RED));
     lv_led_off(led1);
 }
 
-static void set_error(void)
+static void _set_error(void)
 {
     lv_led_set_color(led1, lv_palette_main(LV_PALETTE_RED));
     lv_led_on(led1);
 	lv_timer_resume(timer);
 }
 
-static void set_config(void)
+static void _set_config(void)
 {
     lv_led_set_color(led1, lv_palette_main(LV_PALETTE_ORANGE));
     lv_led_on(led1);
 	lv_timer_resume(timer);
 }
 
-static void set_running(void)
+static void _set_running(void)
 {
+	lv_timer_pause(timer);
     lv_led_set_color(led1, lv_palette_main(LV_PALETTE_GREEN));
     lv_led_on(led1);
-	lv_timer_resume(timer);
 }
-
 
 void set_fpga_status(openht_fpga_status_t status)
 {
     fpga_status_str = openht_get_fpga_status_str(status);
 
 	switch(status){
-	    case FPGA_Offline: set_offline(); break;
-	    case FPGA_Error: set_error(); break;
-	    case FPGA_Loading: set_config(); break;
-	    case FPGA_Running: set_running(); break;
-	    default: set_offline(); break;
+	    case FPGA_Offline: _set_offline(); break;
+	    case FPGA_Error: _set_error(); break;
+	    case FPGA_Loading: _set_config(); break;
+	    case FPGA_Running: _set_running(); break;
+	    default: _set_offline(); break;
 	}
 }
 
