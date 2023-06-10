@@ -70,6 +70,21 @@ void init_freq_change_panel()
 
 	get_str_from_freq(tx_freq, freq_str, 1);
 	lv_textarea_set_text(ui_tx_freq_ta, freq_str);
+
+	lv_obj_add_flag(ui_fm_settings_panel, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_add_flag(ui_m17_settings_panel, LV_OBJ_FLAG_HIDDEN);
+
+	if (user_settings.mode == OpMode_NFM ||
+		user_settings.mode == OpMode_FM ||
+		user_settings.mode == OpMode_WFM) {
+		lv_obj_clear_flag(ui_fm_settings_panel, LV_OBJ_FLAG_HIDDEN);
+	} else if (user_settings.mode == OpMode_M17) {
+		lv_obj_clear_flag(ui_m17_settings_panel, LV_OBJ_FLAG_HIDDEN);
+	}
+
+	// configure m17 panel
+
+
 }
 
 void on_freq_click(lv_event_t *e)

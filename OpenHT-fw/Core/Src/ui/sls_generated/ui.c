@@ -160,9 +160,26 @@ lv_obj_t * ui_label_tx1;
 lv_obj_t * ui_tx_offset_ta;
 void ui_event_split_freq_cb(lv_event_t * e);
 lv_obj_t * ui_split_freq_cb;
-lv_obj_t * ui_Panel2;
-lv_obj_t * ui_ctcss_dropdown;
+lv_obj_t * ui_fm_settings_panel;
+lv_obj_t * ui_ctcss_tx_dropdown;
 lv_obj_t * ui_Label23;
+lv_obj_t * ui_ctcss_rx_dropdown;
+lv_obj_t * ui_Label5;
+lv_obj_t * ui_m17_settings_panel;
+lv_obj_t * ui_can_dropdown;
+lv_obj_t * ui_Label25;
+void ui_event_encrypt_cb(lv_event_t * e);
+lv_obj_t * ui_encrypt_cb;
+void ui_event_send_geo_cb(lv_event_t * e);
+lv_obj_t * ui_send_geo_cb;
+void ui_event_encrypt_lfsr_cb(lv_event_t * e);
+lv_obj_t * ui_encrypt_lfsr_cb;
+void ui_event_encrypt_aes_cb(lv_event_t * e);
+lv_obj_t * ui_encrypt_aes_cb;
+lv_obj_t * ui_Label26;
+lv_obj_t * ui_Label27;
+lv_obj_t * ui_voice_rate_dropdown;
+lv_obj_t * ui_dst_ta;
 lv_obj_t * ui____initial_actions0;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
@@ -470,6 +487,38 @@ void ui_event_tx_freq_ta(lv_event_t * e)
     }
 }
 void ui_event_split_freq_cb(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        on_split_txrx_clicked(e);
+    }
+}
+void ui_event_encrypt_cb(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        on_split_txrx_clicked(e);
+    }
+}
+void ui_event_send_geo_cb(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        on_split_txrx_clicked(e);
+    }
+}
+void ui_event_encrypt_lfsr_cb(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        on_split_txrx_clicked(e);
+    }
+}
+void ui_event_encrypt_aes_cb(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);

@@ -49,6 +49,10 @@ void on_freq_cancel_clicked(lv_event_t * e);
 void on_rx_freq_ta_click(lv_event_t * e);
 void on_tx_freq_ta_click(lv_event_t * e);
 void on_split_txrx_clicked(lv_event_t * e);
+void on_split_txrx_clicked(lv_event_t * e);
+void on_split_txrx_clicked(lv_event_t * e);
+void on_split_txrx_clicked(lv_event_t * e);
+void on_split_txrx_clicked(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

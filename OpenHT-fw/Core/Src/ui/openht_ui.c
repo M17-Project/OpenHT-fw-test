@@ -112,14 +112,10 @@ void custom_ui_init(void)
 	lv_obj_add_event_cb(num_pad, numpad_btnmatrix_event_cb, LV_EVENT_ALL, NULL);
 
 	//ctcss_tone
-	//lv_dropdown_set_options_static(obj, options)
-
-//	for (int index = 0; index < MAX_TONE_INDEX; index++) {
-//    lv_dropdown_set_options(ui_ctcss_dropdown,
-//                            "Option 1\nOption 2\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\n");
-//	}
 
     str_builder_t * sb = str_builder_create();
+
+	str_builder_add_str(sb, "None\n", 0);
 
     for (int index = 0; index < MAX_TONE_INDEX; index++) {
 		str_builder_add_mag_val_decimal(sb, ctcss_tone[index], 10);
@@ -129,7 +125,8 @@ void custom_ui_init(void)
     ctcss_options_str = str_builder_dump(sb, NULL);
     str_builder_destroy(sb);
 
-    lv_dropdown_set_options_static(ui_ctcss_dropdown, ctcss_options_str);
+    lv_dropdown_set_options_static(ui_ctcss_tx_dropdown, ctcss_options_str);
+    lv_dropdown_set_options_static(ui_ctcss_rx_dropdown, ctcss_options_str);
 
 
 	// GET STORED SETTINGS AND UPDATE UI

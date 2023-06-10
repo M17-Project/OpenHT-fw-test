@@ -23,6 +23,7 @@
 extern "C" {
 #endif
 
+#include "cps.h"
 #include "openht_types.h"
 #include "stm32469i_discovery.h" /* DISCOVERY includes component */
 #include "stm32469i_discovery_qspi.h"
@@ -33,8 +34,13 @@ typedef struct
 	freq_t tx_freq;
 	freq_t rx_freq;
 	char callsign[10];
+	char m17_dst[10];	 // not stored yet
 	openht_mode_t mode;
 	uint8_t audio_vol;
+	uint8_t fm_ctcss_tx; // not stored yet
+	uint8_t fm_ctcss_rx; // not stored yet
+	uint8_t m17_can;     // not stored yet
+	m17mode_t m17_voice; // not stored yet
 	bool use_freq_offset;  // using eeeprom bits for settings
 	bool split_mode;
 	bool use_soft_ptt;
