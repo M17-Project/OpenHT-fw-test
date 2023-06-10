@@ -22,6 +22,8 @@
 #include <openht_hwconfig.h>
 #include <openht_hwinterface.h>
 
+// This file contains the unique hardware configuration of the OpenHT.
+
 static openht_hwconfig_t openht_hwconfig;
 
 void init_openht_hwconfig(void)
@@ -32,22 +34,22 @@ void init_openht_hwconfig(void)
 	openht_hwconfig.tx_end_cb = &openht_hw_tx_end;
 
 	// PoC bands supported:
-	// 389.5-510 MHz
-	// 779-1020 MHz
+	// 389.5-510 MHz <-- LPF to about 450 MHz
+	// 779-1020 MHz <-- LPF'd away
 	// 2400- 2483.5 MHz
 
-	openht_hwconfig.num_bands = 3;
+	openht_hwconfig.num_bands = 2;
 
 	openht_hwconfig.bands = malloc(sizeof(openht_bandrange_t) * openht_hwconfig.num_bands);
 
 	openht_hwconfig.bands[0].start_freq = 389500000;
-	openht_hwconfig.bands[0].end_freq =   510000000;
+	openht_hwconfig.bands[0].end_freq =   450000000;
 
-	openht_hwconfig.bands[1].start_freq = 779000000;
-	openht_hwconfig.bands[1].end_freq =  1020000000;
+//	openht_hwconfig.bands[1].start_freq = 779000000;
+//	openht_hwconfig.bands[1].end_freq =  1020000000;
 
-	openht_hwconfig.bands[2].start_freq =2400000000;
-	openht_hwconfig.bands[2].end_freq =  2483500000;
+	openht_hwconfig.bands[1].start_freq =2400000000;
+	openht_hwconfig.bands[1].end_freq =  2483500000;
 }
 
 openht_hwconfig_t get_openht_hwconfig()

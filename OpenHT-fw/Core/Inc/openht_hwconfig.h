@@ -25,8 +25,6 @@ extern "C" {
 
 #include "openht_types.h"
 
-#define NUM_BANDS 3  // number of bands supported by hardware
-
 //typedef enum
 //{
 //	OPENHT_OK = 0, /* (0) Succeeded */
