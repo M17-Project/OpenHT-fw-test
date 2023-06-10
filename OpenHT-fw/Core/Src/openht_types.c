@@ -45,3 +45,25 @@ const char * openht_get_mode_str(openht_mode_t mode)
 
 	return "\0";
 }
+
+struct fpga_status_datum openht_fpga_status_data[] =
+{
+    {FPGA_Offline, "Offline"},
+    {FPGA_Error, "Error"},
+    {FPGA_Loading,  "Loading"},
+    {FPGA_Running,  "Running"},
+};
+
+uint32_t openht_fpga_status_count = sizeof(openht_fpga_status_data)/sizeof(openht_fpga_status_data[0]);
+
+const char * openht_get_fpga_status_str(openht_fpga_status_t fpga_status)
+{
+	for (int i = 0; i < openht_fpga_status_count; i++) {
+		if (openht_fpga_status_data[i].status == fpga_status) {
+			return openht_fpga_status_data[i].status_name;
+		}
+	}
+
+	return "\0";
+}
+
