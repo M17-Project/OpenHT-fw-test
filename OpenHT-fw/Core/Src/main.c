@@ -233,7 +233,9 @@ int main(void)
   MX_I2C2_Init();
   MX_RNG_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_GPIO_WritePin(MAIN_KILL_GPIO_Port, MAIN_KILL_Pin, GPIO_PIN_SET);
+  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
+  HAL_TIM_IC_Start(&htim4, TIM_CHANNEL_1);
 
   BSP_LED_Off(LED_GREEN);
   BSP_LED_Off(LED_ORANGE);
