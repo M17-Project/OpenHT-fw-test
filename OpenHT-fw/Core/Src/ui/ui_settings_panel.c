@@ -22,7 +22,8 @@
 #include <ui/openht_ui.h>
 
 #include "task_fpga.h"
-
+#include "ui/ui_fpga_status_panel.h"
+#include "stm32469i_discovery_lcd.h"
 
 void on_settings_clicked(lv_event_t *e)
 {
