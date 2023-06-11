@@ -19,6 +19,8 @@
 #ifndef INC_OPENHT_HWINTERFACE_H_
 #define INC_OPENHT_HWINTERFACE_H_
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
