@@ -23,10 +23,11 @@
 extern "C" {
 #endif
 
+#include "datatypes.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include "datatypes.h"
 
 typedef enum
 {

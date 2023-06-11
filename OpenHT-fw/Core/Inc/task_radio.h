@@ -16,10 +16,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef INC_TASK_FPGA_H_
-#define INC_TASK_FPGA_H_
+#ifndef INC_TASK_RADIO_H_
+#define INC_TASK_RADIO_H_
 
 #include "main.h"
+
 #include <stdlib.h>
 
 void StartTaskFPGA(void *argument);
@@ -54,4 +55,4 @@ bool fpga_soft_reset();
 bool upload_fpga_binary();
 
 
-#endif /* INC_TASK_FPGA_H_ */
+#endif /* INC_TASK_RADIO_H_ */

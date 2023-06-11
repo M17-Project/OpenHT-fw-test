@@ -16,12 +16,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "ui/ui_about_panel.h"
+
+#include "ui/openht_ui.h"
+
+#include <lvgl.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
-#include <lvgl.h>
-#include <ui/openht_ui.h>
-#include <ui/ui_about_panel.h>
 
 static lv_obj_t *about_tabview = NULL;
 

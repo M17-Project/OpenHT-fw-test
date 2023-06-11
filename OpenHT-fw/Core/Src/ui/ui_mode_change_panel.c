@@ -16,11 +16,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "ui/ui_mode_change_panel.h"
+
+#include "ui/openht_ui.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
-#include <ui/openht_ui.h>
-#include <ui/ui_mode_change_panel.h>
 
 void init_mode_change_panel(void)
 {

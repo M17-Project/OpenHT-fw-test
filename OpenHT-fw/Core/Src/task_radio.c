@@ -16,17 +16,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+
+#include "task_radio.h"
+
 #include "main.h"
-#include "task_fpga.h"
-#include <stdlib.h>
-#include <fatfs.h>
-#include <cmsis_os2.h>
 #include "eeeprom.h"
 #include "eeeprom_hal.h"
 #include "nor_map.h"
-#include "../shell/inc/sys_command_line.h"
 
+#include "../shell/inc/sys_command_line.h"
+#include <fatfs.h>
+#include <cmsis_os2.h>
 #include <stm32f4xx_ll_gpio.h>
+
+#include <stdlib.h>
 
 typedef struct __attribute((__packed__)){
 	uint32_t start_sector:24;

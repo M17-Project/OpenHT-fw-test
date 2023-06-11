@@ -16,13 +16,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "ui/lvht_qwertypad.h"
+
+#include "sls_generated/ui.h"
+
+#include <lvgl.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
-#include <lvgl.h>
-
-#include "sls_generated/ui.h"
-#include <ui/lvht_qwertypad.h>
 
 // array matrix of buttons
 static const char *btnm_map[] = { "1", "2", "3", "4", "5","6", "7", "8", "9","0", "\n",

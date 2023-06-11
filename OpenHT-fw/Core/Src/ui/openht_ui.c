@@ -16,32 +16,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <ui/openht_ui.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <limits.h>
-#include <lvgl.h>
+#include "ui/openht_ui.h"
 
-#include <ui/ui_about_panel.h>
-#include <ui/ui_mode_change_panel.h>
-#include <ui/ui_callsign_change_panel.h>
-#include <ui/ui_freq_change_panel.h>
-#include <ui/ui_fpga_status_panel.h>
-
-#include "utils/str_builder.h"
-
+#include "task_microphone.h"
+#include "task_radio.h"
 #include "cps.h"
 #include "disk_mgr.h"
-#include "fatfs.h"
 #include "bmp_utils.h"
 #include "openht_hwconfig.h"
 #include "openht_types.h"
-#include <../../Drivers/BSP/Components/nt35510/nt35510.h>
-#include <ui/lvht_numpad.h>
-#include <ui/lvht_qwertypad.h>
+#include "ui/ui_about_panel.h"
+#include "ui/ui_mode_change_panel.h"
+#include "ui/ui_callsign_change_panel.h"
+#include "ui/ui_freq_change_panel.h"
+#include "ui/ui_fpga_status_panel.h"
+#include "ui/lvht_numpad.h"
+#include "ui/lvht_qwertypad.h"
+#include "utils/str_builder.h"
 
-#include "task_microphone.h"
-#include "task_fpga.h"
+#include "fatfs.h"
+#include <lvgl.h>
+#include <../../Drivers/BSP/Components/nt35510/nt35510.h>
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <limits.h>
+
 
 char callsign_str[10] = ""; // 9 digits for callsign
 settings_t user_settings;

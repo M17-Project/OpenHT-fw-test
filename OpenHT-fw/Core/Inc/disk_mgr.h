@@ -25,6 +25,7 @@ extern "C" {
 #endif
 
 #include "openht_types.h"
+
 #include "stm32469i_discovery_sd.h"
 #include "fatfs.h"
 

@@ -21,10 +21,10 @@
 #ifndef CPS_H
 #define CPS_H
 
+#include "datatypes.h"
+
 #include <stdint.h>
 #include <stdbool.h>
-#include <datatypes.h>
-//#include <rtx.h>
 
 // Magic number to identify the binary file
 #define CPS_MAGIC 0x43585452

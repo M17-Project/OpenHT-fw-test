@@ -26,14 +26,16 @@
  */
 
 #include "user_settings.h"
+
+#include "nor_map.h"
+#include "eeeprom.h"
+#include "eeeprom_hal.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 
-#include "nor_map.h"
-#include "eeeprom.h"
-#include "eeeprom_hal.h"
 
 #define CALLSIGN1_EEEPROM_ADDR		0x00	// Contains CS letters [1:4]
 #define CALLSIGN2_EEEPROM_ADDR		0x01	// Contains CS letters [5:8]

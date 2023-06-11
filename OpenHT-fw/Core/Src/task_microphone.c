@@ -5,11 +5,14 @@
  *      Author: morga
  */
 
-#include <main.h>
-#include <cmsis_os2.h>
-#include <pdm2pcm.h>
 #include "task_microphone.h"
+
+#include "main.h"
+
+#include "cmsis_os2.h"
+#include "pdm2pcm.h"
 #include "fatfs.h"
+
 #include <stdio.h>
 #include <string.h>
 

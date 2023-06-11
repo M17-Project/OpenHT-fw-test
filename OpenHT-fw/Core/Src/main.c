@@ -23,19 +23,20 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdlib.h>
-#include <stdio.h>
-#include <lvgl.h>
-//#include "./demos/lv_demos.h"
-#include <screen_driver.h>
-#include <touch_sensor_driver.h>
-#include "ui/openht_ui.h"
 #include "disk_mgr.h"
 #include "openht_hwconfig.h"
 #include "task_microphone.h"
-#include "task_fpga.h"
-#include "../shell/inc/sys_command_line.h"
+#include "task_radio.h"
+#include "ui/openht_ui.h"
+#include "touch_sensor_driver.h"
+#include "screen_driver.h"
 
+#include "../shell/inc/sys_command_line.h"
+#include <lvgl.h>
+#include <stm32f4xx_ll_gpio.h>
+
+#include <stdlib.h>
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

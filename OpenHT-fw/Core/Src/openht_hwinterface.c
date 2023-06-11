@@ -15,13 +15,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+#include "openht_hwinterface.h"
+
+#include "openht_hwconfig.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
-#include <openht_hwconfig.h>
-#include <openht_hwinterface.h>
-
 
 void openht_hw_set_freq(const uint32_t freq)
 {
