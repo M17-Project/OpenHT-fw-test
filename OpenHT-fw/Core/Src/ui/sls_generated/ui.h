@@ -193,6 +193,7 @@ LV_IMG_DECLARE(ui_img_openht_logo_png);    // assets/openht_logo.png
 
 LV_FONT_DECLARE(ui_font_number_50);
 LV_FONT_DECLARE(ui_font_number_60);
+LV_FONT_DECLARE(ui_font_RobotoBold);
 
 void ui_init(void);
 

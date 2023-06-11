@@ -4122,7 +4122,7 @@
                               {
                                 "nid": -928710750,
                                 "strtype": "_style/Text_Font",
-                                "strval": "montserrat_42",
+                                "strval": "RobotoBold",
                                 "InheritedType": 3
                               }
                             ],
@@ -4421,7 +4421,7 @@
                               {
                                 "nid": 36781362,
                                 "strtype": "_style/Text_Font",
-                                "strval": "montserrat_42",
+                                "strval": "RobotoBold",
                                 "InheritedType": 3
                               }
                             ],
@@ -4720,7 +4720,7 @@
                               {
                                 "nid": -10899622,
                                 "strtype": "_style/Text_Font",
-                                "strval": "montserrat_42",
+                                "strval": "RobotoBold",
                                 "InheritedType": 3
                               }
                             ],
@@ -5019,7 +5019,7 @@
                               {
                                 "nid": -1330751010,
                                 "strtype": "_style/Text_Font",
-                                "strval": "montserrat_42",
+                                "strval": "RobotoBold",
                                 "InheritedType": 3
                               }
                             ],
@@ -7417,7 +7417,7 @@
                     "InheritedType": 7
                   },
                   {
-                    "nid": 306928808,
+                    "nid": 771364819,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7430,7 +7430,7 @@
                 "strval": "CHECKED",
                 "childs": [
                   {
-                    "nid": -1521352697,
+                    "nid": -2125091553,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7443,7 +7443,7 @@
                 "strval": "PRESSED",
                 "childs": [
                   {
-                    "nid": 905954199,
+                    "nid": -680327524,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7456,7 +7456,7 @@
                 "strval": "CHECKED|PRESSED",
                 "childs": [
                   {
-                    "nid": -840493692,
+                    "nid": 235171021,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7469,7 +7469,7 @@
                 "strval": "DISABLED",
                 "childs": [
                   {
-                    "nid": -723660593,
+                    "nid": -1706734966,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7482,7 +7482,7 @@
                 "strval": "USER_1",
                 "childs": [
                   {
-                    "nid": -1905403906,
+                    "nid": 1226066890,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7495,7 +7495,7 @@
                 "strval": "USER_2",
                 "childs": [
                   {
-                    "nid": -561239948,
+                    "nid": -1323823543,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7508,7 +7508,7 @@
                 "strval": "USER_3",
                 "childs": [
                   {
-                    "nid": -1414049360,
+                    "nid": 377652080,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7521,7 +7521,7 @@
                 "strval": "USER_4",
                 "childs": [
                   {
-                    "nid": 1607643083,
+                    "nid": 834410858,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -37015,7 +37015,7 @@
     "theme_color2": 0,
     "exportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/ui/sls_generated",
     "projectExportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/ui/sls_generated",
-    "backup_cnt": 213,
+    "backup_cnt": 215,
     "autosave_cnt": 0,
     "lvgl_version": "8.3.6",
     "callfuncsexport": "C_FILE",
