@@ -26,6 +26,7 @@
 #include "ui/ui_mode_change_panel.h"
 #include "ui/ui_fpga_status_panel.h"
 #include "openht_types.h"
+#include "fpga_reg_defs.h"
 
 #include "../shell/inc/sys_command_line.h"
 #include <fatfs.h>
@@ -65,9 +66,10 @@ void 			_release_chip();
 #define FPGA_ERASE_STORAGE	(1 << 5)
 #define RADIO_INITN_CHANGED (1 << 6)
 #define RADIO_SPI_ISR_DONE	(1 << 7)
+#define XCVR_INIT			(1 << 8)
 
 #define RADIO_ALL_FLAGS		(FPGA_SEND_SAMPLES | FPGA_FETCH_IQ | FPGA_UPLOAD_BIN | FPGA_DOWNLOAD_BIN | FPGA_RESET |\
-							 FPGA_ERASE_STORAGE | RADIO_INITN_CHANGED)
+							 FPGA_ERASE_STORAGE | RADIO_INITN_CHANGED | XCVR_INIT)
 
 
 #define SPI_PORT_ACTIVATION_KEY	0x8AF4C6A4 // Swapped for endianness
@@ -126,6 +128,7 @@ void StartTaskRadio(void *argument) {
 				HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(SW_CTL1_GPIO_Port, SW_CTL1_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(SW_CTL2_GPIO_Port, SW_CTL2_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(RF_RST_GPIO_Port, RF_RST_Pin, GPIO_PIN_RESET);
 				set_fpga_status(FPGA_Offline);
 				LOG(CLI_LOG_RADIO, "PoC powered off.\r\n");
 			}else if( (initn == GPIO_PIN_SET) \
@@ -135,19 +138,24 @@ void StartTaskRadio(void *argument) {
 				HAL_GPIO_WritePin(MAIN_KILL_GPIO_Port, MAIN_KILL_Pin, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(FPGA_PROGRAMN_GPIO_Port, FPGA_PROGRAMN_Pin, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
-				HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(SW_CTL1_GPIO_Port, SW_CTL1_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(SW_CTL2_GPIO_Port, SW_CTL2_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(RF_RST_GPIO_Port, RF_RST_Pin, GPIO_PIN_RESET);
 				set_fpga_status(FPGA_Online);
+				xcvr_init();
 				LOG(CLI_LOG_RADIO, "PoC powered on.\r\n");
-				upload_fpga_binary();
 			}else if( (initn == GPIO_PIN_RESET) \
 					  && (done == GPIO_PIN_SET) ){
 				LOG(CLI_LOG_RADIO, "INITN and DONE pins are in an inconsistent state...\r\n");
 				set_fpga_status(FPGA_Error);
 			}
 
+		}else if(flag & XCVR_INIT){
+			osThreadFlagsClear(XCVR_INIT);
+			HAL_GPIO_WritePin(RF_RST_GPIO_Port, RF_RST_Pin, GPIO_PIN_SET);
+			upload_fpga_binary();
 		}else if(flag & FPGA_UPLOAD_BIN){
 			osThreadFlagsClear(FPGA_UPLOAD_BIN);				// Clear the flag
 			osPriority_t prev_prio = osThreadGetPriority(NULL); // Lower task's priority
@@ -285,7 +293,20 @@ void StartTaskRadio(void *argument) {
 			}else{
 				LOG(CLI_LOG_FPGA, "FPGA upload done.\r\n");
 				set_fpga_status(FPGA_Running);
+				HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
 			}
+
+
+			*((uint32_t *)(bufferTX)) = 0;
+			*((uint32_t *)(bufferRX)) = 0;
+			bufferTX[1] = SR_1;
+			_select_chip();
+			osDelay(2);
+			HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 4);
+			osThreadFlagsWait(RADIO_SPI_ISR_DONE, 0, 100);
+			_release_chip();
+			DBG("FPGA revision is %u.%u.\r\n", bufferRX[2], bufferRX[3]);
+
 
 			// Release SPI mutex and restore thread priority
 			hspi1.TxCpltCallback 	= NULL;					// Set SPI callbacks
@@ -327,8 +348,8 @@ void StartTaskRadio(void *argument) {
 				uint32_t nb_sectors = (prev_bin_size/SUBSECTOR_SIZE) + 1*(prev_bin_size%SUBSECTOR_SIZE);
 				LOG(CLI_LOG_FPGA, "An image is already stored in memory. Erasing %lu sectors.\r\n", nb_sectors);
 				bool error = false;
-				for(size_t i = 0; i < nb_sectors; i += 16){
-					if(CUSTOM_QSPI_Erase_Sector(FPGA_BIN_STORAGE_START_SECTOR + i*SUBSECTOR_SIZE) != QSPI_OK){
+				for(size_t i = 0; i < nb_sectors; i ++){
+					if(BSP_QSPI_Erase_Block(FPGA_BIN_STORAGE_START_SECTOR + i*SUBSECTOR_SIZE) != QSPI_OK){
 						ERR("Could not erase NOR flash sector %d.\r\n", FPGA_BIN_STORAGE_START_SECTOR + i*SUBSECTOR_SIZE);
 						error = true;
 						break;
@@ -432,6 +453,16 @@ bool fpga_soft_reset(){
 		ERR("Could not soft reset FPGA: osThreadFlagsSet returned 0x%08lx.\r\n", result);
 	}
 
+	return EXIT_FAILURE;
+}
+
+bool xcvr_init() {
+	uint32_t result = osThreadFlagsSet(FPGA_thread_id, XCVR_INIT);
+	if(result < (1<<31)){
+		return EXIT_SUCCESS;
+	}else{
+		ERR("Could not start transceiver initialization: osThreadFlagsSet returned 0x%08lx.\r\n", result);
+	}
 	return EXIT_FAILURE;
 }
 

@@ -56,4 +56,6 @@ bool upload_fpga_binary();
 
 void radio_INITn_it();
 
+bool xcvr_init();
+
 #endif /* INC_TASK_RADIO_H_ */
