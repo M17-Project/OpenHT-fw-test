@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include "screen_driver.h"
 #include "task_general.h"
+#include "task_radio.h"
 
 #include <stm32f4xx_ll_gpio.h>
 
@@ -180,7 +181,6 @@ void DebugMon_Handler(void)
 void EXTI2_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI2_IRQn 0 */
-	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_2);
 	// Determine if the interrupt comes from
 	uint32_t gpio_a = LL_GPIO_ReadInputPort(GPIOA);
 	uint32_t gpio_g = LL_GPIO_ReadInputPort(GPIOG);
@@ -206,6 +206,7 @@ void EXTI2_IRQHandler(void)
 
   /* USER CODE END EXTI2_IRQn 0 */
   /* USER CODE BEGIN EXTI2_IRQn 1 */
+	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_2);
   /* USER CODE END EXTI2_IRQn 1 */
 }
 
@@ -365,4 +366,9 @@ void DSI_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 
+// Pins 4 configured as EXTI: PC4
+void EXTI4_IRQHandler(void){
+	radio_INITn_it();
+	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_4);
+}
 /* USER CODE END 1 */

@@ -54,5 +54,6 @@ bool fpga_soft_reset();
  */
 bool upload_fpga_binary();
 
+void radio_INITn_it();
 
 #endif /* INC_TASK_RADIO_H_ */
