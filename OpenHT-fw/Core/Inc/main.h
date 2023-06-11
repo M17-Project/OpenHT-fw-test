@@ -53,6 +53,7 @@ extern "C" {
 #define CLI_ADDITIONAL_LOG_CATEGORIES \
 	X(EEEPROM, false) \
 	X(FPGA, true) \
+	X(RADIO, true) \
 	X(GENERAL, true) \
 
 /* USER CODE END EM */
