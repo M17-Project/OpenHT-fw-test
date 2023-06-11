@@ -39,11 +39,11 @@ static void _set_offline(void)
     lv_led_off(status_led);
 }
 
-static void _set_error(void)
+static void _set_online(void)
 {
-	blink = true;
-	lv_led_set_color(status_led, lv_palette_main(LV_PALETTE_RED));
-    lv_led_on(status_led);
+	blink = false;
+	lv_led_set_color(status_led, lv_palette_main(LV_PALETTE_ORANGE));
+	lv_led_on(status_led);
 }
 
 static void _set_config(void)
@@ -57,6 +57,13 @@ static void _set_running(void)
 {
 	blink = false;
     lv_led_set_color(status_led, lv_palette_main(LV_PALETTE_GREEN));
+    lv_led_on(status_led);
+}
+
+static void _set_error(void)
+{
+	blink = true;
+	lv_led_set_color(status_led, lv_palette_main(LV_PALETTE_RED));
     lv_led_on(status_led);
 }
 

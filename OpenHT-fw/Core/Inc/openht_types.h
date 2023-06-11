@@ -61,9 +61,10 @@ const char * openht_get_mode_str(openht_mode_t mode);
 typedef enum
 {
     FPGA_Offline,
-    FPGA_Error,
+	FPGA_Online,
     FPGA_Loading,
 	FPGA_Running,
+    FPGA_Error,
 } openht_fpga_status_t;
 
 struct fpga_status_datum

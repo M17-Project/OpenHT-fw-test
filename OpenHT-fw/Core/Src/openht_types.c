@@ -50,9 +50,10 @@ const char * openht_get_mode_str(openht_mode_t mode)
 struct fpga_status_datum openht_fpga_status_data[] =
 {
     {FPGA_Offline, "Offline"},
-    {FPGA_Error, "Error"},
+	{FPGA_Online, "Online"},
     {FPGA_Loading,  "Loading"},
     {FPGA_Running,  "Running"},
+	{FPGA_Error, "Error"},
 };
 
 uint32_t openht_fpga_status_count = sizeof(openht_fpga_status_data)/sizeof(openht_fpga_status_data[0]);
