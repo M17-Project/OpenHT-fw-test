@@ -1313,6 +1313,7 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
+	static bool user_button_pressed = false;
 	// avoid hw interrupts with lvgl ui code, this simply polls the state of the blue hw user button
 	// and calls the appropriate function in the ui code to handle the "event"
 	// this also avoids any need to de-bounce
@@ -1325,7 +1326,7 @@ void StartDefaultTask(void *argument)
 		on_userbutton_release();
 	}
 	CLI_RUN();
-    osDelay(10);
+	osDelay(10);
   }
   /* USER CODE END 5 */
 }
