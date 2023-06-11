@@ -20,6 +20,8 @@
 #define INC_EEEPROM_H_
 
 #include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 typedef struct s_EEPROMInternalData EEPROMInternalData_t;
 

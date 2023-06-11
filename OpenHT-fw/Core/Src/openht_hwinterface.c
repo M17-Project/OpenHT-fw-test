@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
+#include <stdint.h>
 
 void openht_hw_set_freq(const uint32_t freq)
 {
