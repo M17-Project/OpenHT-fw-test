@@ -16,13 +16,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "main.h"
+
 #include "eeeprom.h"
-#include <stdlib.h>
-#include <cmsis_os2.h>
-#include <FreeRTOS.h>
-#include <string.h>
+
+#include "main.h"
+
 #include "../shell/inc/sys_command_line.h"
+#include "cmsis_os2.h"
+#include "FreeRTOS.h"
+
+#include <stdlib.h>
+#include <string.h>
 
 /* Types definitions */
 struct s_EEPROMInternalData{

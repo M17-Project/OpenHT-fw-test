@@ -1,12 +1,12 @@
 // https://nachtimwald.com/2017/02/26/efficient-c-string-builder/
 
+#include "utils/str_builder.h"
+
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-#include "utils/str_builder.h"
 
 /* - - - - */
 

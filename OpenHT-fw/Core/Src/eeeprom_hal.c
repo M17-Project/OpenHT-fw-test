@@ -6,10 +6,13 @@
  */
 
 #include "main.h"
-#include <stdlib.h>
-#include "nor_map.h"
-#include <cmsis_os2.h>
+
 #include "eeeprom_hal.h"
+#include "nor_map.h"
+
+#include "cmsis_os2.h"
+
+#include <stdlib.h>
 
 extern QSPI_HandleTypeDef QSPIHandle;
 extern osMutexId_t NORAccessHandle;

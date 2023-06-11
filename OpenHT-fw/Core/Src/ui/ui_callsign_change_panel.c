@@ -16,14 +16,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <ui/openht_ui.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <limits.h>
-#include <lvgl.h>
+#include "ui/ui_callsign_change_panel.h"
 
 #include "ui/lvht_qwertypad.h"
 #include "ui/openht_ui.h"
+
+#include <lvgl.h>
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <limits.h>
 
 static char work_str[10] = ""; // 9 digits for callsign
 

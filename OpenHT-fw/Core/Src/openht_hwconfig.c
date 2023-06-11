@@ -16,11 +16,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "openht_hwconfig.h"
+
+#include "openht_hwinterface.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
-#include <openht_hwconfig.h>
-#include <openht_hwinterface.h>
 
 // This file contains the unique hardware configuration of the OpenHT.
 

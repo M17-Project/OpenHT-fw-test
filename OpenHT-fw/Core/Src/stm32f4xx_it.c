@@ -22,9 +22,11 @@
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <screen_driver.h>
-#include <stm32f4xx_ll_gpio.h>
+#include "screen_driver.h"
 #include "task_general.h"
+
+#include <stm32f4xx_ll_gpio.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

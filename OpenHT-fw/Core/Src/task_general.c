@@ -6,10 +6,11 @@
  */
 
 #include "task_general.h"
+
 #include "main.h"
-#include "../shell/inc/sys_command_line.h"
 #include "ui/openht_ui.h"
 
+#include "../shell/inc/sys_command_line.h"
 #include <cmsis_os2.h>
 #include <fatfs.h>
 

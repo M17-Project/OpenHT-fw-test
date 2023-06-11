@@ -16,11 +16,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "ui/ui_fpga_status_panel.h"
+
+#include "ui/openht_ui.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
-#include <ui/openht_ui.h>
-#include <ui/ui_fpga_status_panel.h>
 
 static lv_obj_t * status_led = NULL;
 static lv_timer_t * status_timer;

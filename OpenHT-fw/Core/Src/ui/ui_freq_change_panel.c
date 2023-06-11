@@ -16,12 +16,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "ui/ui_freq_change_panel.h"
+
+#include "ui/openht_ui.h"
+#include "ui/lvht_numpad.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
-#include <ui/openht_ui.h>
-#include <ui/ui_freq_change_panel.h>
-#include <ui/lvht_numpad.h>
 
 static char current_freq_str[] = EMPTY_FREQ;
 static uint32_t *current_freq = NULL;

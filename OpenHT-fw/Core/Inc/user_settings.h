@@ -24,6 +24,7 @@ extern "C" {
 #endif
 
 #include "openht_types.h"
+
 #include "stm32469i_discovery.h" /* DISCOVERY includes component */
 #include "stm32469i_discovery_qspi.h"
 

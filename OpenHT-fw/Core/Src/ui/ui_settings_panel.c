@@ -19,9 +19,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
+#include <task_radio.h>
 #include <ui/openht_ui.h>
 
-#include "task_fpga.h"
 #include "ui/ui_fpga_status_panel.h"
 #include "stm32469i_discovery_lcd.h"
 

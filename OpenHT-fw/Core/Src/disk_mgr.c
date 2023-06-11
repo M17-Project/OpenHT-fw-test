@@ -16,13 +16,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "disk_mgr.h"
+
+#include "openht_types.h"
+
+#include "stm32469i_discovery.h"
 #include "fatfs.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-#include "openht_types.h"
-#include <stm32469i_discovery.h>
 
 static uint16_t screen_capture_num = 0;
 
