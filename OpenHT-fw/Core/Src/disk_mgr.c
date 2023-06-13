@@ -42,7 +42,7 @@ int32_t save_image(const char * in_filename, uint8_t *bmp_header, size_t bmp_hea
 	FRESULT res;
 	uint32_t byteswritten;
 	FIL the_file;
-	char filename[13];
+	char filename[16];
 
 	// if the input filename is empty string, grab the next "SCREEN" filename sequence
 	// else use the input name as the filename

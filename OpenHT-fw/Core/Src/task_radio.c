@@ -55,7 +55,6 @@ extern osMutexId_t 			NORAccessHandle;
 
 UINT 			fatfs_bitstream_stream		(const BYTE *p, UINT btf);
 uint32_t 		_fpga_check_status_register(uint8_t *reg);
-void 			_fpga_spi_complete_callback	(SPI_HandleTypeDef *hspi);
 void 			_fpga_wait_busy();
 uint32_t 		_fpga_sspi_classA(uint32_t length, uint8_t *tx, uint8_t *rx);
 uint32_t 		_fpga_sspi_classB(uint32_t length, uint8_t *tx);

@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
+#include <string.h>
 
 static int _num_places (freq_t n)
 {
@@ -52,7 +53,7 @@ void get_display_str_from_freq(freq_t i, char buffer[])
 
 	// don't expect anything less than 100 MHz here... (for now!)
 
-	sprintf(buffer, "%d.%0*d", left_side, num_of_decimals, right_side);
+	sprintf(buffer, "%lu.%0*lu", left_side, num_of_decimals, right_side);
 }
 
 freq_t get_freq_from_str(const char *str)
