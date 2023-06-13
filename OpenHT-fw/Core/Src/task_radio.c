@@ -35,6 +35,12 @@
 
 #include <stdlib.h>
 
+#ifdef DEBUG
+#define WAIT_TIMEOUT osWaitForever
+#else
+#define WAIT_TIMEOUT 1500
+#endif
+
 typedef struct __attribute((__packed__)){
 	uint32_t start_sector:24;
 	uint32_t size;
@@ -65,8 +71,7 @@ void 			_release_chip();
 #define FPGA_RESET			(1 << 4)
 #define FPGA_ERASE_STORAGE	(1 << 5)
 #define RADIO_INITN_CHANGED (1 << 6)
-#define RADIO_SPI_ISR_DONE	(1 << 7)
-#define XCVR_INIT			(1 << 8)
+#define XCVR_INIT			(1 << 7)
 
 #define RADIO_ALL_FLAGS		(FPGA_SEND_SAMPLES | FPGA_FETCH_IQ | FPGA_UPLOAD_BIN | FPGA_DOWNLOAD_BIN | FPGA_RESET |\
 							 FPGA_ERASE_STORAGE | RADIO_INITN_CHANGED | XCVR_INIT)
@@ -165,17 +170,13 @@ void StartTaskRadio(void *argument) {
 
 			uint8_t bufferTX[16] = {0};	// Used for data to TX
 			uint8_t bufferRX[16] = {0};
-			uint32_t res = 0;
 
 			// First set PROGRAMN low
 			HAL_GPIO_WritePin(FPGA_PROGRAMN_GPIO_Port, FPGA_PROGRAMN_Pin, GPIO_PIN_RESET);
 			osDelay(2); // Must wait for at least 50ns
 
 			// Drive SCSN low then clock in the key
-			osMutexAcquire(SPI1AccessHandle, osWaitForever);						// Exclusive access to SPI1
-			hspi1.TxCpltCallback 	= _fpga_spi_complete_callback;					// Set SPI callbacks
-			hspi1.RxCpltCallback 	= _fpga_spi_complete_callback;
-			hspi1.TxRxCpltCallback 	= _fpga_spi_complete_callback;
+			osMutexAcquire(SPI1AccessHandle, WAIT_TIMEOUT);						// Exclusive access to SPI1
 			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);	// Slave select lines
 			HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_SET);
 
@@ -193,9 +194,6 @@ void StartTaskRadio(void *argument) {
 			if(*(uint32_t *)(bufferRX+4) != 0x43100F11){
 				ERR("Wrong FPGA IDCODE. Aborting upload.\r\n");
 				// Release SPI mutex and restore thread priority
-				hspi1.TxCpltCallback 	= NULL;					// Set SPI callbacks
-				hspi1.RxCpltCallback 	= NULL;
-				hspi1.TxRxCpltCallback 	= NULL;
 				osMutexRelease(SPI1AccessHandle);
 				osThreadSetPriority(FPGA_thread_id, prev_prio);
 				set_fpga_status(FPGA_Error);
@@ -216,16 +214,13 @@ void StartTaskRadio(void *argument) {
 			// Check status register
 			_fpga_check_status_register(NULL);
 
-			// LSC-Bitstream-burst followed by bitstream
+			// LSC_Bitstream_burst followed by bitstream
 			fpga_bin_entry_t e;
 			bool eeeprom_result = EEEPROM_read_data(&eeeprom, 0, &e);
 			if(eeeprom_result == EXIT_FAILURE){
 				ERR("Could not find a valid FPGA image.\r\n");
 				set_fpga_status(FPGA_Error);
 				// Release SPI mutex and restore thread priority
-				hspi1.TxCpltCallback 	= NULL;					// Set SPI callbacks
-				hspi1.RxCpltCallback 	= NULL;
-				hspi1.TxRxCpltCallback 	= NULL;
 				osMutexRelease(SPI1AccessHandle);
 				osThreadSetPriority(FPGA_thread_id, prev_prio);
 				continue;
@@ -236,12 +231,9 @@ void StartTaskRadio(void *argument) {
 			LOG(CLI_LOG_FPGA, "Sending LSC_BITSTREAM_BURST.\r\n");
 			HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
 			HAL_SPI_Transmit_IT(&hspi1, bufferTX, 4);
-			res = osThreadFlagsWait(RADIO_SPI_ISR_DONE, 0, 500);					// Wait for TX to be done
-			if(res >= (1<<31)){
-				LOG(CLI_LOG_FPGA, "osThreadFlagsWait returned %ld.\r\n", (int32_t)res);
-			}
+			wait_spi_xfer_done(WAIT_TIMEOUT);
 
-			osMutexAcquire(NORAccessHandle, 150);
+			osMutexAcquire(NORAccessHandle, WAIT_TIMEOUT);
 			BSP_QSPI_EnableMemoryMappedMode();	// Enable memory mapped mode to read the bitstream
 
 			uint32_t sent = 0;
@@ -250,10 +242,7 @@ void StartTaskRadio(void *argument) {
 				uint16_t to_send = (UINT16_MAX < bytes_left)?UINT16_MAX:bytes_left;
 				HAL_SPI_Transmit_DMA(&hspi1, bitstream + sent, to_send);
 				LOG(CLI_LOG_FPGA, "Sent %lu bitstream bytes.\r\n", sent);
-				res = osThreadFlagsWait(RADIO_SPI_ISR_DONE, 0, 500);					// Wait for TX to be done
-				if(res >= (1<<31)){
-					LOG(CLI_LOG_FPGA, "osThreadFlagsWait returned %ld.\r\n", (int32_t)res);
-				}
+				wait_spi_xfer_done(WAIT_TIMEOUT);
 				sent += to_send;
 			}
 			LOG(CLI_LOG_FPGA, "Sent %lu bitstream bytes.\r\n", sent);
@@ -283,7 +272,7 @@ void StartTaskRadio(void *argument) {
 				error = true;
 			}
 
-			// ISC-Disable
+			// ISC_Disable
 			bufferTX[0] = 0x26;
 			_fpga_sspi_classC(0x26);
 
@@ -296,22 +285,26 @@ void StartTaskRadio(void *argument) {
 				HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
 			}
 
+			while(HAL_GPIO_ReadPin(FPGA_DONE_GPIO_Port, FPGA_DONE_Pin) == GPIO_PIN_RESET){
+				osDelay(5);
+			}
+			LOG(CLI_LOG_FPGA, "FPGA configuration finished.\r\n");
+
+			while(HAL_GPIO_ReadPin(IO3_GPIO_Port, IO3_Pin) == GPIO_PIN_RESET){
+				osDelay(5);
+			}
+			LOG(CLI_LOG_FPGA, "FPGA PLL is locked. Querying revision number.\r\n");
 
 			*((uint32_t *)(bufferTX)) = 0;
 			*((uint32_t *)(bufferRX)) = 0;
 			bufferTX[1] = SR_1;
 			_select_chip();
-			osDelay(2);
 			HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 4);
-			osThreadFlagsWait(RADIO_SPI_ISR_DONE, 0, 100);
+			wait_spi_xfer_done(WAIT_TIMEOUT);
 			_release_chip();
 			DBG("FPGA revision is %u.%u.\r\n", bufferRX[2], bufferRX[3]);
 
-
 			// Release SPI mutex and restore thread priority
-			hspi1.TxCpltCallback 	= NULL;					// Set SPI callbacks
-			hspi1.RxCpltCallback 	= NULL;
-			hspi1.TxRxCpltCallback 	= NULL;
 			osMutexRelease(SPI1AccessHandle);
 			osThreadSetPriority(FPGA_thread_id, prev_prio);
 		}else if(flag & FPGA_DOWNLOAD_BIN){
@@ -484,13 +477,6 @@ UINT fatfs_bitstream_stream(const BYTE *p, UINT btf){
 	return 0;
 }
 
-void _fpga_spi_complete_callback(SPI_HandleTypeDef *hspi){
-	uint32_t result = osThreadFlagsSet(FPGA_thread_id, RADIO_SPI_ISR_DONE);
-	if(result > 0x80000000){
-		ERR("Could not soft reset FPGA: osThreadFlagsSet returned 0x%08lx.\r\n", result);
-	}
-}
-
 void _fpga_wait_busy(){
 	// LSC-CHECK-BUSY (5 bits)
 	uint8_t tx[5] = {0xF0, 0, 0, 0, 0};
@@ -527,14 +513,12 @@ uint32_t _fpga_check_status_register(uint8_t *reg){
 uint32_t _fpga_sspi_classA(uint32_t length, uint8_t *tx, uint8_t *rx){
 	uint32_t res = 0;
 	_select_chip();
+	//reset_spi1_flag();
 	res = HAL_SPI_TransmitReceive_IT(&hspi1, tx, rx, length);
 	if(res != HAL_OK){
 		LOG(CLI_LOG_FPGA, "HAL_SPI_TransmitReceive_IT returned %lu.\r\n", res);
 	}
-	res = osThreadFlagsWait(RADIO_SPI_ISR_DONE, 0, 2500);					// Wait for TX to be done
-	if(res >= (1<<31)){
-		LOG(CLI_LOG_FPGA, "osThreadFlagsWait returned %ld.\r\n", (int32_t)res);
-	}
+	wait_spi_xfer_done(WAIT_TIMEOUT);
 	_release_chip();
 	return EXIT_SUCCESS;
 }
@@ -542,14 +526,12 @@ uint32_t _fpga_sspi_classA(uint32_t length, uint8_t *tx, uint8_t *rx){
 uint32_t _fpga_sspi_classB(uint32_t length, uint8_t *tx){
 	uint32_t res = 0;
 	_select_chip();
+	//reset_spi1_flag();
 	res = HAL_SPI_Transmit_IT(&hspi1, tx, length);
 	if(res != HAL_OK){
 		LOG(CLI_LOG_FPGA, "HAL_SPI_TransmitReceive_IT returned %lu.\r\n", res);
 	}
-	res = osThreadFlagsWait(RADIO_SPI_ISR_DONE, 0, 2500);					// Wait for TX to be done
-	if(res >= (1<<31)){
-		LOG(CLI_LOG_FPGA, "osThreadFlagsWait returned %ld.\r\n", (int32_t)res);
-	}
+	wait_spi_xfer_done(WAIT_TIMEOUT);
 	_release_chip();
 	return EXIT_SUCCESS;
 }
@@ -558,14 +540,12 @@ uint32_t _fpga_sspi_classC(uint8_t cmd){
 	uint32_t res = 0;
 	uint8_t tx[4] = {cmd, 0, 0, 0};
 	_select_chip();
+	//reset_spi1_flag();
 	res = HAL_SPI_Transmit_IT(&hspi1, tx, 4);
 	if(res != HAL_OK){
 		LOG(CLI_LOG_FPGA, "HAL_SPI_TransmitReceive_IT returned %lu.\r\n", res);
 	}
-	res = osThreadFlagsWait(RADIO_SPI_ISR_DONE, 0, 2500);					// Wait for TX to be done
-	if(res >= (1<<31)){
-		LOG(CLI_LOG_FPGA, "osThreadFlagsWait returned %ld.\r\n", (int32_t)res);
-	}
+	wait_spi_xfer_done(WAIT_TIMEOUT);
 	_release_chip();
 	return EXIT_SUCCESS;
 }

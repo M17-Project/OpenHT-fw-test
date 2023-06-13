@@ -64,7 +64,8 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void wait_spi_xfer_done(uint32_t timeout);
+//void reset_spi1_flag();
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -72,6 +73,8 @@ void Error_Handler(void);
 #define SPKR_HP_GPIO_Port GPIOE
 #define audio_rst_Pin GPIO_PIN_2
 #define audio_rst_GPIO_Port GPIOE
+#define IO1_Pin GPIO_PIN_14
+#define IO1_GPIO_Port GPIOG
 #define FMC_NBL1_Pin GPIO_PIN_1
 #define FMC_NBL1_GPIO_Port GPIOE
 #define FMC_NBL0_Pin GPIO_PIN_0
@@ -88,14 +91,20 @@ void Error_Handler(void);
 #define I2C1_SDA_GPIO_Port GPIOB
 #define SDNCAS_Pin GPIO_PIN_15
 #define SDNCAS_GPIO_Port GPIOG
+#define IO2_Pin GPIO_PIN_11
+#define IO2_GPIO_Port GPIOG
 #define D2_Pin GPIO_PIN_0
 #define D2_GPIO_Port GPIOD
 #define FMC_NBL2_Pin GPIO_PIN_4
 #define FMC_NBL2_GPIO_Port GPIOI
 #define MAIN_KILL_Pin GPIO_PIN_12
 #define MAIN_KILL_GPIO_Port GPIOG
+#define IO3_Pin GPIO_PIN_10
+#define IO3_GPIO_Port GPIOG
 #define LED3_Pin GPIO_PIN_5
 #define LED3_GPIO_Port GPIOD
+#define IO6_Pin GPIO_PIN_3
+#define IO6_GPIO_Port GPIOD
 #define D3_Pin GPIO_PIN_1
 #define D3_GPIO_Port GPIOD
 #define D27_Pin GPIO_PIN_3
@@ -114,6 +123,8 @@ void Error_Handler(void);
 #define D28_GPIO_Port GPIOI
 #define LED4_Pin GPIO_PIN_3
 #define LED4_GPIO_Port GPIOK
+#define IO0_Pin GPIO_PIN_9
+#define IO0_GPIO_Port GPIOG
 #define LED2_Pin GPIO_PIN_4
 #define LED2_GPIO_Port GPIOD
 #define D23_Pin GPIO_PIN_15
@@ -178,8 +189,6 @@ void Error_Handler(void);
 #define A9_GPIO_Port GPIOF
 #define uSD_Detect_Pin GPIO_PIN_2
 #define uSD_Detect_GPIO_Port GPIOG
-#define LCD_INT_Pin GPIO_PIN_5
-#define LCD_INT_GPIO_Port GPIOJ
 #define D20_Pin GPIO_PIN_12
 #define D20_GPIO_Port GPIOH
 #define IRQ_XCVR_Pin GPIO_PIN_1
@@ -196,6 +205,8 @@ void Error_Handler(void);
 #define A10_GPIO_Port GPIOG
 #define D5_Pin GPIO_PIN_8
 #define D5_GPIO_Port GPIOE
+#define LCD_RST_Pin GPIO_PIN_7
+#define LCD_RST_GPIO_Port GPIOH
 #define D17_Pin GPIO_PIN_9
 #define D17_GPIO_Port GPIOH
 #define D19_Pin GPIO_PIN_11
@@ -205,6 +216,7 @@ void Error_Handler(void);
 #define PB_INT_EXTI_IRQn EXTI2_IRQn
 #define PTT_Pin GPIO_PIN_5
 #define PTT_GPIO_Port GPIOC
+#define PTT_EXTI_IRQn EXTI9_5_IRQn
 #define A8_Pin GPIO_PIN_14
 #define A8_GPIO_Port GPIOF
 #define DSI_TE_Pin GPIO_PIN_2
@@ -243,6 +255,10 @@ void Error_Handler(void);
 #define D10_GPIO_Port GPIOE
 #define STLK_TX_Pin GPIO_PIN_11
 #define STLK_TX_GPIO_Port GPIOB
+#define IO5_Pin GPIO_PIN_14
+#define IO5_GPIO_Port GPIOB
+#define IO4_Pin GPIO_PIN_15
+#define IO4_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

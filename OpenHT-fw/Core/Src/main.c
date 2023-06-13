@@ -77,6 +77,9 @@
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
+/* Peripheral events flags */
+#define PERIPH_SPI1_DONE	(1 << 0)
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -151,6 +154,11 @@ osEventFlagsId_t microphoneEventsHandle;
 const osEventFlagsAttr_t microphoneEvents_attributes = {
   .name = "microphoneEvents"
 };
+/* Definitions for peripheralEvents */
+osEventFlagsId_t peripheralEventsHandle;
+const osEventFlagsAttr_t peripheralEvents_attributes = {
+  .name = "peripheralEvents"
+};
 /* USER CODE BEGIN PV */
 
 extern uint32_t gpio_port_a_state;
@@ -182,7 +190,7 @@ extern void StartMicrophonesTask(void *argument);
 extern void StartTaskRadio(void *argument);
 
 /* USER CODE BEGIN PFP */
-
+void spi_xfer_done_event();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -320,6 +328,9 @@ int main(void)
 
   /* creation of microphoneEvents */
   microphoneEventsHandle = osEventFlagsNew(&microphoneEvents_attributes);
+
+  /* creation of peripheralEvents */
+  peripheralEventsHandle = osEventFlagsNew(&peripheralEvents_attributes);
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
@@ -825,7 +836,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -835,7 +846,9 @@ static void MX_SPI1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN SPI1_Init 2 */
-
+  hspi1.TxCpltCallback 		= spi_xfer_done_event;					// Set SPI callbacks
+  hspi1.RxCpltCallback 		= spi_xfer_done_event;
+  hspi1.TxRxCpltCallback 	= spi_xfer_done_event;
   /* USER CODE END SPI1_Init 2 */
 
 }
@@ -1113,10 +1126,10 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOE_CLK_ENABLE();
+  __HAL_RCC_GPIOG_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOG_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOI_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
@@ -1143,7 +1156,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, SW_CTL2_Pin|RF_RST_Pin|OTG_FS1_PowerSwitchOn_Pin|EXT_RESET_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOH, GPIO_PIN_7|FPGA_RST_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOH, LCD_RST_Pin|FPGA_RST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
@@ -1154,6 +1167,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : IO1_Pin IO2_Pin IO3_Pin IO0_Pin
+                           uSD_Detect_Pin */
+  GPIO_InitStruct.Pin = IO1_Pin|IO2_Pin|IO3_Pin|IO0_Pin
+                          |uSD_Detect_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
   /*Configure GPIO pin : MAIN_KILL_Pin */
   GPIO_InitStruct.Pin = MAIN_KILL_Pin;
@@ -1168,6 +1189,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : IO6_Pin */
+  GPIO_InitStruct.Pin = IO6_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(IO6_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LED4_Pin */
   GPIO_InitStruct.Pin = LED4_Pin;
@@ -1205,23 +1232,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : FPGA_DONE_Pin FPGA_INITN_Pin PTT_Pin */
-  GPIO_InitStruct.Pin = FPGA_DONE_Pin|FPGA_INITN_Pin|PTT_Pin;
+  /*Configure GPIO pin : FPGA_DONE_Pin */
+  GPIO_InitStruct.Pin = FPGA_DONE_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : uSD_Detect_Pin */
-  GPIO_InitStruct.Pin = uSD_Detect_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(uSD_Detect_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : LCD_INT_Pin */
-  GPIO_InitStruct.Pin = LCD_INT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(LCD_INT_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(FPGA_DONE_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : IRQ_XCVR_Pin PB_INT_Pin */
   GPIO_InitStruct.Pin = IRQ_XCVR_Pin|PB_INT_Pin;
@@ -1235,12 +1250,24 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(Batt_Measurement_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PH7 FPGA_RST_Pin */
-  GPIO_InitStruct.Pin = GPIO_PIN_7|FPGA_RST_Pin;
+  /*Configure GPIO pin : FPGA_INITN_Pin */
+  GPIO_InitStruct.Pin = FPGA_INITN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(FPGA_INITN_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LCD_RST_Pin FPGA_RST_Pin */
+  GPIO_InitStruct.Pin = LCD_RST_Pin|FPGA_RST_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PTT_Pin */
+  GPIO_InitStruct.Pin = PTT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(PTT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : FPGA_NSS_Pin */
   GPIO_InitStruct.Pin = FPGA_NSS_Pin;
@@ -1249,15 +1276,18 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(FPGA_NSS_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PGOOD_Pin */
-  GPIO_InitStruct.Pin = PGOOD_Pin;
+  /*Configure GPIO pins : PGOOD_Pin IO5_Pin IO4_Pin */
+  GPIO_InitStruct.Pin = PGOOD_Pin|IO5_Pin|IO4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(PGOOD_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI2_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 
@@ -1300,6 +1330,27 @@ void greet(void){
     TERMINAL_SHOW_CURSOR();
 }
 
+void spi_xfer_done_event(SPI_HandleTypeDef *hspi){
+	if(hspi->Instance == SPI1){
+		uint32_t result = osEventFlagsSet(peripheralEventsHandle, PERIPH_SPI1_DONE);
+		if(result >= (1<<31)){
+			DBG("SPI1 Transfer done: could not set the event flag, osEventFlagSet returned %ld.\r\n", (int32_t)result);
+		}
+	}
+}
+
+void wait_spi_xfer_done(uint32_t timeout){
+	int32_t result = (int32_t)osEventFlagsWait(peripheralEventsHandle, PERIPH_SPI1_DONE, 0, timeout);
+	if(result == -2){
+		DBG("SPI1 transfer timed out.\r\n");
+	}else if(result & (1<<31)){
+		DBG("SPI1 Error while waiting for transfer to finish: osEventFlagsWait returned %ld.\r\n", result);
+	}
+}
+
+/*void reset_spi1_flag(){
+	osEventFlagsClear(peripheralEventsHandle, PERIPH_SPI1_DONE);
+}*/
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartGeneralTask */
