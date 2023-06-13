@@ -20,6 +20,7 @@
 
 #include "ui/openht_ui.h"
 #include "ui/lvht_numpad.h"
+#include "utils/str_formatting.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -72,6 +73,21 @@ void init_freq_change_panel()
 
 	get_str_from_freq(tx_freq, freq_str, 1);
 	lv_textarea_set_text(ui_tx_freq_ta, freq_str);
+
+	lv_obj_add_flag(ui_fm_settings_panel, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_add_flag(ui_m17_settings_panel, LV_OBJ_FLAG_HIDDEN);
+
+	if (user_settings.mode == OpMode_NFM ||
+		user_settings.mode == OpMode_FM ||
+		user_settings.mode == OpMode_WFM) {
+		lv_obj_clear_flag(ui_fm_settings_panel, LV_OBJ_FLAG_HIDDEN);
+	} else if (user_settings.mode == OpMode_M17) {
+		lv_obj_clear_flag(ui_m17_settings_panel, LV_OBJ_FLAG_HIDDEN);
+	}
+
+	// configure m17 panel
+
+
 }
 
 void on_freq_click(lv_event_t *e)
@@ -103,15 +119,17 @@ void on_freq_ok_clicked(lv_event_t *e)
 
 	user_settings_save(&user_settings);
 
-	char rx_buffer[] = EMPTY_FREQ;
-	get_str_from_freq(rx_freq, rx_buffer, -1);
-//	lv_label_set_text(ui_label_test_rx, rx_buffer);
-	lv_label_set_text_fmt(ui_label_test_rx, "Rx:%s", rx_buffer);
+	char rx_buffer[10];
+	//get_str_from_freq(rx_freq, rx_buffer, -1);
+	get_display_str_from_freq(rx_freq, rx_buffer);
+//	lv_label_set_text(ui_rx_display_label, rx_buffer);
+	lv_label_set_text_fmt(ui_rx_display_label, "%s", rx_buffer);
 
-	char tx_buffer[] = EMPTY_FREQ;
-	get_str_from_freq(tx_freq, tx_buffer, -1);
-//	lv_label_set_text(ui_label_test_tx, tx_buffer);
-	lv_label_set_text_fmt(ui_label_test_tx, "Tx:%s", tx_buffer);
+	char tx_buffer[10];
+	//get_str_from_freq(tx_freq, tx_buffer, -1);
+	get_display_str_from_freq(tx_freq, tx_buffer);
+//	lv_label_set_text(ui_tx_display_label, tx_buffer);
+	lv_label_set_text_fmt(ui_tx_display_label, "%s", tx_buffer);
 
 }
 

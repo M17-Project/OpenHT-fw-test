@@ -116,31 +116,31 @@ __attribute__((packed)) dmrContact_t; // 5B
 /**
  * M17 channel modes.
  */
-enum m17mode_t
+typedef enum
 {
     DIGITAL_VOICE      = 1,     //< Digital Voice
     DIGITAL_DATA       = 2,     //< Digital Data
     DIGITAL_VOICE_DATA = 3      //< Digital Voice and Data
-};
+} m17mode_t;
 
 /**
  * M17 channel encryption.
  */
-enum m17crypto_t
+typedef enum
 {
     PLAIN     = 0,              //< No encryption, plaintext data is sent
     AES256    = 1,              //< AES-256 Encryption
     SCRAMBLER = 2               //< Scrambler
-};
+} m17crypto_t;
 
 /**
  * M17 gps operation.
  */
-enum m17gps_t
+typedef enum
 {
     NO_GPS   = 0,               //< No GPS information is sent
     GPS_META = 1                //< GPS position is sent along with payload
-};
+} m17gps_t;
 
 /**
  * Data structure containing all and only the information for M17 channels.

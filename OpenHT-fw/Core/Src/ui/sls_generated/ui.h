@@ -37,8 +37,10 @@ extern lv_obj_t * ui_fpga_status_panel;
 extern lv_obj_t * ui_vfo_label;
 void ui_event_vfo_panel(lv_event_t * e);
 extern lv_obj_t * ui_vfo_panel;
-extern lv_obj_t * ui_label_test_rx;
-extern lv_obj_t * ui_label_test_tx;
+extern lv_obj_t * ui_rx_display_label;
+extern lv_obj_t * ui_tx_display_label;
+extern lv_obj_t * ui_rx_lbl;
+extern lv_obj_t * ui_rx_lbl1;
 void ui_event_ptt_btn(lv_event_t * e);
 extern lv_obj_t * ui_ptt_btn;
 extern lv_obj_t * ui_Label3;
@@ -160,9 +162,26 @@ extern lv_obj_t * ui_label_tx1;
 extern lv_obj_t * ui_tx_offset_ta;
 void ui_event_split_freq_cb(lv_event_t * e);
 extern lv_obj_t * ui_split_freq_cb;
-extern lv_obj_t * ui_Panel2;
-extern lv_obj_t * ui_ctcss_dropdown;
+extern lv_obj_t * ui_fm_settings_panel;
+extern lv_obj_t * ui_ctcss_tx_dropdown;
 extern lv_obj_t * ui_Label23;
+extern lv_obj_t * ui_ctcss_rx_dropdown;
+extern lv_obj_t * ui_Label5;
+extern lv_obj_t * ui_m17_settings_panel;
+extern lv_obj_t * ui_can_dropdown;
+extern lv_obj_t * ui_Label25;
+void ui_event_encrypt_cb(lv_event_t * e);
+extern lv_obj_t * ui_encrypt_cb;
+void ui_event_send_geo_cb(lv_event_t * e);
+extern lv_obj_t * ui_send_geo_cb;
+void ui_event_encrypt_lfsr_cb(lv_event_t * e);
+extern lv_obj_t * ui_encrypt_lfsr_cb;
+void ui_event_encrypt_aes_cb(lv_event_t * e);
+extern lv_obj_t * ui_encrypt_aes_cb;
+extern lv_obj_t * ui_Label26;
+extern lv_obj_t * ui_Label27;
+extern lv_obj_t * ui_voice_rate_dropdown;
+extern lv_obj_t * ui_dst_ta;
 extern lv_obj_t * ui____initial_actions0;
 
 LV_IMG_DECLARE(ui_img_openht_logo_w_png);    // assets/openht_logo_w.png
@@ -174,6 +193,7 @@ LV_IMG_DECLARE(ui_img_openht_logo_png);    // assets/openht_logo.png
 
 LV_FONT_DECLARE(ui_font_number_50);
 LV_FONT_DECLARE(ui_font_number_60);
+LV_FONT_DECLARE(ui_font_RobotoBold);
 
 void ui_init(void);
 

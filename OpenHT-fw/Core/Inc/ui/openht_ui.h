@@ -39,7 +39,7 @@ extern "C" {
       __typeof__ (b) _b = (b); \
     _a < _b ? _a : _b; })
 
-#define EMPTY_FREQ "_.___.___.___"
+
 #define END_POS 13
 #define THOU_POS 9
 #define MEG_POS 5
@@ -55,8 +55,6 @@ void custom_ui_init(void);
 
 void numpad_btnmatrix_event_cb(lv_event_t *e);
 void qwertypad_btnmatrix_event_cb(lv_event_t *e);
-freq_t get_freq_from_str(const char *str);
-void get_str_from_freq(uint32_t i, char b[], int prepend_blank);
 void update_callsign();
 bool validate_freq(uint32_t *freq);
 

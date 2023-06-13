@@ -126,7 +126,7 @@ void user_settings_init()
 		cached_settings.mode = (buffer>>8) & 0xFF;
 	}else{
 		cached_settings.audio_vol = 0;
-		cached_settings.mode = FM;
+		cached_settings.mode = OpMode_FM;
 	}
 
 	// config bits

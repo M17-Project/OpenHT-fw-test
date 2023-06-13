@@ -33,6 +33,7 @@
 #include "ui/lvht_numpad.h"
 #include "ui/lvht_qwertypad.h"
 #include "utils/str_builder.h"
+#include "utils/str_formatting.h"
 
 #include "fatfs.h"
 #include <lvgl.h>
@@ -50,10 +51,14 @@ char * mode_prefix = NULL;
 char * ctcss_options_str;
 
 static int32_t _screen_capture(lv_obj_t *scr, const char * filename);
-static int _num_places(uint32_t n);
 
 void custom_ui_init(void)
 {
+	char test_buf[10];
+	get_display_str_from_freq(123456789, test_buf);
+
+	get_display_str_from_freq(2423456789, test_buf);
+
 	// SquareLine designer add widgets to screens, however, we want to use
 	// these as top layer widgets. So we can still use the designer
 	// but then need to set the parent to the top layer for each widget
@@ -112,14 +117,10 @@ void custom_ui_init(void)
 	lv_obj_add_event_cb(num_pad, numpad_btnmatrix_event_cb, LV_EVENT_ALL, NULL);
 
 	//ctcss_tone
-	//lv_dropdown_set_options_static(obj, options)
-
-//	for (int index = 0; index < MAX_TONE_INDEX; index++) {
-//    lv_dropdown_set_options(ui_ctcss_dropdown,
-//                            "Option 1\nOption 2\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\nOption 3\n");
-//	}
 
     str_builder_t * sb = str_builder_create();
+
+	str_builder_add_str(sb, "None\n", 0);
 
     for (int index = 0; index < MAX_TONE_INDEX; index++) {
 		str_builder_add_mag_val_decimal(sb, ctcss_tone[index], 10);
@@ -129,19 +130,22 @@ void custom_ui_init(void)
     ctcss_options_str = str_builder_dump(sb, NULL);
     str_builder_destroy(sb);
 
-    lv_dropdown_set_options_static(ui_ctcss_dropdown, ctcss_options_str);
+    lv_dropdown_set_options_static(ui_ctcss_tx_dropdown, ctcss_options_str);
+    lv_dropdown_set_options_static(ui_ctcss_rx_dropdown, ctcss_options_str);
 
 
 	// GET STORED SETTINGS AND UPDATE UI
 	user_settings_get(&user_settings);
 
-	char rx_buffer[] = EMPTY_FREQ;
-	get_str_from_freq(user_settings.rx_freq, rx_buffer, -1);
-	lv_label_set_text_fmt(ui_label_test_rx, "Rx:%s", rx_buffer);
+	char rx_buffer[10];
+	//get_str_from_freq(user_settings.rx_freq, rx_buffer, -1);
+	get_display_str_from_freq(user_settings.rx_freq, rx_buffer);
+	lv_label_set_text_fmt(ui_rx_display_label, "%s", rx_buffer);
 
-	char tx_buffer[] = EMPTY_FREQ;
-	get_str_from_freq(user_settings.tx_freq, tx_buffer, -1);
-	lv_label_set_text_fmt(ui_label_test_tx, "Tx:%s", tx_buffer);
+	char tx_buffer[10];
+	//get_str_from_freq(user_settings.tx_freq, tx_buffer, -1);
+	get_display_str_from_freq(user_settings.tx_freq, tx_buffer);
+	lv_label_set_text_fmt(ui_tx_display_label, "%s", tx_buffer);
 
 	strcpy(callsign_str, user_settings.callsign);
 	lv_textarea_set_text(ui_text_area_callsign, callsign_str);
@@ -279,103 +283,6 @@ void update_callsign()
 
     strcpy(user_settings.callsign, callsign_str);
 	user_settings_save(&user_settings);
-}
-
-
-freq_t get_freq_from_str(const char *str)
-{
-	freq_t num = 0;  // uint32 max: 4294967295
-
-	// converting string to number
-	for (int i = 0; str[i] != '\0'; i++) {
-		freq_t digit = str[i] - 48;
-
-		// if it is a "_" treat as a 0
-		if (digit == 47) {
-			digit = 0;
-		}
-
-		// if it is a digit 0-9
-		if (digit >= 0 && digit <= 9) {
-
-			// check for overflow and handle it
-		    if (num > UINT_MAX / 10) {
-		    	return UINT_MAX;
-		    }
-		    num *= 10;
-
-		    // check for overflow and handle it
-		    if (num > UINT_MAX - digit) {
-		    	return UINT_MAX;
-		    }
-			num += digit;
-		}
-	}
-
-	return num;
-}
-
-// formats a str from a numeric freq
-// if prepend_blank is 0 - output includes leading underscores and thous separators
-// if prepend_blank is 1 - output includes spaces instead of underscores and thous separators
-// if prepend_blank is -1 - output does not include any padding to the left most number
-void get_str_from_freq(freq_t i, char b[], int prepend_blank)
-{
-	char const digit[] = "0123456789";
-	char *p = b;
-
-	if (i == 0) {
-		strcpy(p, EMPTY_FREQ);
-		return;
-	}
-
-	//Move to end of str
-	int str_i;
-	for (str_i = 0; b[str_i] != '\0'; ++str_i)
-		;
-	p = p + str_i;
-
-	if (prepend_blank == -1) {
-		int nums = _num_places(i);
-		int mod = nums % 3;
-		int thous = (nums / 3);
-		if (mod == 0) thous--;
-
-		int discard_len = str_i - (nums + thous);
-
-		for (int idx = 0; idx < discard_len; idx++)
-		{
-			*--p = '\0';
-		}
-	}
-
-	int thousands = 0;
-	do { // add digits backwards, inserting thousands separator
-		if (thousands == 3) {
-			if (i == 0 && prepend_blank == 1) {
-				*--p = ' ';
-			} else {
-				*--p = '.';
-			}
-			thousands = 0;
-		} else {
-			if (i) {
-				*--p = digit[i % 10];
-				i = i / 10;
-			} else if (prepend_blank == 1){
-				*--p = ' ';
-			} else { // prepend underscores
-				*--p = '_';
-			}
-			thousands++;
-		}
-	} while (p > b);
-}
-
-static int _num_places (freq_t n)
-{
-    if (n < 10) return 1;
-    return 1 + _num_places (n / 10);
 }
 
 // assign buffer to SDRAM since we are limited on SRAM

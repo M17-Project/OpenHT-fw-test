@@ -37,14 +37,14 @@ typedef enum
 
 typedef enum
 {
-    M17,
-    FreeDV,
-    NFM,
-	FM,
-	WFM,
-	AM,
-	LSB,
-	USB,
+    OpMode_M17,
+	OpMode_FreeDV,
+	OpMode_NFM,
+	OpMode_FM,
+	OpMode_WFM,
+	OpMode_AM,
+	OpMode_LSB,
+	OpMode_USB,
 } openht_mode_t;
 
 struct mode_datum
