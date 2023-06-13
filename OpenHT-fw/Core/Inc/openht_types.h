@@ -54,7 +54,7 @@ struct mode_datum
 };
 extern struct mode_datum openht_mode_data[];
 extern uint32_t openht_mode_count;
-const char * openht_get_mode_str(openht_mode_t mode);
+char * openht_get_mode_str(openht_mode_t mode);
 
 //---
 
@@ -74,7 +74,7 @@ struct fpga_status_datum
 };
 extern struct fpga_status_datum openht_fpga_status_data[];
 extern uint32_t openht_fpga_status_count;
-const char * openht_get_fpga_status_str(openht_fpga_status_t fpga_status);
+char * openht_get_fpga_status_str(openht_fpga_status_t fpga_status);
 
 
 #ifdef __cplusplus

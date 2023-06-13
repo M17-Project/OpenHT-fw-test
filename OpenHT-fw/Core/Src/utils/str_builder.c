@@ -111,7 +111,7 @@ void str_builder_add_int(str_builder_t *sb, int val)
 
 void str_builder_add_mag_val_decimal(str_builder_t *sb, int val, int magnitude)
 {
-    char str[12];
+    char str[23];
 
     int whole_num = val/magnitude;
     int decimal_num = val - (whole_num * magnitude);

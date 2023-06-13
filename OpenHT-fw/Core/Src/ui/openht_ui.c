@@ -218,7 +218,7 @@ void on_userbutton_press()
 
 	if (image_num != -1) {
 		char filename[13];
-		sprintf(filename, "OVERLY%02d", image_num);
+		sprintf(filename, "OVERLY%02ld", image_num);
 		_screen_capture(lv_layer_top(), filename);
 	}
 
@@ -387,6 +387,7 @@ static int32_t _screen_capture(lv_obj_t *scr, const char * filename)
 	lv_img_dsc_t snapshot_img;
 	lv_res_t snap = lv_snapshot_take_to_buf(scr, LV_IMG_CF_TRUE_COLOR_ALPHA,
 			&snapshot_img, &img_buffer, sizeof(img_buffer));
+	int32_t ret = -1;
 
 	if (snap == LV_RES_INV) {
 		//Snapshot failed
@@ -402,7 +403,7 @@ static int32_t _screen_capture(lv_obj_t *scr, const char * filename)
 		get_bitmap_header(width, height, LV_COLOR_DEPTH, header,
 				sizeof(header));
 
-		int32_t ret = save_image(filename, header, sizeof(header), img_buffer, sizeof(img_buffer));
+		ret = save_image(filename, header, sizeof(header), img_buffer, sizeof(img_buffer));
 
 		if (ret == -1) {
 			// error
@@ -410,8 +411,8 @@ static int32_t _screen_capture(lv_obj_t *scr, const char * filename)
 		} else {
 			BSP_LED_On(LED_GREEN);
 		}
-
-		return ret;
 	}
+
+	return ret;
 }
 

@@ -36,7 +36,7 @@ struct mode_datum openht_mode_data[] =
 
 uint32_t openht_mode_count = sizeof(openht_mode_data)/sizeof(openht_mode_data[0]);
 
-const char * openht_get_mode_str(openht_mode_t mode)
+char * openht_get_mode_str(openht_mode_t mode)
 {
 	for (int i = 0; i < openht_mode_count; i++) {
 		if (openht_mode_data[i].mode == mode) {
@@ -58,7 +58,7 @@ struct fpga_status_datum openht_fpga_status_data[] =
 
 uint32_t openht_fpga_status_count = sizeof(openht_fpga_status_data)/sizeof(openht_fpga_status_data[0]);
 
-const char * openht_get_fpga_status_str(openht_fpga_status_t fpga_status)
+char * openht_get_fpga_status_str(openht_fpga_status_t fpga_status)
 {
 	for (int i = 0; i < openht_fpga_status_count; i++) {
 		if (openht_fpga_status_data[i].status == fpga_status) {
