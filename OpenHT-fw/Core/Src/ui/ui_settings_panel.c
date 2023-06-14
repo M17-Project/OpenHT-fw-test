@@ -21,6 +21,8 @@
 #include <limits.h>
 #include <task_radio.h>
 #include <ui/openht_ui.h>
+#include <user_settings.h>
+#include <radio_settings.h>
 
 #include "ui/ui_fpga_status_panel.h"
 #include "stm32469i_discovery_lcd.h"
@@ -40,6 +42,11 @@ void on_settings_ok_clicked(lv_event_t *e)
 void on_settings_erase_usr_clicked(lv_event_t *e)
 {
 	user_settings_reset();
+}
+
+void on_settings_erase_radio_clicked(lv_event_t *e)
+{
+	radio_settings_reset();
 }
 
 void on_settings_load_fpga_clicked(lv_event_t *e)
@@ -62,7 +69,6 @@ void on_settings_a_clicked(lv_event_t *e)
 void on_settings_b_clicked(lv_event_t *e)
 {
 	// TODO: add button b
-
 }
 
 void on_settings_c_clicked(lv_event_t *e)
@@ -75,7 +81,6 @@ void on_settings_d_clicked(lv_event_t *e)
 {
 	// TODO: add button d
 	set_fpga_status(FPGA_Error);
-
 }
 
 void on_settings_e_clicked(lv_event_t *e)
@@ -88,7 +93,6 @@ void on_settings_f_clicked(lv_event_t *e)
 {
 	// TODO: add button d
 	set_fpga_status(FPGA_Running);
-
 }
 
 void on_use_soft_ptt_clicked(lv_event_t *e)

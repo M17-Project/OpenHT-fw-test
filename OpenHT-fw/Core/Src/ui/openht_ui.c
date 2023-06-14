@@ -43,7 +43,6 @@
 #include <stdio.h>
 #include <limits.h>
 
-
 char callsign_str[10] = ""; // 9 digits for callsign
 settings_t user_settings;
 char * callsign_prefix = NULL;
@@ -54,11 +53,6 @@ static int32_t _screen_capture(lv_obj_t *scr, const char * filename);
 
 void custom_ui_init(void)
 {
-	char test_buf[10];
-	get_display_str_from_freq(123456789, test_buf);
-
-	get_display_str_from_freq(2423456789, test_buf);
-
 	// SquareLine designer add widgets to screens, however, we want to use
 	// these as top layer widgets. So we can still use the designer
 	// but then need to set the parent to the top layer for each widget

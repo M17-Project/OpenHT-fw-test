@@ -126,6 +126,9 @@ extern lv_obj_t * ui_settings_f_btn;
 extern lv_obj_t * ui_Label24;
 void ui_event_use_soft_ptt_cb(lv_event_t * e);
 extern lv_obj_t * ui_use_soft_ptt_cb;
+void ui_event_settings_erase_radio_btn(lv_event_t * e);
+extern lv_obj_t * ui_settings_erase_radio_btn;
+extern lv_obj_t * ui_Label28;
 // SCREEN: ui_screen_scratchpad_4
 void ui_screen_scratchpad_4_screen_init(void);
 extern lv_obj_t * ui_screen_scratchpad_4;
@@ -191,9 +194,9 @@ LV_IMG_DECLARE(ui_img_gear_w_png);    // assets/gear_w.png
 LV_IMG_DECLARE(ui_img_m17_logo_sm_png);    // assets/m17_logo_sm.png
 LV_IMG_DECLARE(ui_img_openht_logo_png);    // assets/openht_logo.png
 
+LV_FONT_DECLARE(ui_font_RobotoBold);
 LV_FONT_DECLARE(ui_font_number_50);
 LV_FONT_DECLARE(ui_font_number_60);
-LV_FONT_DECLARE(ui_font_RobotoBold);
 
 void ui_init(void);
 

@@ -124,6 +124,9 @@ lv_obj_t * ui_settings_f_btn;
 lv_obj_t * ui_Label24;
 void ui_event_use_soft_ptt_cb(lv_event_t * e);
 lv_obj_t * ui_use_soft_ptt_cb;
+void ui_event_settings_erase_radio_btn(lv_event_t * e);
+lv_obj_t * ui_settings_erase_radio_btn;
+lv_obj_t * ui_Label28;
 
 // SCREEN: ui_screen_scratchpad_4
 void ui_screen_scratchpad_4_screen_init(void);
@@ -422,6 +425,14 @@ void ui_event_use_soft_ptt_cb(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
         on_use_soft_ptt_clicked(e);
+    }
+}
+void ui_event_settings_erase_radio_btn(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        on_settings_erase_radio_clicked(e);
     }
 }
 void ui_event_callsign_ok_btn(lv_event_t * e)
