@@ -40,6 +40,7 @@ void on_settings_ok_clicked(lv_event_t * e);
 void on_settings_e_clicked(lv_event_t * e);
 void on_settings_f_clicked(lv_event_t * e);
 void on_use_soft_ptt_clicked(lv_event_t * e);
+void on_settings_erase_radio_clicked(lv_event_t * e);
 void on_callsign_ok_clicked(lv_event_t * e);
 void on_callsign_cancel_clicked(lv_event_t * e);
 void on_callsign_ta_click(lv_event_t * e);

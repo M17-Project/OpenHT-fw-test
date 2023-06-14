@@ -60,8 +60,8 @@ EEEPROMHandle_t user_settings_eeeprom = {
 		.start_address = USER_SETTINGS_START_ADDRESS,
 };
 
-bool init_done = false;
-settings_t cached_settings;
+static bool init_done = false;
+static settings_t cached_settings;
 
 void user_settings_reset(){
 	bool res = EEEPROM_erase(&user_settings_eeeprom);

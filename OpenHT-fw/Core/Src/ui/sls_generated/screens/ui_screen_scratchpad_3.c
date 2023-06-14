@@ -11,7 +11,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_clear_flag(ui_screen_scratchpad_3, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
     ui_settings_panel = lv_obj_create(ui_screen_scratchpad_3);
-    lv_obj_set_width(ui_settings_panel, 420);
+    lv_obj_set_width(ui_settings_panel, 440);
     lv_obj_set_height(ui_settings_panel, 660);
     lv_obj_set_x(ui_settings_panel, 0);
     lv_obj_set_y(ui_settings_panel, 50);
@@ -25,6 +25,8 @@ void ui_screen_scratchpad_3_screen_init(void)
     ui_settings_erase_user_btn = lv_btn_create(ui_settings_panel);
     lv_obj_set_width(ui_settings_erase_user_btn, 261);
     lv_obj_set_height(ui_settings_erase_user_btn, 50);
+    lv_obj_set_x(ui_settings_erase_user_btn, 0);
+    lv_obj_set_y(ui_settings_erase_user_btn, -5);
     lv_obj_add_flag(ui_settings_erase_user_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_settings_erase_user_btn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_settings_erase_user_btn, lv_color_hex(0x191C26), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -43,7 +45,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_width(ui_settings_load_fpga_btn, 156);
     lv_obj_set_height(ui_settings_load_fpga_btn, 50);
     lv_obj_set_x(ui_settings_load_fpga_btn, 0);
-    lv_obj_set_y(ui_settings_load_fpga_btn, 60);
+    lv_obj_set_y(ui_settings_load_fpga_btn, 110);
     lv_obj_add_flag(ui_settings_load_fpga_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_settings_load_fpga_btn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_settings_load_fpga_btn, lv_color_hex(0x191C26), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -62,7 +64,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_width(ui_settings_erase_fpga_btn, 156);
     lv_obj_set_height(ui_settings_erase_fpga_btn, 50);
     lv_obj_set_x(ui_settings_erase_fpga_btn, 180);
-    lv_obj_set_y(ui_settings_erase_fpga_btn, 60);
+    lv_obj_set_y(ui_settings_erase_fpga_btn, 110);
     lv_obj_add_flag(ui_settings_erase_fpga_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_settings_erase_fpga_btn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_settings_erase_fpga_btn, lv_color_hex(0x191C26), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -81,7 +83,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_width(ui_settings_a_btn, 156);
     lv_obj_set_height(ui_settings_a_btn, 50);
     lv_obj_set_x(ui_settings_a_btn, 0);
-    lv_obj_set_y(ui_settings_a_btn, 120);
+    lv_obj_set_y(ui_settings_a_btn, 170);
     lv_obj_add_flag(ui_settings_a_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_settings_a_btn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_settings_a_btn, lv_color_hex(0x191C26), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -100,7 +102,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_width(ui_settings_b_btn, 156);
     lv_obj_set_height(ui_settings_b_btn, 50);
     lv_obj_set_x(ui_settings_b_btn, 180);
-    lv_obj_set_y(ui_settings_b_btn, 120);
+    lv_obj_set_y(ui_settings_b_btn, 170);
     lv_obj_add_flag(ui_settings_b_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_settings_b_btn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_settings_b_btn, lv_color_hex(0x191C26), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -119,7 +121,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_width(ui_settings_c_btn, 156);
     lv_obj_set_height(ui_settings_c_btn, 50);
     lv_obj_set_x(ui_settings_c_btn, 0);
-    lv_obj_set_y(ui_settings_c_btn, 180);
+    lv_obj_set_y(ui_settings_c_btn, 230);
     lv_obj_add_flag(ui_settings_c_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_settings_c_btn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_settings_c_btn, lv_color_hex(0x191C26), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -138,7 +140,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_width(ui_settings_d_btn, 156);
     lv_obj_set_height(ui_settings_d_btn, 50);
     lv_obj_set_x(ui_settings_d_btn, 180);
-    lv_obj_set_y(ui_settings_d_btn, 180);
+    lv_obj_set_y(ui_settings_d_btn, 230);
     lv_obj_add_flag(ui_settings_d_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_settings_d_btn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_settings_d_btn, lv_color_hex(0x191C26), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -170,7 +172,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_width(ui_use_freq_offset_cb, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_use_freq_offset_cb, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_use_freq_offset_cb, 0);
-    lv_obj_set_y(ui_use_freq_offset_cb, 350);
+    lv_obj_set_y(ui_use_freq_offset_cb, 400);
     lv_obj_add_flag(ui_use_freq_offset_cb, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_set_style_text_color(ui_use_freq_offset_cb, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_use_freq_offset_cb, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -240,7 +242,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_width(ui_settings_e_btn, 156);
     lv_obj_set_height(ui_settings_e_btn, 50);
     lv_obj_set_x(ui_settings_e_btn, 0);
-    lv_obj_set_y(ui_settings_e_btn, 240);
+    lv_obj_set_y(ui_settings_e_btn, 290);
     lv_obj_add_flag(ui_settings_e_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_settings_e_btn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_settings_e_btn, lv_color_hex(0x191C26), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -259,7 +261,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_width(ui_settings_f_btn, 156);
     lv_obj_set_height(ui_settings_f_btn, 50);
     lv_obj_set_x(ui_settings_f_btn, 180);
-    lv_obj_set_y(ui_settings_f_btn, 240);
+    lv_obj_set_y(ui_settings_f_btn, 290);
     lv_obj_add_flag(ui_settings_f_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_settings_f_btn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_settings_f_btn, lv_color_hex(0x191C26), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -279,7 +281,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_width(ui_use_soft_ptt_cb, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_use_soft_ptt_cb, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_use_soft_ptt_cb, 0);
-    lv_obj_set_y(ui_use_soft_ptt_cb, 310);
+    lv_obj_set_y(ui_use_soft_ptt_cb, 360);
     lv_obj_add_flag(ui_use_soft_ptt_cb, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_set_style_text_color(ui_use_soft_ptt_cb, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_use_soft_ptt_cb, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -287,6 +289,25 @@ void ui_screen_scratchpad_3_screen_init(void)
 
     lv_obj_set_style_bg_color(ui_use_soft_ptt_cb, lv_color_hex(0x4E4E4E), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_use_soft_ptt_cb, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+
+    ui_settings_erase_radio_btn = lv_btn_create(ui_settings_panel);
+    lv_obj_set_width(ui_settings_erase_radio_btn, 261);
+    lv_obj_set_height(ui_settings_erase_radio_btn, 50);
+    lv_obj_set_x(ui_settings_erase_radio_btn, 0);
+    lv_obj_set_y(ui_settings_erase_radio_btn, 53);
+    lv_obj_add_flag(ui_settings_erase_radio_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_settings_erase_radio_btn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_settings_erase_radio_btn, lv_color_hex(0x191C26), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_settings_erase_radio_btn, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_settings_erase_radio_btn, lv_color_hex(0x37B9F5), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_opa(ui_settings_erase_radio_btn, 255, LV_PART_MAIN | LV_STATE_PRESSED);
+
+    ui_Label28 = lv_label_create(ui_settings_erase_radio_btn);
+    lv_obj_set_width(ui_Label28, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label28, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_Label28, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label28, "Erase Radio Settings");
+    lv_obj_set_style_text_font(ui_Label28, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_settings_erase_user_btn, ui_event_settings_erase_user_btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_settings_load_fpga_btn, ui_event_settings_load_fpga_btn, LV_EVENT_ALL, NULL);
@@ -301,5 +322,6 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_add_event_cb(ui_settings_e_btn, ui_event_settings_e_btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_settings_f_btn, ui_event_settings_f_btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_use_soft_ptt_cb, ui_event_use_soft_ptt_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_settings_erase_radio_btn, ui_event_settings_erase_radio_btn, LV_EVENT_ALL, NULL);
 
 }
