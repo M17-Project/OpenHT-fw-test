@@ -16,8 +16,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef INC_USER_SETTINGS_H_
-#define INC_USER_SETTINGS_H_
+#ifndef INC_RADIO_SETTINGS_H_
+#define INC_RADIO_SETTINGS_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,27 +32,29 @@ extern "C" {
 
 typedef struct
 {
-	freq_t tx_freq;
-	freq_t rx_freq;
-	char callsign[10];
-	char m17_dst[10];	 // not stored yet
-	openht_mode_t mode;
-	uint8_t audio_vol;
-	uint8_t fm_ctcss_tx; // not stored yet
-	uint8_t fm_ctcss_rx; // not stored yet
-	uint8_t m17_can;     // not stored yet
-	m17mode_t m17_voice; // not stored yet
-	bool use_freq_offset;  // using eeeprom bits for settings
-	bool split_mode;
-	bool use_soft_ptt;
-} __attribute__((packed)) settings_t;
+	freq_t rx_freq;			// RX_FREQ_EEEPROM_ADDR
+	freq_t tx_freq;			// TX_FREQ_EEEPROM_ADDR
 
-void user_settings_reset();
-void user_settings_save(const settings_t *settings);
-void user_settings_get(settings_t *settings);
+	uint8_t agc_target;		// AGC_PWR_MODE_EEEPROM_ADDR
+	uint8_t output_pwr; 	// AGC_PWR_MODE_EEEPROM_ADDR
+
+	openht_mode_t mode; 	// AGC_PWR_MODE_EEEPROM_ADDR
+	//uint8_t reserved; 	// AGC_PWR_MODE_EEEPROM_ADDR
+
+	char m17_callsign[10];	// M17_CALLSIGN[1][2][3]_EEEPROM_ADDR
+	char m17_dst[10];	 	// M17_DST[1][2][3]_EEEPROM_ADDR
+	m17Info_t m17_info;		// M17_INFO_EEEPROM_ADDR
+
+	fmInfo_t fm_settings;	// FM_SETTINGS_EEEPROM_ADDR
+
+} __attribute__((packed)) radio_settings_t; // pack the struct into smallest data size
+
+void radio_settings_reset();
+void radio_settings_save(const radio_settings_t *settings);
+void radio_settings_get(radio_settings_t *settings);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* INC_USER_SETTINGS_H_ */
+#endif /* INC_RADIO_SETTINGS_H_ */
