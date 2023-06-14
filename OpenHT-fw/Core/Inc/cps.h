@@ -152,9 +152,11 @@ typedef struct
     uint8_t  mode  : 4,         //< Channel operation mode
              encr  : 4;         //< Encryption mode
     uint8_t gps_mode;           //< Channel GPS mode
-    uint16_t contact_index;     //< Index to retrieve data from contact list
+    //uint16_t contact_index;     //< Index to retrieve data from contact list
+    // made this change to pack struct into 4B for OpenHT
+    uint8_t contact_index;     //< Index to retrieve data from contact list
 }
-__attribute__((packed)) m17Info_t; // 5B
+__attribute__((packed)) m17Info_t; // 5B now 4B
 
 /**
  * Data structure describing M17-specific contact fields.
