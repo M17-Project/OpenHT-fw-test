@@ -609,8 +609,8 @@ void StartTaskRadio(void *argument) {
 				uint32_t nb_sectors = (prev_bin_size/SUBSECTOR_SIZE) + 1*(prev_bin_size%SUBSECTOR_SIZE);
 				LOG(CLI_LOG_FPGA, "An image is already stored in memory. Erasing %lu sectors.\r\n", nb_sectors);
 				bool error = false;
-				for(size_t i = 0; i < nb_sectors; i ++){
-					if(BSP_QSPI_Erase_Block(FPGA_BIN_STORAGE_START_SECTOR + i*SUBSECTOR_SIZE) != QSPI_OK){
+				for(size_t i = 0; i < nb_sectors; i+=16){
+					if(CUSTOM_QSPI_Erase_Sector(FPGA_BIN_STORAGE_START_SECTOR + i*SUBSECTOR_SIZE) != QSPI_OK){
 						ERR("Could not erase NOR flash sector %d.\r\n", FPGA_BIN_STORAGE_START_SECTOR + i*SUBSECTOR_SIZE);
 						error = true;
 						break;
@@ -661,9 +661,9 @@ void StartTaskRadio(void *argument) {
 			LOG(CLI_LOG_FPGA, "Erasing EEEPROM...\r\n");
 			EEEPROM_erase(&eeeprom);
 			LOG(CLI_LOG_FPGA, "Erasing bin storage...\r\n");
-			for(size_t i = FPGA_BIN_STORAGE_START_SECTOR; i < FPGA_BIN_STORAGE_END_SECTOR; i++){
+			for(size_t i = FPGA_BIN_STORAGE_START_SECTOR; i < FPGA_BIN_STORAGE_END_SECTOR; i+=16){
 				//CUSTOM_QSPI_Erase_Sector(i*SUBSECTOR_SIZE);
-				BSP_QSPI_Erase_Block(i*SUBSECTOR_SIZE);
+				CUSTOM_QSPI_Erase_Sector(i*SUBSECTOR_SIZE);
 			}
 			LOG(CLI_LOG_FPGA, "Done!\r\n");
 

@@ -748,8 +748,8 @@ uint8_t CUSTOM_QSPI_Erase_Sector(uint32_t address){
 	QSPI_CommandTypeDef s_command;
 
 	/* Initialize the erase command */
-	s_command.InstructionMode   = QSPI_INSTRUCTION_4_LINES;
-	s_command.Instruction       = SUBSECTOR_ERASE_CMD;
+	s_command.InstructionMode   = QSPI_INSTRUCTION_1_LINE;
+	s_command.Instruction       = SECTOR_ERASE_CMD;
 	s_command.AddressMode       = QSPI_ADDRESS_1_LINE;
 	s_command.AddressSize       = QSPI_ADDRESS_24_BITS;
 	s_command.Address           = address;
@@ -773,7 +773,7 @@ uint8_t CUSTOM_QSPI_Erase_Sector(uint32_t address){
 	}
 
 	/* Configure automatic polling mode to wait for end of erase */
-	if (QSPI_AutoPollingMemReady(&QSPIHandle, N25Q128A_SUBSECTOR_ERASE_MAX_TIME) != QSPI_OK)
+	if (QSPI_AutoPollingMemReady(&QSPIHandle, N25Q128A_SUBSECTOR_ERASE_MAX_TIME*16) != QSPI_OK)
 	{
 		return QSPI_ERROR;
 	}
