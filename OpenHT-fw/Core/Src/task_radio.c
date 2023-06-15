@@ -27,6 +27,8 @@
 #include "ui/ui_fpga_status_panel.h"
 #include "openht_types.h"
 #include "fpga_reg_defs.h"
+#include "../radio/at86rf215.h"
+#include "radio_settings.h"
 
 #include "../shell/inc/sys_command_line.h"
 #include <fatfs.h>
@@ -59,8 +61,15 @@ void 			_fpga_wait_busy();
 uint32_t 		_fpga_sspi_classA(uint32_t length, uint8_t *tx, uint8_t *rx);
 uint32_t 		_fpga_sspi_classB(uint32_t length, uint8_t *tx);
 uint32_t 		_fpga_sspi_classC(uint8_t cmd);
-void 			_select_chip();
-void 			_release_chip();
+uint32_t 		_fpga_read_reg(uint16_t addr, uint16_t *data);
+uint32_t 		_fpga_write_reg(uint16_t addr, uint16_t data);
+uint32_t 		_xcvr_write_reg(uint16_t addr, uint8_t data);
+uint32_t		_xcvr_read_reg(uint16_t addr, uint8_t *data);
+
+void 			_select_FPGA_chip();
+void 			_release_FPGA_chip();
+void 			_select_XCVR_chip();
+void 			_release_XCVR_chip();
 
 /* Event flags */
 #define FPGA_SEND_SAMPLES	(1 << 0)
@@ -71,9 +80,10 @@ void 			_release_chip();
 #define FPGA_ERASE_STORAGE	(1 << 5)
 #define RADIO_INITN_CHANGED (1 << 6)
 #define XCVR_INIT			(1 << 7)
+#define XCVR_CONFIG			(1 << 8)
 
 #define RADIO_ALL_FLAGS		(FPGA_SEND_SAMPLES | FPGA_FETCH_IQ | FPGA_UPLOAD_BIN | FPGA_DOWNLOAD_BIN | FPGA_RESET |\
-							 FPGA_ERASE_STORAGE | RADIO_INITN_CHANGED | XCVR_INIT)
+							 FPGA_ERASE_STORAGE | RADIO_INITN_CHANGED | XCVR_INIT | XCVR_CONFIG)
 
 
 #define SPI_PORT_ACTIVATION_KEY	0x8AF4C6A4 // Swapped for endianness
@@ -117,6 +127,56 @@ void StartTaskRadio(void *argument) {
 
 		}else if(flag & FPGA_FETCH_IQ){
 
+		}else if(flag & XCVR_CONFIG){
+			osThreadFlagsClear(XCVR_CONFIG);
+
+			radio_settings_t settings;
+			radio_settings_get(&settings);
+			uint8_t rx_band = 0, tx_band = 0; // Band = 0 for sub-ghz and = 1 for 2.4G
+			if(settings.rx_freq > 1e9){
+				rx_band = 1;
+			}
+			if(settings.tx_freq > 1e9){
+				tx_band = 1;
+			}
+
+			// Check that we are not in crossband operation
+			if(tx_band ^ rx_band){
+				LOG(CLI_LOG_RADIO, "Cross-band operation is not supported yet!. Aborting configuration.\r\n");
+				continue;
+			}
+
+			// Configure RX switch to correct RF port
+			if(rx_band == 0){
+				// Sub GHz
+				HAL_GPIO_WritePin(SW_CTL1_GPIO_Port, SW_CTL1_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(SW_CTL2_GPIO_Port, SW_CTL2_Pin, GPIO_PIN_SET);
+			}else{
+				//2.4 GHz
+				HAL_GPIO_WritePin(SW_CTL1_GPIO_Port, SW_CTL1_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(SW_CTL2_GPIO_Port, SW_CTL2_Pin, GPIO_PIN_RESET);
+			}
+
+			switch(settings.mode){
+			case OpMode_FM:
+				// Config...
+				// Configure FPGA
+				_fpga_write_reg(CR_1, MOD_FM | IO0_DRDY | DEM_FM | ( (1-rx_band)*BAND_09 + (rx_band*BAND_24) ) );
+				// Todo determine if we are in FN_N or FM_W
+
+				uint8_t ctcss_rx = ( ( settings.fm_settings.txToneEn?settings.fm_settings.txTone:0)<<2);
+				_fpga_write_reg(CR_2, CH_RX_12_5 | FM_TX_W | ctcss_rx | STATE_RX);
+
+
+				break;
+
+			default:
+				LOG(CLI_LOG_RADIO, "Mode %d not implemented yet.\r\n", settings.mode);
+				break;
+			}
+
+
+
 		}else if(flag & RADIO_INITN_CHANGED){
 			osThreadFlagsClear(RADIO_INITN_CHANGED);
 			GPIO_PinState initn 	= HAL_GPIO_ReadPin(FPGA_INITN_GPIO_Port, FPGA_INITN_Pin);
@@ -159,6 +219,7 @@ void StartTaskRadio(void *argument) {
 		}else if(flag & XCVR_INIT){
 			osThreadFlagsClear(XCVR_INIT);
 			HAL_GPIO_WritePin(RF_RST_GPIO_Port, RF_RST_Pin, GPIO_PIN_SET);
+			osDelay(5);
 			upload_fpga_binary();
 		}else if(flag & FPGA_UPLOAD_BIN){
 			osThreadFlagsClear(FPGA_UPLOAD_BIN);				// Clear the flag
@@ -167,8 +228,8 @@ void StartTaskRadio(void *argument) {
 			set_fpga_status(FPGA_Loading);
 			LOG(CLI_LOG_FPGA, "Started FPGA bitstream upload\r\n");
 
-			uint8_t bufferTX[16] = {0};	// Used for data to TX
-			uint8_t bufferRX[16] = {0};
+			uint8_t bufferTX[8] = {0};	// Used for data to TX
+			uint8_t bufferRX[8] = {0};
 
 			// First set PROGRAMN low
 			HAL_GPIO_WritePin(FPGA_PROGRAMN_GPIO_Port, FPGA_PROGRAMN_Pin, GPIO_PIN_RESET);
@@ -294,14 +355,17 @@ void StartTaskRadio(void *argument) {
 			}
 			LOG(CLI_LOG_FPGA, "FPGA PLL is locked. Querying revision number.\r\n");
 
-			*((uint32_t *)(bufferTX)) = 0;
-			*((uint32_t *)(bufferRX)) = 0;
-			bufferTX[1] = SR_1;
-			_select_chip();
-			HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 4);
-			wait_spi_xfer_done(WAIT_TIMEOUT);
-			_release_chip();
-			DBG("FPGA revision is %u.%u.\r\n", bufferRX[2], bufferRX[3]);
+			_fpga_read_reg(SR_1, (uint16_t *)bufferRX);
+			DBG("FPGA revision is %u.%u.\r\n", bufferRX[1], bufferRX[0]);
+
+			uint8_t read = 0;
+			_xcvr_read_reg(RF_PN, &read);
+			LOG(CLI_LOG_RADIO, "XCVR PN is 0x%02x.\r\n", read);
+			osDelay(1);
+			_xcvr_read_reg(RF_VN, &read);
+			LOG(CLI_LOG_RADIO, "XCVR VN is 0x%02x.\r\n", read);
+
+			_xcvr_write_reg(RF_IQIFC1, RF_IQIFC1_RF | RF_IQIFC1_SKEWDRV39);
 
 			// Release SPI mutex and restore thread priority
 			osMutexRelease(SPI1AccessHandle);
@@ -511,50 +575,123 @@ uint32_t _fpga_check_status_register(uint8_t *reg){
 
 uint32_t _fpga_sspi_classA(uint32_t length, uint8_t *tx, uint8_t *rx){
 	uint32_t res = 0;
-	_select_chip();
+	_select_FPGA_chip();
 	//reset_spi1_flag();
 	res = HAL_SPI_TransmitReceive_IT(&hspi1, tx, rx, length);
 	if(res != HAL_OK){
 		LOG(CLI_LOG_FPGA, "HAL_SPI_TransmitReceive_IT returned %lu.\r\n", res);
 	}
 	wait_spi_xfer_done(WAIT_TIMEOUT);
-	_release_chip();
+	_release_FPGA_chip();
 	return EXIT_SUCCESS;
 }
 
 uint32_t _fpga_sspi_classB(uint32_t length, uint8_t *tx){
 	uint32_t res = 0;
-	_select_chip();
+	_select_FPGA_chip();
 	//reset_spi1_flag();
 	res = HAL_SPI_Transmit_IT(&hspi1, tx, length);
 	if(res != HAL_OK){
 		LOG(CLI_LOG_FPGA, "HAL_SPI_TransmitReceive_IT returned %lu.\r\n", res);
 	}
 	wait_spi_xfer_done(WAIT_TIMEOUT);
-	_release_chip();
+	_release_FPGA_chip();
 	return EXIT_SUCCESS;
 }
 
 uint32_t _fpga_sspi_classC(uint8_t cmd){
 	uint32_t res = 0;
 	uint8_t tx[4] = {cmd, 0, 0, 0};
-	_select_chip();
+	_select_FPGA_chip();
 	//reset_spi1_flag();
 	res = HAL_SPI_Transmit_IT(&hspi1, tx, 4);
 	if(res != HAL_OK){
 		LOG(CLI_LOG_FPGA, "HAL_SPI_TransmitReceive_IT returned %lu.\r\n", res);
 	}
 	wait_spi_xfer_done(WAIT_TIMEOUT);
-	_release_chip();
+	_release_FPGA_chip();
 	return EXIT_SUCCESS;
 }
 
-void _select_chip(){
+
+uint32_t _fpga_read_reg(uint16_t addr, uint16_t *data){
+	uint8_t bufferTX[4];
+	uint8_t bufferRX[4] = {0};
+
+	_select_FPGA_chip();
+	osDelay(1);
+	*(uint16_t *)bufferTX = addr;
+	*(uint16_t *)(bufferTX + 2) = 0;
+	HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 4);
+	wait_spi_xfer_done(WAIT_TIMEOUT);
+	*data = ((uint16_t)bufferRX[2]<<8) + bufferRX[3];
+	_release_FPGA_chip();
+
+	return EXIT_SUCCESS;
+}
+
+
+uint32_t _fpga_write_reg(uint16_t addr, uint16_t data){
+	uint8_t buffer[4];
+
+	_select_FPGA_chip();
+	osDelay(1);
+	*(uint16_t *)buffer = addr | REG_WR;
+	buffer[2] = (data>>8) & 0xFF;
+	buffer[3] = (uint8_t)data;
+	HAL_SPI_Transmit_IT(&hspi1, buffer, 4);
+	wait_spi_xfer_done(WAIT_TIMEOUT);
+	_release_FPGA_chip();
+
+	return EXIT_SUCCESS;
+}
+
+uint32_t _xcvr_write_reg(uint16_t addr, uint8_t data){
+	uint8_t buffer[3];
+
+	_select_XCVR_chip();
+	osDelay(1);
+	*(uint16_t *)buffer = addr | (1<<7);
+	buffer[2] = data;
+	HAL_SPI_Transmit_IT(&hspi1, buffer, 3);
+	wait_spi_xfer_done(WAIT_TIMEOUT);
+	osDelay(1);
+	_release_XCVR_chip();
+
+	return EXIT_SUCCESS;
+}
+
+uint32_t _xcvr_read_reg(uint16_t addr, uint8_t *data){
+	uint8_t bufferTX[3];
+	uint8_t bufferRX[3] = {0};
+
+	_select_XCVR_chip();
+	osDelay(1);
+	*(uint16_t *)bufferTX = addr;
+	bufferTX[2] = 0;
+	HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 3);
+	wait_spi_xfer_done(WAIT_TIMEOUT);
+	*data = bufferRX[2];
+	osDelay(1);
+	_release_XCVR_chip();
+
+	return EXIT_SUCCESS;
+}
+
+void _select_FPGA_chip(){
 	HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
 }
 
-void _release_chip(){
+void _release_FPGA_chip(){
 	HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+}
+
+void _select_XCVR_chip(){
+	HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_RESET);
+}
+
+void _release_XCVR_chip(){
+	HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_SET);
 }
 
 void radio_INITn_it(){

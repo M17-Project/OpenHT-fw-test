@@ -1300,6 +1300,11 @@ static void MX_GPIO_Init(void)
 	gpio_port_a_state = LL_GPIO_ReadInputPort(GPIOA);
 	gpio_port_g_state = LL_GPIO_ReadInputPort(GPIOG);
 
+	GPIO_InitStruct.Pin = XCVR_NSS_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
