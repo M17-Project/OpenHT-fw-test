@@ -215,7 +215,6 @@ void StartTaskRadio(void *argument) {
 			if(ptt == GPIO_PIN_RESET){
 				LOG(CLI_LOG_RADIO, "PTT pressed.\r\n");
 				// Switch FPGA to TX
-				_fpga_write_reg(CR_2, CH_RX_12_5 | FM_TX_W | ctcss_tx | STATE_TX);
 
 				if(tx_band){
 					LOG(CLI_LOG_RADIO, "Radio set in TX 2.4G.\r\n");
@@ -247,9 +246,12 @@ void StartTaskRadio(void *argument) {
 				}else{
 					LOG(CLI_LOG_RADIO, "Radio set in TX Sub-GHz.\r\n");
 					uint8_t readback;
+					float ppm = 0.1;
 					// Sub GHz
 					// Disable 2.4G transceiver
 					_xcvr_write_reg(RF24_CMD, RFn_CMD_TRXOFF);
+					_xcvr_read_reg(RF24_CMD, &readback);
+					LOG(CLI_LOG_RADIO, "Readback RF24_CMD is 0x%02x.\r\n", readback);
 
 					// Configure switch
 					HAL_GPIO_WritePin(SW_CTL1_GPIO_Port, SW_CTL1_Pin, GPIO_PIN_SET);
@@ -257,21 +259,62 @@ void StartTaskRadio(void *argument) {
 
 					// Configure SubGHZ Transceiver
 					_xcvr_write_reg(RF09_CMD, RFn_CMD_TRXOFF);
+					_xcvr_read_reg(RF09_CMD, &readback);
+					LOG(CLI_LOG_RADIO, "Readback RF09_CMD is 0x%02x.\r\n", readback);
+
 					_xcvr_write_reg(RF09_PAC, RFn_PAC_TXPWR_MAX | RFn_PAC_PACUR_MAX);
+					_xcvr_read_reg(RF09_PAC, &readback);
+					LOG(CLI_LOG_RADIO, "Readback RF09_PAC is 0x%02x.\r\n", readback);
 
 					/* Set frequency */ // TODO PPM
-					uint32_t val = round((radio_settings.tx_freq-377000000)/(203125.0/2048.0));
+					uint32_t val = round((radio_settings.tx_freq*(1.0+ppm*1e-6)-377000000)/(203125.0/2048.0));
 					_xcvr_write_reg(RF09_CCF0L, (uint8_t)(val>>8));
+					_xcvr_read_reg(RF09_CCF0L, &readback);
+					LOG(CLI_LOG_RADIO, "Readback RF09_CCF0L is 0x%02x.\r\n", readback);
+
 					_xcvr_write_reg(RF09_CCF0H, (uint8_t)(val>>16));
+					_xcvr_read_reg(RF09_CCF0H, &readback);
+					LOG(CLI_LOG_RADIO, "Readback RF09_CCF0H is 0x%02x.\r\n", readback);
+
 					_xcvr_write_reg(RF09_CNL, (uint8_t)(val));
-					_xcvr_write_reg(RF09_CNM, RFn_CNM_CM_FINE3);
+					_xcvr_read_reg(RF09_CNL, &readback);
+					LOG(CLI_LOG_RADIO, "Readback RF09_CNL is 0x%02x.\r\n", readback);
+
+					_xcvr_write_reg(RF09_CNM, RFn_CNM_CM_FINE1);
+					_xcvr_read_reg(RF09_CNM, &readback);
+					LOG(CLI_LOG_RADIO, "Readback RF09_CNM is 0x%02x.\r\n", readback);
 
 					/* */
 					_xcvr_write_reg(RF09_TXCUTC, RFn_TXCUTC_PARAMP4 | RFn_TXCUTC_FLC_80K);
+					_xcvr_read_reg(RF09_TXCUTC, &readback);
+					LOG(CLI_LOG_RADIO, "Readback RF09_TXCUTC is 0x%02x.\r\n", readback);
+
 					_xcvr_write_reg(RF09_TXDFE, RFn_TXDFE_RCUT_0_25 | RFn_TXDFE_SR_400K);
+					_xcvr_read_reg(RF09_TXDFE, &readback);
+					LOG(CLI_LOG_RADIO, "Readback RF09_TXDFE is 0x%02x.\r\n", readback);
+
 					_xcvr_write_reg(RF09_CMD, RFn_CMD_TXPREP);
+					_xcvr_read_reg(RF09_CMD, &readback);
+					LOG(CLI_LOG_RADIO, "Readback RF09_CMD is 0x%02x.\r\n", readback);
+
+					HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_RESET);
 					osDelay(5);
+					HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
 					_xcvr_write_reg(RF09_CMD, RFn_CMD_TX);
+					_xcvr_read_reg(RF09_CMD, &readback);
+					LOG(CLI_LOG_RADIO, "Readback RF09_CMD is 0x%02x.\r\n", readback);
+
+					_fpga_write_reg(CR_2, CH_RX_12_5 | FM_TX_W | ctcss_tx | STATE_TX);
+					_fpga_write_reg(CR_1, MOD_FM|((uint16_t)0b010<<9)|PD_ON|DEM_FM|BAND_09);
+					_fpga_write_reg(CR_2, CH_RX_12_5|CTCSS_TX_NONE|STATE_TX|FM_TX_N);
+					_fpga_write_reg(MOD_IN, 0x1234);
+
+					_xcvr_read_reg(RF09_STATE, &readback);
+					LOG(CLI_LOG_RADIO, "Readback RF09_STATE is 0x%02x.\r\n", readback);
+					_xcvr_read_reg(RF_IQIFC1, &readback);
+					LOG(CLI_LOG_RADIO, "Readback RF_IQIFC1 is 0x%02x.\r\n", readback);
+					_xcvr_read_reg(RF_IQIFC2, &readback);
+					LOG(CLI_LOG_RADIO, "Readback RF_IQIFC2 is 0x%02x.\r\n", readback);
 				}
 
 			}else{
