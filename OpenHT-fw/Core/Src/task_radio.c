@@ -567,6 +567,7 @@ void StartTaskRadio(void *argument) {
 			_xcvr_read_reg(RF_VN, &read);
 			LOG(CLI_LOG_RADIO, "XCVR VN is 0x%02x.\r\n", read);
 
+			_xcvr_write_reg(RF_IQIFC0, RF_IQIFC0_CMV1V2 | RF_IQIFC0_DRV3);
 			_xcvr_write_reg(RF_IQIFC1, RF_IQIFC1_RF | RF_IQIFC1_SKEWDRV39);
 
 			osThreadFlagsSet(FPGA_thread_id, XCVR_CONFIG);
