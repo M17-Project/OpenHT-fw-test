@@ -48,12 +48,18 @@ typedef struct __attribute((__packed__)){
 	uint32_t size;
 }fpga_bin_entry_t;
 
-osThreadId_t 				FPGA_thread_id 			= NULL;
-uint32_t 					bitstream_load_address 	= 0x80000000;
-uint32_t 					bitstream_load_offset 	= 0;
 extern SPI_HandleTypeDef 	hspi1;
 extern osMutexId_t 			SPI1AccessHandle;
 extern osMutexId_t 			NORAccessHandle;
+
+osThreadId_t 				FPGA_thread_id 			= NULL;
+uint32_t 					bitstream_load_address 	= 0x80000000;
+uint32_t 					bitstream_load_offset 	= 0;
+osTimerId_t					ptt_debounce_timer = NULL;
+const osTimerAttr_t			ptt_debounce_timer_attr = {
+		.name = "ptt_debounce"
+};
+
 
 UINT 			fatfs_bitstream_stream		(const BYTE *p, UINT btf);
 uint32_t 		_fpga_check_status_register(uint8_t *reg);
@@ -65,11 +71,11 @@ uint32_t 		_fpga_read_reg(uint16_t addr, uint16_t *data);
 uint32_t 		_fpga_write_reg(uint16_t addr, uint16_t data);
 uint32_t 		_xcvr_write_reg(uint16_t addr, uint8_t data);
 uint32_t		_xcvr_read_reg(uint16_t addr, uint8_t *data);
-
 void 			_select_FPGA_chip();
 void 			_release_FPGA_chip();
 void 			_select_XCVR_chip();
 void 			_release_XCVR_chip();
+void 			_ptt_timer_expired(void *argument);
 
 /* Event flags */
 #define FPGA_SEND_SAMPLES	(1 << 0)
@@ -81,9 +87,11 @@ void 			_release_XCVR_chip();
 #define RADIO_INITN_CHANGED (1 << 6)
 #define XCVR_INIT			(1 << 7)
 #define XCVR_CONFIG			(1 << 8)
+#define RADIO_PTT_START_TIMER	(1 << 9)
+#define RADIO_PTT			(1<<10)
 
 #define RADIO_ALL_FLAGS		(FPGA_SEND_SAMPLES | FPGA_FETCH_IQ | FPGA_UPLOAD_BIN | FPGA_DOWNLOAD_BIN | FPGA_RESET |\
-							 FPGA_ERASE_STORAGE | RADIO_INITN_CHANGED | XCVR_INIT | XCVR_CONFIG)
+							 FPGA_ERASE_STORAGE | RADIO_INITN_CHANGED | XCVR_INIT | XCVR_CONFIG | RADIO_PTT_START_TIMER | RADIO_PTT)
 
 
 #define SPI_PORT_ACTIVATION_KEY	0x8AF4C6A4 // Swapped for endianness
@@ -119,6 +127,8 @@ void StartTaskRadio(void *argument) {
 	HAL_GPIO_Init(FPGA_INITN_GPIO_Port, &initn_pin);
 	HAL_NVIC_SetPriority(EXTI4_IRQn, 5, 0);
 	HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+
+	ptt_debounce_timer = osTimerNew(_ptt_timer_expired, osTimerOnce, NULL, &ptt_debounce_timer_attr);
 
 	for(;;){
 		uint32_t flag = osThreadFlagsWait(RADIO_ALL_FLAGS, osFlagsNoClear, osWaitForever);
@@ -161,12 +171,11 @@ void StartTaskRadio(void *argument) {
 			case OpMode_FM:
 				// Config...
 				// Configure FPGA
-				_fpga_write_reg(CR_1, MOD_FM | IO0_DRDY | DEM_FM | ( (1-rx_band)*BAND_09 + (rx_band*BAND_24) ) );
+				_fpga_write_reg(CR_1, MOD_FM | IO0_DRDY | PD_ON | DEM_FM | ( (1-rx_band)*BAND_09 + (rx_band*BAND_24) ) );
 				// Todo determine if we are in FN_N or FM_W
 
-				uint8_t ctcss_rx = ( ( settings.fm_settings.txToneEn?settings.fm_settings.txTone:0)<<2);
-				_fpga_write_reg(CR_2, CH_RX_12_5 | FM_TX_W | ctcss_rx | STATE_RX);
-
+				uint8_t ctcss_tx = ( ( settings.fm_settings.txToneEn?settings.fm_settings.txTone:0)<<2);
+				_fpga_write_reg(CR_2, CH_RX_12_5 | FM_TX_W | ctcss_tx | STATE_RX);
 
 				break;
 
@@ -175,7 +184,15 @@ void StartTaskRadio(void *argument) {
 				break;
 			}
 
+		}else if(flag & RADIO_PTT_START_TIMER){
+			osThreadFlagsClear(RADIO_PTT_START_TIMER);
+			osTimerStart(ptt_debounce_timer, 5);
 
+			GPIO_PinState ptt = HAL_GPIO_ReadPin(PTT_GPIO_Port, PTT_Pin);
+			LOG(CLI_LOG_RADIO, "PTT state is %d.\r\n", ptt);
+
+		}else if(flag & RADIO_PTT){
+			osThreadFlagsClear(RADIO_PTT);
 
 		}else if(flag & RADIO_INITN_CHANGED){
 			osThreadFlagsClear(RADIO_INITN_CHANGED);
@@ -698,5 +715,19 @@ void radio_INITn_it(){
 	uint32_t result = osThreadFlagsSet(FPGA_thread_id, RADIO_INITN_CHANGED);
 	if(result >= (1<<31)){
 		LOG(CLI_LOG_RADIO, "Could not process INITN changed: osThreadFlagSet returned %lu.\r\n", result);
+	}
+}
+
+void ptt_toggled(){
+	uint32_t result = osThreadFlagsSet(FPGA_thread_id, RADIO_PTT_START_TIMER);
+	if(result >= (1<<31)){
+		ERR("Could not start PTT debounce timer: osThreadFlagSet returned 0x%08lx.\r\n", result);
+	}
+}
+
+void _ptt_timer_expired(void *argument){
+	uint32_t result = osThreadFlagsSet(FPGA_thread_id, RADIO_PTT);
+	if(result >= (1<<31)){
+		ERR("Could not process PTT pin change: osThreadFlagSet returned 0x%08lx.\r\n", result);
 	}
 }
