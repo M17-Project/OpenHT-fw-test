@@ -58,4 +58,8 @@ void radio_INITn_it();
 
 bool xcvr_init();
 
+void ptt_toggled();
+
+void radio_config();
+
 #endif /* INC_TASK_RADIO_H_ */

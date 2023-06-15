@@ -159,9 +159,9 @@ void radio_settings_init()
 
 	// FM Settings
 	if(EEEPROM_read_data(&radio_settings_eeeprom, FM_SETTINGS_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		*(uint16_t *)(&cached_settings.fm_settings) = (uint16_t)buffer & 0xFFFF;
+		*(uint16_t *)(&cached_settings.fm_settings) = (uint16_t)buffer;
 	}else{
-		*(uint16_t *)(&cached_settings.fm_settings) = (uint16_t)0 & 0xFFFF;;
+		*(uint16_t *)(&cached_settings.fm_settings) = (uint16_t)0;
 	}
 
 	init_done = true;

@@ -230,9 +230,12 @@ void DMA1_Stream0_IRQHandler(void)
 void EXTI9_5_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI9_5_IRQn 0 */
+	ptt_toggled();
 
   /* USER CODE END EXTI9_5_IRQn 0 */
   /* USER CODE BEGIN EXTI9_5_IRQn 1 */
+
+	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_5);
 
   /* USER CODE END EXTI9_5_IRQn 1 */
 }
