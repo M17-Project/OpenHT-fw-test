@@ -25,6 +25,7 @@ extern "C" {
 
 #include "cps.h"
 #include "openht_types.h"
+#include "user_settings.h"
 
 #include "stm32469i_discovery.h" /* DISCOVERY includes component */
 #include "stm32469i_discovery_qspi.h"
@@ -41,7 +42,7 @@ typedef struct
 	openht_mode_t mode; 	// AGC_PWR_MODE_EEEPROM_ADDR
 	//uint8_t reserved; 	// AGC_PWR_MODE_EEEPROM_ADDR
 
-	char m17_callsign[10];	// M17_CALLSIGN[1][2][3]_EEEPROM_ADDR
+	user_callsign_func_t m17_callsign;
 	char m17_dst[10];	 	// M17_DST[1][2][3]_EEEPROM_ADDR
 	m17Info_t m17_info;		// M17_INFO_EEEPROM_ADDR
 

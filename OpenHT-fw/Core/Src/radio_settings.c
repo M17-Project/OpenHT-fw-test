@@ -39,17 +39,12 @@
 static const uint8_t RX_FREQ_EEEPROM_ADDR =     	0x00;	// Rx frequency (in Hz)
 static const uint8_t TX_FREQ_EEEPROM_ADDR =	    	0x01;	// Tx frequency (in Hz)
 static const uint8_t AGC_PWR_MODE_EEEPROM_ADDR =   	0x02;	// AGC, Power level, OpMode
-//static const uint8_t RESERVED_EEEPROM_ADDR =   		0x03;
+static const uint8_t M17_DST1_EEEPROM_ADDR =   		0x03;	// Contains CS letters [1:4]
+static const uint8_t M17_DST2_EEEPROM_ADDR =   		0x04;	// Contains CS letters [5:8]
+static const uint8_t M17_DST3_EEEPROM_ADDR =   		0x05;	// Contains CS letters [9:10]
+static const uint8_t M17_INFO_EEEPROM_ADDR =		0x06;	// Contains M17 info struct
 
-static const uint8_t M17_CALLSIGN1_EEEPROM_ADDR =   0x04;	// Contains CS letters [1:4]
-static const uint8_t M17_CALLSIGN2_EEEPROM_ADDR =   0x05;	// Contains CS letters [5:8]
-static const uint8_t M17_CALLSIGN3_EEEPROM_ADDR =   0x06;	// Contains CS letters [9:10]
-static const uint8_t M17_DST1_EEEPROM_ADDR =   		0x07;	// Contains CS letters [1:4]
-static const uint8_t M17_DST2_EEEPROM_ADDR =   		0x08;	// Contains CS letters [5:8]
-static const uint8_t M17_DST3_EEEPROM_ADDR =   		0x09;	// Contains CS letters [9:10]
-static const uint8_t M17_INFO_EEEPROM_ADDR =		0x0A;	// Contains M17 info struct
-
-static const uint8_t FM_SETTINGS_EEEPROM_ADDR =    	0x0B;	// Contains FM settings struct
+static const uint8_t FM_SETTINGS_EEEPROM_ADDR =    	0x07;	// Contains FM settings struct
 
 
 EEEPROMHandle_t radio_settings_eeeprom = {
@@ -112,24 +107,9 @@ void radio_settings_init()
 		//cached_settings.reserved = 0;
 	}
 
-	// M17 Callsign letters 1 to 4
-	if(EEEPROM_read_data(&radio_settings_eeeprom, M17_CALLSIGN1_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		*(uint32_t *)(cached_settings.m17_callsign) = buffer;
-	}else{
-		cached_settings.m17_callsign[0] = '\0';
-	}
-	// M17 Callsign letters 5 to 8
-	if(EEEPROM_read_data(&radio_settings_eeeprom, M17_CALLSIGN2_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		*(uint32_t *)(cached_settings.m17_callsign+4) = buffer;
-	}else{
-		cached_settings.m17_callsign[4] = '\0';
-	}
-	// M17 Callsign  letters 9-10
-	if(EEEPROM_read_data(&radio_settings_eeeprom, M17_CALLSIGN3_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		*(uint16_t *)(cached_settings.m17_callsign+8) = (uint16_t)buffer;
-	}else{
-		cached_settings.m17_callsign[8] = '\0';
-	}
+	// M17 Callsign
+	// set func ptr to get user callsign
+	cached_settings.m17_callsign = user_callsign;
 
 	// DST letters 1 to 4
 	if(EEEPROM_read_data(&radio_settings_eeeprom, M17_DST1_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
@@ -188,7 +168,7 @@ void radio_settings_save(const radio_settings_t *settings)
 		(cached_settings.mode != settings->mode) ){
 		buffer = cached_settings.agc_target +
 				( ( (uint16_t)settings->output_pwr ) << 8 ) +
-				( ( (uint32_t)settings->output_pwr ) << 16 );
+				( ( (uint32_t)settings->mode ) << 16 );
 		EEEPROM_write_data(&radio_settings_eeeprom, AGC_PWR_MODE_EEEPROM_ADDR, (void *)(&buffer));
 		cached_settings.agc_target = settings->agc_target;
 		cached_settings.output_pwr = settings->output_pwr;
@@ -197,21 +177,7 @@ void radio_settings_save(const radio_settings_t *settings)
 	}
 
 	// M17 Callsign
-	if(strcmp(settings->m17_callsign, cached_settings.m17_callsign) != 0){
-		// Compare first four letters
-		if(*(uint32_t *)(settings->m17_callsign) != *(uint32_t *)(cached_settings.m17_callsign)){
-			EEEPROM_write_data(&radio_settings_eeeprom, M17_CALLSIGN1_EEEPROM_ADDR, (void *)settings->m17_callsign);
-		}
-		// Compare letters 5 to 8
-		if(*(uint32_t *)(settings->m17_callsign+4) != *(uint32_t *)(cached_settings.m17_callsign+4)){
-			EEEPROM_write_data(&radio_settings_eeeprom, M17_CALLSIGN2_EEEPROM_ADDR, (void *)(settings->m17_callsign+4));
-		}
-		// Compare letters 9-10
-		if(*(uint16_t *)(settings->m17_callsign+8) != *(uint16_t *)(cached_settings.m17_callsign+8)){
-			EEEPROM_write_data(&radio_settings_eeeprom, M17_CALLSIGN3_EEEPROM_ADDR, (void *)(settings->m17_callsign+8));
-		}
-		memcpy(cached_settings.m17_callsign, settings->m17_callsign, 10);
-	}
+	// using a func ptr from the user_settings
 
 	// M17 DST
 	if(strcmp(settings->m17_dst, cached_settings.m17_dst) != 0){

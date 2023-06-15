@@ -53,7 +53,7 @@ typedef struct __attribute((__packed__)){
 extern SPI_HandleTypeDef 	hspi1;
 extern osMutexId_t 			SPI1AccessHandle;
 extern osMutexId_t 			NORAccessHandle;
-extern settings_t			user_settings;
+extern user_settings_t		user_settings;
 
 osThreadId_t 				FPGA_thread_id 			= NULL;
 uint32_t 					bitstream_load_address 	= 0x80000000;
@@ -148,13 +148,13 @@ void StartTaskRadio(void *argument) {
 			LOG(CLI_LOG_RADIO, "Configuring XCVR.\r\n");
 
 			radio_settings_get(&radio_settings);
-			radio_settings.mode = user_settings.mode;
-			radio_settings.tx_freq = user_settings.tx_freq;
-			radio_settings.rx_freq = user_settings.rx_freq;
 			radio_settings.fm_settings.rxTone = 0;
 			radio_settings.fm_settings.rxToneEn = 0;
 			radio_settings.fm_settings.txTone = 0;
 			radio_settings.fm_settings.txToneEn = 0;
+
+			// TODO: M17 mode support. This will get user callsign:
+			// const char * test = radio_settings.m17_callsign();
 
 			LOG(CLI_LOG_RADIO, "Setting radio in mode %d. RX freq = %lu, TX freq = %lu.\r\n",
 					radio_settings.mode, radio_settings.rx_freq, radio_settings.tx_freq);

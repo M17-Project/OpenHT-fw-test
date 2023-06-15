@@ -32,24 +32,20 @@ extern "C" {
 
 typedef struct
 {
-	freq_t tx_freq;
-	freq_t rx_freq;
 	char callsign[10];
-	char m17_dst[10];	 // not stored yet
-	openht_mode_t mode;
 	uint8_t audio_vol;
-	uint8_t fm_ctcss_tx; // not stored yet
-	uint8_t fm_ctcss_rx; // not stored yet
-	uint8_t m17_can;     // not stored yet
-	m17mode_t m17_voice; // not stored yet
+	//uint8_t reserved;
 	bool use_freq_offset;  // using eeeprom bits for settings
 	bool split_mode;
 	bool use_soft_ptt;
-} __attribute__((packed)) settings_t;
+} __attribute__((packed)) user_settings_t;
 
 void user_settings_reset();
-void user_settings_save(const settings_t *settings);
-void user_settings_get(settings_t *settings);
+void user_settings_save(const user_settings_t *settings);
+void user_settings_get(user_settings_t *settings);
+
+typedef const char * (*user_callsign_func_t)();
+const char * user_callsign();
 
 #ifdef __cplusplus
 }
