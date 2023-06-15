@@ -29,6 +29,7 @@
 #include "fpga_reg_defs.h"
 #include "../radio/at86rf215.h"
 #include "radio_settings.h"
+#include "user_settings.h"
 
 #include "../shell/inc/sys_command_line.h"
 #include <fatfs.h>
@@ -36,6 +37,7 @@
 #include <stm32f4xx_ll_gpio.h>
 
 #include <stdlib.h>
+#include <math.h>
 
 #ifdef DEBUG
 #define WAIT_TIMEOUT osWaitForever
@@ -51,6 +53,7 @@ typedef struct __attribute((__packed__)){
 extern SPI_HandleTypeDef 	hspi1;
 extern osMutexId_t 			SPI1AccessHandle;
 extern osMutexId_t 			NORAccessHandle;
+extern settings_t			user_settings;
 
 osThreadId_t 				FPGA_thread_id 			= NULL;
 uint32_t 					bitstream_load_address 	= 0x80000000;
@@ -59,7 +62,10 @@ osTimerId_t					ptt_debounce_timer = NULL;
 const osTimerAttr_t			ptt_debounce_timer_attr = {
 		.name = "ptt_debounce"
 };
-
+radio_settings_t 			radio_settings;
+uint8_t 					ctcss_tx = 0;
+uint8_t 					rx_band = 0;
+uint8_t						tx_band = 0;
 
 UINT 			fatfs_bitstream_stream		(const BYTE *p, UINT btf);
 uint32_t 		_fpga_check_status_register(uint8_t *reg);
@@ -139,14 +145,26 @@ void StartTaskRadio(void *argument) {
 
 		}else if(flag & XCVR_CONFIG){
 			osThreadFlagsClear(XCVR_CONFIG);
+			LOG(CLI_LOG_RADIO, "Configuring XCVR.\r\n");
 
-			radio_settings_t settings;
-			radio_settings_get(&settings);
-			uint8_t rx_band = 0, tx_band = 0; // Band = 0 for sub-ghz and = 1 for 2.4G
-			if(settings.rx_freq > 1e9){
+			radio_settings_get(&radio_settings);
+			radio_settings.mode = user_settings.mode;
+			radio_settings.tx_freq = user_settings.tx_freq;
+			radio_settings.rx_freq = user_settings.rx_freq;
+			radio_settings.fm_settings.rxTone = 0;
+			radio_settings.fm_settings.rxToneEn = 0;
+			radio_settings.fm_settings.txTone = 0;
+			radio_settings.fm_settings.txToneEn = 0;
+
+			LOG(CLI_LOG_RADIO, "Setting radio in mode %d. RX freq = %lu, TX freq = %lu.\r\n",
+					radio_settings.mode, radio_settings.rx_freq, radio_settings.tx_freq);
+
+			rx_band = 0;
+			tx_band = 0; // Band = 0 for sub-ghz and = 1 for 2.4G
+			if(radio_settings.rx_freq > 1e9){
 				rx_band = 1;
 			}
-			if(settings.tx_freq > 1e9){
+			if(radio_settings.tx_freq > 1e9){
 				tx_band = 1;
 			}
 
@@ -167,32 +185,156 @@ void StartTaskRadio(void *argument) {
 				HAL_GPIO_WritePin(SW_CTL2_GPIO_Port, SW_CTL2_Pin, GPIO_PIN_RESET);
 			}
 
-			switch(settings.mode){
+			switch(radio_settings.mode){
 			case OpMode_FM:
 				// Config...
 				// Configure FPGA
 				_fpga_write_reg(CR_1, MOD_FM | IO0_DRDY | PD_ON | DEM_FM | ( (1-rx_band)*BAND_09 + (rx_band*BAND_24) ) );
 				// Todo determine if we are in FN_N or FM_W
 
-				uint8_t ctcss_tx = ( ( settings.fm_settings.txToneEn?settings.fm_settings.txTone:0)<<2);
-				_fpga_write_reg(CR_2, CH_RX_12_5 | FM_TX_W | ctcss_tx | STATE_RX);
-
+				ctcss_tx = ( ( radio_settings.fm_settings.txToneEn?radio_settings.fm_settings.txTone:0)<<2);
 				break;
 
 			default:
-				LOG(CLI_LOG_RADIO, "Mode %d not implemented yet.\r\n", settings.mode);
+				LOG(CLI_LOG_RADIO, "Mode %d not implemented yet.\r\n", radio_settings.mode);
 				break;
 			}
+
+			// For now we simulate a PTT press to configure the XCVR.
+			osThreadFlagsSet(FPGA_thread_id, RADIO_PTT_START_TIMER);
 
 		}else if(flag & RADIO_PTT_START_TIMER){
 			osThreadFlagsClear(RADIO_PTT_START_TIMER);
 			osTimerStart(ptt_debounce_timer, 5);
-
-			GPIO_PinState ptt = HAL_GPIO_ReadPin(PTT_GPIO_Port, PTT_Pin);
-			LOG(CLI_LOG_RADIO, "PTT state is %d.\r\n", ptt);
-
 		}else if(flag & RADIO_PTT){
 			osThreadFlagsClear(RADIO_PTT);
+
+			GPIO_PinState ptt = HAL_GPIO_ReadPin(PTT_GPIO_Port, PTT_Pin);
+
+			// SET means released
+			if(ptt == GPIO_PIN_RESET){
+				LOG(CLI_LOG_RADIO, "PTT pressed.\r\n");
+				// Switch FPGA to TX
+				_fpga_write_reg(CR_2, CH_RX_12_5 | FM_TX_W | ctcss_tx | STATE_TX);
+
+				if(tx_band){
+					LOG(CLI_LOG_RADIO, "Radio set in TX 2.4G.\r\n");
+					// 2.4 G
+					// Disable sub-ghz transceiver
+					_xcvr_write_reg(RF09_CMD, RFn_CMD_TRXOFF);
+
+					// Configure switch
+					HAL_GPIO_WritePin(SW_CTL1_GPIO_Port, SW_CTL1_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(SW_CTL2_GPIO_Port, SW_CTL2_Pin, GPIO_PIN_RESET);
+
+					// Configure 2.4G transceiver
+					_xcvr_write_reg(RF24_CMD, RFn_CMD_TRXOFF);
+					_xcvr_write_reg(RF24_PAC, RFn_PAC_TXPWR_MAX | RFn_PAC_PACUR_MAX);
+
+					/* Set frequency */ // TODO PPM
+					uint32_t val = round((radio_settings.tx_freq-2366000000)/(406250.0/1024.0));
+					_xcvr_write_reg(RF24_CCF0L, (uint8_t)(val>>8));
+					_xcvr_write_reg(RF24_CCF0H, (uint8_t)(val>>16));
+					_xcvr_write_reg(RF24_CNL, (uint8_t)(val));
+					_xcvr_write_reg(RF24_CNM, RFn_CNM_CM_FINE3);
+
+					/* */
+					_xcvr_write_reg(RF24_TXCUTC, RFn_TXCUTC_PARAMP4 | RFn_TXCUTC_FLC_80K);
+					_xcvr_write_reg(RF24_TXDFE, RFn_TXDFE_RCUT_0_25 | RFn_TXDFE_SR_400K);
+					_xcvr_write_reg(RF24_CMD, RFn_CMD_TXPREP);
+					osDelay(5);
+					_xcvr_write_reg(RF24_CMD, RFn_CMD_TX);
+				}else{
+					LOG(CLI_LOG_RADIO, "Radio set in TX Sub-GHz.\r\n");
+					uint8_t readback;
+					// Sub GHz
+					// Disable 2.4G transceiver
+					_xcvr_write_reg(RF24_CMD, RFn_CMD_TRXOFF);
+
+					// Configure switch
+					HAL_GPIO_WritePin(SW_CTL1_GPIO_Port, SW_CTL1_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(SW_CTL2_GPIO_Port, SW_CTL2_Pin, GPIO_PIN_SET);
+
+					// Configure SubGHZ Transceiver
+					_xcvr_write_reg(RF09_CMD, RFn_CMD_TRXOFF);
+					_xcvr_write_reg(RF09_PAC, RFn_PAC_TXPWR_MAX | RFn_PAC_PACUR_MAX);
+
+					/* Set frequency */ // TODO PPM
+					uint32_t val = round((radio_settings.tx_freq-377000000)/(203125.0/2048.0));
+					_xcvr_write_reg(RF09_CCF0L, (uint8_t)(val>>8));
+					_xcvr_write_reg(RF09_CCF0H, (uint8_t)(val>>16));
+					_xcvr_write_reg(RF09_CNL, (uint8_t)(val));
+					_xcvr_write_reg(RF09_CNM, RFn_CNM_CM_FINE3);
+
+					/* */
+					_xcvr_write_reg(RF09_TXCUTC, RFn_TXCUTC_PARAMP4 | RFn_TXCUTC_FLC_80K);
+					_xcvr_write_reg(RF09_TXDFE, RFn_TXDFE_RCUT_0_25 | RFn_TXDFE_SR_400K);
+					_xcvr_write_reg(RF09_CMD, RFn_CMD_TXPREP);
+					osDelay(5);
+					_xcvr_write_reg(RF09_CMD, RFn_CMD_TX);
+				}
+
+			}else{
+				LOG(CLI_LOG_RADIO, "PTT released.\r\n");
+				// Back to rx
+				if(rx_band){
+					LOG(CLI_LOG_RADIO, "Radio set in RX 2.4G.\r\n");
+					// 2.4 G
+					// Disable sub-ghz transceiver
+					_xcvr_write_reg(RF09_CMD, RFn_CMD_TRXOFF);
+
+					// Configure switch
+					HAL_GPIO_WritePin(SW_CTL1_GPIO_Port, SW_CTL1_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(SW_CTL2_GPIO_Port, SW_CTL2_Pin, GPIO_PIN_RESET);
+
+					// Configure 2.4G transceiver
+					_xcvr_write_reg(RF24_CMD, RFn_CMD_TRXOFF);
+					_xcvr_write_reg(RF24_AGCC, RFn_AGCC_EN); // TODO manage AGC enabled/disabled
+					_xcvr_write_reg(RF24_AGCS, RFn_AGCS_TGT_n30);
+
+					/* Set frequency */ // TODO PPM
+					uint32_t val = round((radio_settings.tx_freq-2366000000)/(406250.0/1024.0));
+					_xcvr_write_reg(RF24_CCF0L, (uint8_t)(val>>8));
+					_xcvr_write_reg(RF24_CCF0H, (uint8_t)(val>>16));
+					_xcvr_write_reg(RF24_CNL, (uint8_t)(val));
+					_xcvr_write_reg(RF24_CNM, RFn_CNM_CM_FINE3);
+
+					_xcvr_write_reg(RF24_RXBWC, RFn_RXBWC_BW160K);
+					_xcvr_write_reg(RF24_RXDFE, RFn_RXDFE_RCUT_1 | RFn_RXDFE_SR_400K);
+
+					osDelay(5);
+					_xcvr_write_reg(RF24_CMD, RFn_CMD_RX);
+
+				}else{
+					LOG(CLI_LOG_RADIO, "Radio set in RX Sub-GHz.\r\n");
+					// Sub GHz
+					// Disable 2.4G transceiver
+					_xcvr_write_reg(RF24_CMD, RFn_CMD_TRXOFF);
+
+					// Configure switch
+					HAL_GPIO_WritePin(SW_CTL1_GPIO_Port, SW_CTL1_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(SW_CTL2_GPIO_Port, SW_CTL2_Pin, GPIO_PIN_SET);
+
+					// Configure Sub GHz transceiver
+					_xcvr_write_reg(RF09_CMD, RFn_CMD_TRXOFF);
+					_xcvr_write_reg(RF09_AGCC, RFn_AGCC_EN); // TODO manage AGC enabled/disabled
+					_xcvr_write_reg(RF09_AGCS, RFn_AGCS_TGT_n30);
+
+					/* Set frequency */ // TODO PPM
+					uint32_t val = round((radio_settings.tx_freq-377000000)/(203125.0/2048.0));
+					_xcvr_write_reg(RF09_CCF0L, (uint8_t)(val>>8));
+					_xcvr_write_reg(RF09_CCF0H, (uint8_t)(val>>16));
+					_xcvr_write_reg(RF09_CNL, (uint8_t)(val));
+					_xcvr_write_reg(RF09_CNM, RFn_CNM_CM_FINE3);
+
+					_xcvr_write_reg(RF09_RXBWC, RFn_RXBWC_BW160K);
+					_xcvr_write_reg(RF09_RXDFE, RFn_RXDFE_RCUT_1 | RFn_RXDFE_SR_400K);
+
+					osDelay(5);
+					_xcvr_write_reg(RF09_CMD, RFn_CMD_RX);
+
+				}
+			}
 
 		}else if(flag & RADIO_INITN_CHANGED){
 			osThreadFlagsClear(RADIO_INITN_CHANGED);
@@ -383,6 +525,8 @@ void StartTaskRadio(void *argument) {
 			LOG(CLI_LOG_RADIO, "XCVR VN is 0x%02x.\r\n", read);
 
 			_xcvr_write_reg(RF_IQIFC1, RF_IQIFC1_RF | RF_IQIFC1_SKEWDRV39);
+
+			osThreadFlagsSet(FPGA_thread_id, XCVR_CONFIG);
 
 			// Release SPI mutex and restore thread priority
 			osMutexRelease(SPI1AccessHandle);
@@ -729,5 +873,12 @@ void _ptt_timer_expired(void *argument){
 	uint32_t result = osThreadFlagsSet(FPGA_thread_id, RADIO_PTT);
 	if(result >= (1<<31)){
 		ERR("Could not process PTT pin change: osThreadFlagSet returned 0x%08lx.\r\n", result);
+	}
+}
+
+void radio_config(){
+	uint32_t result = osThreadFlagsSet(FPGA_thread_id, XCVR_CONFIG);
+	if(result >= (1<<31)){
+		LOG(CLI_LOG_RADIO, "Could configure transceiver: osThreadFlagSet returned %lu.\r\n", result);
 	}
 }
