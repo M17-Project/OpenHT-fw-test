@@ -300,14 +300,16 @@ void StartTaskRadio(void *argument) {
 					HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_RESET);
 					osDelay(5);
 					HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
+
+					_fpga_write_reg(CR_1, MOD_FM | ((uint16_t)0b010<<9) | PD_ON | DEM_FM | BAND_09);
+					_fpga_write_reg(CR_2, CH_RX_12_5 | FM_TX_W | ctcss_tx | STATE_TX);
+					_fpga_write_reg(MOD_IN, 0x8000);
+
 					_xcvr_write_reg(RF09_CMD, RFn_CMD_TX);
 					_xcvr_read_reg(RF09_CMD, &readback);
 					LOG(CLI_LOG_RADIO, "Readback RF09_CMD is 0x%02x.\r\n", readback);
 
-					_fpga_write_reg(CR_2, CH_RX_12_5 | FM_TX_W | ctcss_tx | STATE_TX);
-					_fpga_write_reg(CR_1, MOD_FM|((uint16_t)0b010<<9)|PD_ON|DEM_FM|BAND_09);
-					_fpga_write_reg(CR_2, CH_RX_12_5|CTCSS_TX_NONE|STATE_TX|FM_TX_N);
-					_fpga_write_reg(MOD_IN, 0x1234);
+
 
 					_xcvr_read_reg(RF09_STATE, &readback);
 					LOG(CLI_LOG_RADIO, "Readback RF09_STATE is 0x%02x.\r\n", readback);
@@ -665,6 +667,7 @@ void StartTaskRadio(void *argument) {
 				//CUSTOM_QSPI_Erase_Sector(i*SUBSECTOR_SIZE);
 				CUSTOM_QSPI_Erase_Sector(i*SUBSECTOR_SIZE);
 			}
+
 			LOG(CLI_LOG_FPGA, "Done!\r\n");
 
 			osThreadSetPriority(FPGA_thread_id, prev_prio);	// Restore the task's previous priority
