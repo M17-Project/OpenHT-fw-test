@@ -589,12 +589,26 @@ void StartTaskRadio(void *argument) {
 			fpga_bin_entry_t bin_entry;
 			FSIZE_t file_size;
 			UINT btf;
+			DIR dir;
+			FILINFO file_info;
 
-			if(f_open(&bin_file, "/fpga_00.bit", FA_OPEN_EXISTING | FA_READ) != FR_OK){
-				ERR("Error opening file fpga_00.bit.\r\n");
+			FRESULT fr = f_findfirst(&dir, &file_info, "", "*.bit");
+			if(fr == FR_OK){
+				if(f_open(&bin_file, file_info.fname, FA_OPEN_EXISTING | FA_READ) != FR_OK){
+					ERR("Error opening file %s.\r\n", file_info.fname);
+					osThreadSetPriority(NULL, prev_prio);
+					f_closedir(&dir);
+					continue;
+				}
+			}else{
+				ERR("No bitstream found on SD card.\r\n");
 				osThreadSetPriority(NULL, prev_prio);
+				f_closedir(&dir);
 				continue;
 			}
+			f_closedir(&dir);
+
+			LOG(CLI_LOG_FPGA, "Reading bitstream from file %s.\r\n", file_info.fname);
 
 			// Check that the bitstream size fits in the allocated space
 			file_size = f_size(&bin_file);
