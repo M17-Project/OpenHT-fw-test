@@ -1,13 +1,25 @@
 /*
- * TaskMicrophone.c
+ * Copyright (C) 2023 M17 Project and contributors
  *
- *  Created on: May 22, 2023
- *      Author: morga
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
 #include "task_microphone.h"
 
 #include "main.h"
+#include "task_audio_process.h"
 
 #include "cmsis_os2.h"
 #include "pdm2pcm.h"
@@ -40,7 +52,7 @@ uint8_t pcm_buffer[PCM_BYTES] = {0};
 uint8_t *pdm_reading_ptr;
 volatile bool save_file = false;
 
-__attribute__ ( (section(".sdram"))) uint8_t sound_buffer[2*1024*1024];
+//__attribute__ ( (section(".sdram"))) uint8_t sound_buffer[2*1024*1024];
 //__attribute__ ( (section(".sdram"))) uint8_t raw_pdm_storage[4*1024*1024];
 
 FRESULT save_wav_file(const char *filename, const uint8_t *data, const uint32_t number_bytes);
@@ -101,7 +113,7 @@ void StartMicrophonesTask(void *argument)
 
 		// if save_file is true, that means that PTT was released and we have to save the file.
 		if(save_file){
-			save_wav_file("rec.wav", sound_buffer, sound_buffer_offset);
+			//save_wav_file("rec.wav", sound_buffer, sound_buffer_offset);
 			sound_buffer_offset = 0;
 
 			/*FIL fp;
@@ -116,7 +128,9 @@ void StartMicrophonesTask(void *argument)
 				raw_buffer_offset += PDM_BYTES;
 			}*/
 
-			PDM_Filter(pdm_reading_ptr, sound_buffer + sound_buffer_offset, &pdm_handle);
+			//PDM_Filter(pdm_reading_ptr, sound_buffer + sound_buffer_offset, &pdm_handle);
+			PDM_Filter(pdm_reading_ptr, pcm_buffer, &pdm_handle);
+			write_voice_samples(pcm_buffer, PCM_SAMPLES);
 			sound_buffer_offset += PCM_BYTES;
 		}
 	}

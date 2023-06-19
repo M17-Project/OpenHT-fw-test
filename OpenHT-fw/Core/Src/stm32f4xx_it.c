@@ -269,6 +269,20 @@ void USART3_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles EXTI line[15:10] interrupts.
+  */
+void EXTI15_10_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI15_10_IRQn 0 */
+	/* Only PG14 (IO1) */
+	radio_send_samples();
+  /* USER CODE END EXTI15_10_IRQn 0 */
+  /* USER CODE BEGIN EXTI15_10_IRQn 1 */
+	__HAL_GPIO_EXTI_CLEAR_IT(IO1_Pin);
+  /* USER CODE END EXTI15_10_IRQn 1 */
+}
+
+/**
   * @brief This function handles SDIO global interrupt.
   */
 void SDIO_IRQHandler(void)

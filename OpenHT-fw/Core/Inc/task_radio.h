@@ -62,4 +62,6 @@ void ptt_toggled();
 
 void radio_config();
 
+void radio_send_samples();
+
 #endif /* INC_TASK_RADIO_H_ */

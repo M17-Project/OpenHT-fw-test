@@ -30,6 +30,7 @@
 #include "../radio/at86rf215.h"
 #include "radio_settings.h"
 #include "user_settings.h"
+#include "task_audio_process.h"
 
 #include "../shell/inc/sys_command_line.h"
 #include <fatfs.h>
@@ -140,7 +141,12 @@ void StartTaskRadio(void *argument) {
 		uint32_t flag = osThreadFlagsWait(RADIO_ALL_FLAGS, osFlagsNoClear, osWaitForever);
 
 		if(flag & FPGA_SEND_SAMPLES){
-
+			osThreadFlagsClear(FPGA_SEND_SAMPLES);
+			uint8_t samples[34];
+			*(uint16_t *)samples = MOD_IN;
+			read_voice_samples((uint16_t *)(samples+2), 16);
+			HAL_SPI_Transmit_IT(&hspi1, samples, 33);
+			wait_spi_xfer_done(WAIT_TIMEOUT);
 		}else if(flag & FPGA_FETCH_IQ){
 
 		}else if(flag & XCVR_CONFIG){
@@ -941,5 +947,12 @@ void radio_config(){
 	uint32_t result = osThreadFlagsSet(FPGA_thread_id, XCVR_CONFIG);
 	if(result >= (1<<31)){
 		LOG(CLI_LOG_RADIO, "Could configure transceiver: osThreadFlagSet returned %lu.\r\n", result);
+	}
+}
+
+void radio_send_samples(){
+	uint32_t result = osThreadFlagsSet(FPGA_thread_id, FPGA_SEND_SAMPLES);
+	if(result >= (1<<31)){
+		LOG(CLI_LOG_RADIO, "Could send samples: osThreadFlagSet returned %lu.\r\n", result);
 	}
 }

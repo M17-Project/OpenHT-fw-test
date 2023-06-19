@@ -1168,10 +1168,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : IO1_Pin IO2_Pin IO3_Pin IO0_Pin
-                           uSD_Detect_Pin */
-  GPIO_InitStruct.Pin = IO1_Pin|IO2_Pin|IO3_Pin|IO0_Pin
-                          |uSD_Detect_Pin;
+  /*Configure GPIO pin : IO1_Pin */
+  GPIO_InitStruct.Pin = IO1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(IO1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : IO2_Pin IO3_Pin IO0_Pin uSD_Detect_Pin */
+  GPIO_InitStruct.Pin = IO2_Pin|IO3_Pin|IO0_Pin|uSD_Detect_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
@@ -1288,6 +1292,9 @@ static void MX_GPIO_Init(void)
 
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 
