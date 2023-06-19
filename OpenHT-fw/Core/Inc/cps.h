@@ -56,14 +56,15 @@ static const uint16_t ctcss_tone[MAX_TONE_INDEX] =
 /**
  * Data structure defining an analog-specific channel information such as tones.
  */
-typedef struct
-{
+typedef union{
+	struct __attribute__((packed)) {
     uint8_t rxToneEn : 1,   //< RX CTC/DCS tone enable
             rxTone   : 7;   //< RX CTC/DCS tone index
     uint8_t txToneEn : 1,   //< TX CTC/DCS tone enable
             txTone   : 7;   //< TX CTC/DCS tone index
-}
-__attribute__((packed)) fmInfo_t; // 2B
+	};
+	uint16_t raw;
+} fmInfo_t; // 2B
 
 
 

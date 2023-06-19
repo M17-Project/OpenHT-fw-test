@@ -144,9 +144,9 @@ void radio_settings_init()
 
 	// FM Settings
 	if(EEEPROM_read_data(&radio_settings_eeeprom, FM_SETTINGS_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		*(uint16_t *)(&saved_settings.fm_settings) = (uint16_t)buffer;
+		saved_settings.fm_settings.raw = buffer;
 	}else{
-		*(uint16_t *)(&saved_settings.fm_settings) = (uint16_t)0;
+		saved_settings.fm_settings.raw = 0;
 	}
 
 	// set the saved_settings (which represents the contents of the EEEPROM) and the
@@ -204,7 +204,7 @@ void radio_settings_save()
 	}
 
 	// FM settings
-	if(*(uint16_t *)(&saved_settings.fm_settings) != *(uint16_t *)(&cached_settings.fm_settings)){
+	if(saved_settings.fm_settings.raw != cached_settings.fm_settings.raw){
 		EEEPROM_write_data(&radio_settings_eeeprom, FM_SETTINGS_EEEPROM_ADDR, (void *)(&(cached_settings.fm_settings)));
 	}
 
