@@ -62,6 +62,9 @@ EEEPROMHandle_t radio_settings_eeeprom = {
 
 static bool init_done = false;
 static radio_settings_t cached_settings;
+static radio_settings_t saved_settings;
+static user_callsign_func_t callsign_cb = NULL; // function which provides user callsign
+static radio_setting_changed_func_t radio_settings_rx_changed_cb = NULL; // function which is called when rx has changed
 
 void radio_settings_reset(){
 	bool res = EEEPROM_erase(&radio_settings_eeeprom);
@@ -75,6 +78,10 @@ void radio_settings_reset(){
 
 void radio_settings_init()
 {
+	if (init_done) {
+		return;
+	}
+
 	if(EEEPROM_init(&radio_settings_eeeprom) != EXIT_SUCCESS){
 		printf("Error initializing EEEPROM for user settings.\r\n");
 	}
@@ -82,144 +89,223 @@ void radio_settings_init()
 
 	// RX freq
 	if(EEEPROM_read_data(&radio_settings_eeeprom, RX_FREQ_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		cached_settings.rx_freq = buffer;
+		saved_settings.rx_freq = buffer;
 	}else{
-		cached_settings.rx_freq = 0;
+		saved_settings.rx_freq = 0;
 	}
 
 	// TX freq
 	if(EEEPROM_read_data(&radio_settings_eeeprom, TX_FREQ_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		cached_settings.tx_freq = buffer;
+		saved_settings.tx_freq = buffer;
 	}else{
-		cached_settings.tx_freq = 0;
+		saved_settings.tx_freq = 0;
 	}
 
 	// AGC and Power output
 	if(EEEPROM_read_data(&radio_settings_eeeprom, AGC_PWR_MODE_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		cached_settings.agc_target = buffer & 0xFF;
-		cached_settings.output_pwr = (buffer>>8) & 0xFF;
-		cached_settings.mode = (buffer>>16) & 0xFF;
-		//cached_settings.reserved = (buffer>>24) & 0xFF;
+		saved_settings.agc_target = buffer & 0xFF;
+		saved_settings.output_pwr = (buffer>>8) & 0xFF;
+		saved_settings.mode = (buffer>>16) & 0xFF;
 	}else{
-		cached_settings.agc_target = 0;
-		cached_settings.output_pwr = 0;
-		cached_settings.mode = 0;
-		//cached_settings.reserved = 0;
+		saved_settings.agc_target = 0;
+		saved_settings.output_pwr = 0;
+		saved_settings.mode = 0;
 	}
 
 	// M17 Callsign
 	// set func ptr to get user callsign
-	cached_settings.m17_callsign = user_callsign;
+	callsign_cb = user_settings_callsign;
 
 	// DST letters 1 to 4
 	if(EEEPROM_read_data(&radio_settings_eeeprom, M17_DST1_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		*(uint32_t *)(cached_settings.m17_dst) = buffer;
+		*(uint32_t *)(saved_settings.m17_dst) = buffer;
 	}else{
-		cached_settings.m17_dst[0] = '\0';
+		saved_settings.m17_dst[0] = '\0';
 	}
 	// DST letters 5 to 8
 	if(EEEPROM_read_data(&radio_settings_eeeprom, M17_DST2_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		*(uint32_t *)(cached_settings.m17_dst+4) = buffer;
+		*(uint32_t *)(saved_settings.m17_dst+4) = buffer;
 	}else{
-		cached_settings.m17_dst[4] = '\0';
+		saved_settings.m17_dst[4] = '\0';
 	}
 	// DST letters 9-10
 	if(EEEPROM_read_data(&radio_settings_eeeprom, M17_DST3_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		*(uint16_t *)(cached_settings.m17_dst+8) = (uint16_t)buffer;
+		*(uint16_t *)(saved_settings.m17_dst+8) = (uint16_t)buffer;
 	}else{
-		cached_settings.m17_dst[8] = '\0';
+		saved_settings.m17_dst[8] = '\0';
 	}
 
 	// M17 Info
 	if(EEEPROM_read_data(&radio_settings_eeeprom, M17_INFO_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		*(uint32_t *)(&cached_settings.m17_info) = buffer;
+		*(uint32_t *)(&saved_settings.m17_info) = buffer;
 	}else{
-		*(uint32_t *)(&cached_settings.m17_info) = 0;
+		*(uint32_t *)(&saved_settings.m17_info) = 0;
 	}
 
 	// FM Settings
 	if(EEEPROM_read_data(&radio_settings_eeeprom, FM_SETTINGS_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		*(uint16_t *)(&cached_settings.fm_settings) = (uint16_t)buffer;
+		*(uint16_t *)(&saved_settings.fm_settings) = (uint16_t)buffer;
 	}else{
-		*(uint16_t *)(&cached_settings.fm_settings) = (uint16_t)0;
+		*(uint16_t *)(&saved_settings.fm_settings) = (uint16_t)0;
 	}
+
+	// set the saved_settings (which represents the contents of the EEEPROM) and the
+	// cached_settings (which is the volatile settings) to be equal
+	memcpy(&cached_settings, &saved_settings, sizeof(radio_settings_t));
 
 	init_done = true;
 }
 
-void radio_settings_save(const radio_settings_t *settings)
+void radio_settings_save()
 {
 	uint32_t buffer;
 	// RX freq
-	if(cached_settings.rx_freq != settings->rx_freq){
-		EEEPROM_write_data(&radio_settings_eeeprom, RX_FREQ_EEEPROM_ADDR, &(settings->rx_freq) );
-		cached_settings.rx_freq = settings->rx_freq;
+	if(saved_settings.rx_freq != cached_settings.rx_freq){
+		EEEPROM_write_data(&radio_settings_eeeprom, RX_FREQ_EEEPROM_ADDR, &(cached_settings.rx_freq) );
 	}
 
 	// TX freq
-	if(cached_settings.tx_freq != settings->tx_freq){
-		EEEPROM_write_data(&radio_settings_eeeprom, TX_FREQ_EEEPROM_ADDR, (void *)(&(settings->tx_freq)));
-		cached_settings.tx_freq = settings->tx_freq;
+	if(saved_settings.tx_freq != cached_settings.tx_freq){
+		EEEPROM_write_data(&radio_settings_eeeprom, TX_FREQ_EEEPROM_ADDR, (void *)(&(cached_settings.tx_freq)));
 	}
 
 	// AGC, Power output, OpMode
-	if( (cached_settings.agc_target != settings->agc_target) ||
-		(cached_settings.output_pwr != settings->output_pwr) ||
-		(cached_settings.mode != settings->mode) ){
+	if( (saved_settings.agc_target != cached_settings.agc_target) ||
+		(saved_settings.output_pwr != cached_settings.output_pwr) ||
+		(saved_settings.mode != cached_settings.mode) ){
 		buffer = cached_settings.agc_target +
-				( ( (uint16_t)settings->output_pwr ) << 8 ) +
-				( ( (uint32_t)settings->mode ) << 16 );
+				( ( (uint16_t)cached_settings.output_pwr ) << 8 ) +
+				( ( (uint32_t)cached_settings.mode ) << 16 );
 		EEEPROM_write_data(&radio_settings_eeeprom, AGC_PWR_MODE_EEEPROM_ADDR, (void *)(&buffer));
-		cached_settings.agc_target = settings->agc_target;
-		cached_settings.output_pwr = settings->output_pwr;
-		cached_settings.mode = settings->mode;
-		//cached_settings.reserved = settings->reserved;
 	}
 
 	// M17 Callsign
 	// using a func ptr from the user_settings
 
 	// M17 DST
-	if(strcmp(settings->m17_dst, cached_settings.m17_dst) != 0){
+	if(strcmp(cached_settings.m17_dst, saved_settings.m17_dst) != 0){
 		// Compare first four letters
-		if(*(uint32_t *)(settings->m17_dst) != *(uint32_t *)(cached_settings.m17_dst)){
-			EEEPROM_write_data(&radio_settings_eeeprom, M17_DST1_EEEPROM_ADDR, (void *)settings->m17_dst);
+		if(*(uint32_t *)(cached_settings.m17_dst) != *(uint32_t *)(saved_settings.m17_dst)){
+			EEEPROM_write_data(&radio_settings_eeeprom, M17_DST1_EEEPROM_ADDR, (void *)cached_settings.m17_dst);
 		}
 		// Compare letters 5 to 8
-		if(*(uint32_t *)(settings->m17_dst+4) != *(uint32_t *)(cached_settings.m17_dst+4)){
-			EEEPROM_write_data(&radio_settings_eeeprom, M17_DST2_EEEPROM_ADDR, (void *)(settings->m17_dst+4));
+		if(*(uint32_t *)(cached_settings.m17_dst+4) != *(uint32_t *)(saved_settings.m17_dst+4)){
+			EEEPROM_write_data(&radio_settings_eeeprom, M17_DST2_EEEPROM_ADDR, (void *)(cached_settings.m17_dst+4));
 		}
 		// Compare letters 9-10
-		if(*(uint16_t *)(settings->m17_dst+8) != *(uint16_t *)(cached_settings.m17_dst+8)){
-			EEEPROM_write_data(&radio_settings_eeeprom, M17_DST3_EEEPROM_ADDR, (void *)(settings->m17_dst+8));
+		if(*(uint16_t *)(cached_settings.m17_dst+8) != *(uint16_t *)(saved_settings.m17_dst+8)){
+			EEEPROM_write_data(&radio_settings_eeeprom, M17_DST3_EEEPROM_ADDR, (void *)(cached_settings.m17_dst+8));
 		}
-		memcpy(cached_settings.m17_dst, settings->m17_dst, 10);
 	}
 
 	// M17 info
-	if(*(uint32_t *)(&cached_settings.m17_info) != *(uint32_t *)(&settings->m17_info)){
-		EEEPROM_write_data(&radio_settings_eeeprom, M17_INFO_EEEPROM_ADDR, (void *)(&(settings->m17_info)));
-		*(uint32_t *)(&cached_settings.m17_info) = *(uint32_t *)(&settings->m17_info);
+	if(*(uint32_t *)(&saved_settings.m17_info) != *(uint32_t *)(&cached_settings.m17_info)){
+		EEEPROM_write_data(&radio_settings_eeeprom, M17_INFO_EEEPROM_ADDR, (void *)(&(cached_settings.m17_info)));
 	}
 
 	// FM settings
-	if(*(uint16_t *)(&cached_settings.fm_settings) != *(uint16_t *)(&settings->fm_settings)){
-		EEEPROM_write_data(&radio_settings_eeeprom, FM_SETTINGS_EEEPROM_ADDR, (void *)(&(settings->fm_settings)));
-		*(uint16_t *)(&cached_settings.fm_settings) = *(uint16_t *)(&settings->fm_settings);
+	if(*(uint16_t *)(&saved_settings.fm_settings) != *(uint16_t *)(&cached_settings.fm_settings)){
+		EEEPROM_write_data(&radio_settings_eeeprom, FM_SETTINGS_EEEPROM_ADDR, (void *)(&(cached_settings.fm_settings)));
 	}
 
+	// update the saved_settings to be equal to cached_settings now that the EEEPROM has been updated.
+	memcpy(&saved_settings, &cached_settings, sizeof(radio_settings_t));
 }
 
-void radio_settings_get(radio_settings_t *settings)
+void radio_settings_subscribe_freq_changed(radio_setting_changed_func_t cb)
 {
-
-	BSP_LED_Off(LED_ORANGE);
-	BSP_LED_Off(LED_GREEN);
-
-	if(!init_done){
-		radio_settings_init();
-	}
-
-	memcpy(settings, &cached_settings, sizeof(radio_settings_t));
+	radio_settings_rx_changed_cb = cb;
 }
 
+void radio_settings_set_rx_freq (freq_t freq)
+{
+	cached_settings.rx_freq = freq;
+
+	if (radio_settings_rx_changed_cb != NULL) {
+		radio_settings_rx_changed_cb();
+	}
+}
+
+freq_t radio_settings_get_rx_freq (void)
+{
+	return cached_settings.rx_freq;
+}
+
+void radio_settings_set_tx_freq (freq_t freq)
+{
+	cached_settings.tx_freq = freq;
+}
+
+freq_t radio_settings_get_tx_freq (void)
+{
+	return cached_settings.tx_freq;
+}
+
+void radio_settings_set_agc_target (uint8_t agc_target)
+{
+	cached_settings.agc_target = agc_target;
+}
+
+uint8_t radio_settings_get_agc_target (void)
+{
+	return cached_settings.agc_target;
+}
+
+void radio_settings_set_output_pwr (uint8_t output_pwr)
+{
+	cached_settings.output_pwr = output_pwr;
+}
+
+uint8_t radio_settings_get_output_pwr (void)
+{
+	return cached_settings.output_pwr;
+}
+
+void radio_settings_set_mode (openht_mode_t mode)
+{
+	cached_settings.mode = mode;
+}
+
+openht_mode_t radio_settings_get_mode (void)
+{
+	return cached_settings.mode;
+}
+
+const char * radio_settings_get_m17_callsign(void)
+{
+	if (callsign_cb != NULL) {
+		return callsign_cb();
+	}
+
+	return NULL;
+}
+
+void radio_settings_set_m17_dst (const char * m17_dst)
+{
+	strcpy(cached_settings.m17_dst, m17_dst);
+}
+
+const char * radio_settings_get_m17_dst (void)
+{
+	return cached_settings.m17_dst;
+}
+
+void radio_settings_set_m17_info (m17Info_t m17_info)
+{
+	cached_settings.m17_info = m17_info;
+}
+
+m17Info_t radio_settings_get_m17_info (void)
+{
+	return cached_settings.m17_info;
+}
+
+void radio_settings_set_fm_settings (fmInfo_t fm_settings)
+{
+	cached_settings.fm_settings = fm_settings;
+}
+
+fmInfo_t radio_settings_get_fm_settings (void)
+{
+	return cached_settings.fm_settings;
+}

@@ -44,15 +44,15 @@ static void _update_freq_text(void);
 
 void init_freq_change_panel()
 {
-	rx_freq = radio_settings.rx_freq;
+	rx_freq = radio_settings_get_rx_freq();
 
 	if (user_settings.split_mode) {
 		split_mode = true;
-		tx_freq = radio_settings.tx_freq;
+		tx_freq = radio_settings_get_tx_freq();
 		lv_obj_add_state(ui_split_freq_cb, LV_STATE_CHECKED);
 	} else {
 		split_mode = false;
-		tx_freq = radio_settings.rx_freq;
+		tx_freq = radio_settings_get_rx_freq();
 		lv_obj_clear_state(ui_split_freq_cb, LV_STATE_CHECKED);
 	}
 
@@ -77,11 +77,12 @@ void init_freq_change_panel()
 	lv_obj_add_flag(ui_fm_settings_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_add_flag(ui_m17_settings_panel, LV_OBJ_FLAG_HIDDEN);
 
-	if (radio_settings.mode == OpMode_NFM ||
-			radio_settings.mode == OpMode_FM ||
-			radio_settings.mode == OpMode_WFM) {
+	openht_mode_t mode = radio_settings_get_mode();
+	if (mode == OpMode_NFM ||
+			mode == OpMode_FM ||
+			mode == OpMode_WFM) {
 		lv_obj_clear_flag(ui_fm_settings_panel, LV_OBJ_FLAG_HIDDEN);
-	} else if (radio_settings.mode == OpMode_M17) {
+	} else if (mode == OpMode_M17) {
 		lv_obj_clear_flag(ui_m17_settings_panel, LV_OBJ_FLAG_HIDDEN);
 	}
 
@@ -113,11 +114,11 @@ void on_freq_ok_clicked(lv_event_t *e)
 	lv_obj_add_flag(ui_freq_change_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
 
-	radio_settings.rx_freq = rx_freq;
-	radio_settings.tx_freq = tx_freq;
+	radio_settings_set_rx_freq(rx_freq);
+	radio_settings_set_tx_freq(tx_freq);
 	user_settings.split_mode = split_mode;
 
-	radio_settings_save(&radio_settings);
+	radio_settings_save();//&radio_settings);
 	user_settings_save(&user_settings);
 
 	char rx_buffer[10];

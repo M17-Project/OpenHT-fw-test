@@ -175,7 +175,7 @@ void user_settings_get(user_settings_t *settings)
 	memcpy(settings, &cached_settings, sizeof(user_settings_t));
 }
 
-const char * user_callsign()
+const char * user_settings_callsign()
 {
 	if(!init_done){
 		user_settings_init();

@@ -48,7 +48,6 @@ extern "C" {
 
 extern char callsign_str[10];
 extern user_settings_t user_settings;
-extern radio_settings_t radio_settings;
 extern char * callsign_prefix;
 extern char * mode_prefix;
 extern char * ctcss_options_str;

@@ -130,17 +130,17 @@ void custom_ui_init(void)
 
 
 	// GET STORED SETTINGS AND UPDATE UI
-	radio_settings_get(&radio_settings);
+	radio_settings_init(); //get(&radio_settings);
 	user_settings_get(&user_settings);
 
 	char rx_buffer[10];
 	//get_str_from_freq(user_settings.rx_freq, rx_buffer, -1);
-	get_display_str_from_freq(radio_settings.rx_freq, rx_buffer);
+	get_display_str_from_freq(radio_settings_get_rx_freq(), rx_buffer);
 	lv_label_set_text_fmt(ui_rx_display_label, "%s", rx_buffer);
 
 	char tx_buffer[10];
 	//get_str_from_freq(user_settings.tx_freq, tx_buffer, -1);
-	get_display_str_from_freq(radio_settings.tx_freq, tx_buffer);
+	get_display_str_from_freq(radio_settings_get_tx_freq(), tx_buffer);
 	lv_label_set_text_fmt(ui_tx_display_label, "%s", tx_buffer);
 
 	strcpy(callsign_str, user_settings.callsign);
@@ -171,7 +171,7 @@ void custom_ui_init(void)
 	mode_prefix = malloc(strlen(label_str) + 1);
 	strcpy(mode_prefix, label_str);
 
-	lv_label_set_text_fmt(ui_header_mode_label, "%s%s", mode_prefix, openht_get_mode_str(radio_settings.mode));
+	lv_label_set_text_fmt(ui_header_mode_label, "%s%s", mode_prefix, openht_get_mode_str(radio_settings_get_mode()));
 }
 
 void on_screen_pressed(lv_event_t *e)

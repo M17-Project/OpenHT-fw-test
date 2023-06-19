@@ -45,7 +45,7 @@ void user_settings_save(const user_settings_t *settings);
 void user_settings_get(user_settings_t *settings);
 
 typedef const char * (*user_callsign_func_t)();
-const char * user_callsign();
+const char * user_settings_callsign();
 
 #ifdef __cplusplus
 }
