@@ -25,6 +25,7 @@ extern "C" {
 
 #include "stm32469i_discovery.h"
 #include "stm32f4xx_hal.h"
+#include "radio_settings.h"
 #include "user_settings.h"
 #include <lvgl.h>
 #include "../../Src/ui/sls_generated/ui.h"
@@ -46,7 +47,7 @@ extern "C" {
 #define GIG_POS 1
 
 extern char callsign_str[10];
-extern settings_t user_settings;
+extern user_settings_t user_settings;
 extern char * callsign_prefix;
 extern char * mode_prefix;
 extern char * ctcss_options_str;

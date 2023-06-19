@@ -54,7 +54,7 @@ typedef struct __attribute((__packed__)){
 extern SPI_HandleTypeDef 	hspi1;
 extern osMutexId_t 			SPI1AccessHandle;
 extern osMutexId_t 			NORAccessHandle;
-extern settings_t			user_settings;
+extern user_settings_t		user_settings;
 
 osThreadId_t 				FPGA_thread_id 			= NULL;
 uint32_t 					bitstream_load_address 	= 0x80000000;
@@ -63,7 +63,7 @@ osTimerId_t					ptt_debounce_timer = NULL;
 const osTimerAttr_t			ptt_debounce_timer_attr = {
 		.name = "ptt_debounce"
 };
-radio_settings_t 			radio_settings;
+
 uint8_t 					ctcss_tx = 0;
 uint8_t 					rx_band = 0;
 uint8_t						tx_band = 0;
@@ -103,6 +103,11 @@ void 			_ptt_timer_expired(void *argument);
 
 #define SPI_PORT_ACTIVATION_KEY	0x8AF4C6A4 // Swapped for endianness
 
+void rx_changed_cb()
+{
+	// TODO: implement the rx freq change callback
+}
+
 void StartTaskRadio(void *argument) {
 	FPGA_thread_id = osThreadGetId();
 
@@ -137,8 +142,16 @@ void StartTaskRadio(void *argument) {
 
 	ptt_debounce_timer = osTimerNew(_ptt_timer_expired, osTimerOnce, NULL, &ptt_debounce_timer_attr);
 
+	// init
+	radio_settings_init();
+	radio_settings_subscribe_freq_changed(rx_changed_cb);
+
 	for(;;){
 		uint32_t flag = osThreadFlagsWait(RADIO_ALL_FLAGS, osFlagsNoClear, osWaitForever);
+
+		openht_mode_t mode = radio_settings_get_mode();
+		freq_t rx_freq = radio_settings_get_rx_freq();
+		freq_t tx_freq = radio_settings_get_tx_freq();
 
 		if(flag & FPGA_SEND_SAMPLES){
 			osThreadFlagsClear(FPGA_SEND_SAMPLES);
@@ -153,24 +166,19 @@ void StartTaskRadio(void *argument) {
 			osThreadFlagsClear(XCVR_CONFIG);
 			LOG(CLI_LOG_RADIO, "Configuring XCVR.\r\n");
 
-			radio_settings_get(&radio_settings);
-			radio_settings.mode = user_settings.mode;
-			radio_settings.tx_freq = user_settings.tx_freq;
-			radio_settings.rx_freq = user_settings.rx_freq;
-			radio_settings.fm_settings.rxTone = 0;
-			radio_settings.fm_settings.rxToneEn = 0;
-			radio_settings.fm_settings.txTone = 0;
-			radio_settings.fm_settings.txToneEn = 0;
+			// TODO: M17 mode support. This will get user callsign:
+			//const char * test = radio_settings_get_m17_callsign();
+
 
 			LOG(CLI_LOG_RADIO, "Setting radio in mode %d. RX freq = %lu, TX freq = %lu.\r\n",
-					radio_settings.mode, radio_settings.rx_freq, radio_settings.tx_freq);
+					mode, rx_freq, tx_freq);
 
 			rx_band = 0;
 			tx_band = 0; // Band = 0 for sub-ghz and = 1 for 2.4G
-			if(radio_settings.rx_freq > 1e9){
+			if(rx_freq > 1e9){
 				rx_band = 1;
 			}
-			if(radio_settings.tx_freq > 1e9){
+			if(tx_freq > 1e9){
 				tx_band = 1;
 			}
 
@@ -191,18 +199,18 @@ void StartTaskRadio(void *argument) {
 				HAL_GPIO_WritePin(SW_CTL2_GPIO_Port, SW_CTL2_Pin, GPIO_PIN_RESET);
 			}
 
-			switch(radio_settings.mode){
+			switch(mode){
 			case OpMode_FM:
 				// Config...
 				// Configure FPGA
 				_fpga_write_reg(CR_1, MOD_FM | IO0_DRDY | PD_ON | DEM_FM | ( (1-rx_band)*BAND_09 + (rx_band*BAND_24) ) );
 				// Todo determine if we are in FN_N or FM_W
-
-				ctcss_tx = ( ( radio_settings.fm_settings.txToneEn?radio_settings.fm_settings.txTone:0)<<2);
+				fmInfo_t fm_settings = radio_settings_get_fm_settings();
+				ctcss_tx = ( ( fm_settings.txToneEn?fm_settings.txTone:0)<<2);
 				break;
 
 			default:
-				LOG(CLI_LOG_RADIO, "Mode %d not implemented yet.\r\n", radio_settings.mode);
+				LOG(CLI_LOG_RADIO, "Mode %d not implemented yet.\r\n", mode);
 				break;
 			}
 
@@ -237,7 +245,7 @@ void StartTaskRadio(void *argument) {
 					_xcvr_write_reg(RF24_PAC, RFn_PAC_TXPWR_MAX | RFn_PAC_PACUR_MAX);
 
 					/* Set frequency */ // TODO PPM
-					uint32_t val = round((radio_settings.tx_freq-2366000000)/(406250.0/1024.0));
+					uint32_t val = round((rx_freq-2366000000)/(406250.0/1024.0));
 					_xcvr_write_reg(RF24_CCF0L, (uint8_t)(val>>8));
 					_xcvr_write_reg(RF24_CCF0H, (uint8_t)(val>>16));
 					_xcvr_write_reg(RF24_CNL, (uint8_t)(val));
@@ -273,7 +281,7 @@ void StartTaskRadio(void *argument) {
 					LOG(CLI_LOG_RADIO, "Readback RF09_PAC is 0x%02x.\r\n", readback);
 
 					/* Set frequency */ // TODO PPM
-					uint32_t val = round((radio_settings.tx_freq*(1.0+ppm*1e-6)-377000000)/(203125.0/2048.0));
+					uint32_t val = round((tx_freq-377000000)/(203125.0/2048.0));
 					_xcvr_write_reg(RF09_CCF0L, (uint8_t)(val>>8));
 					_xcvr_read_reg(RF09_CCF0L, &readback);
 					LOG(CLI_LOG_RADIO, "Readback RF09_CCF0L is 0x%02x.\r\n", readback);
@@ -344,7 +352,7 @@ void StartTaskRadio(void *argument) {
 					_xcvr_write_reg(RF24_AGCS, RFn_AGCS_TGT_n30);
 
 					/* Set frequency */ // TODO PPM
-					uint32_t val = round((radio_settings.tx_freq-2366000000)/(406250.0/1024.0));
+					uint32_t val = round((tx_freq-2366000000)/(406250.0/1024.0));
 					_xcvr_write_reg(RF24_CCF0L, (uint8_t)(val>>8));
 					_xcvr_write_reg(RF24_CCF0H, (uint8_t)(val>>16));
 					_xcvr_write_reg(RF24_CNL, (uint8_t)(val));
@@ -372,7 +380,7 @@ void StartTaskRadio(void *argument) {
 					_xcvr_write_reg(RF09_AGCS, RFn_AGCS_TGT_n30);
 
 					/* Set frequency */ // TODO PPM
-					uint32_t val = round((radio_settings.tx_freq-377000000)/(203125.0/2048.0));
+					uint32_t val = round((tx_freq-377000000)/(203125.0/2048.0));
 					_xcvr_write_reg(RF09_CCF0L, (uint8_t)(val>>8));
 					_xcvr_write_reg(RF09_CCF0H, (uint8_t)(val>>16));
 					_xcvr_write_reg(RF09_CNL, (uint8_t)(val));

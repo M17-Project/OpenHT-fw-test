@@ -36,16 +36,11 @@
 #include <stdbool.h>
 #include <string.h>
 
-
-#define CALLSIGN1_EEEPROM_ADDR		0x00	// Contains CS letters [1:4]
-#define CALLSIGN2_EEEPROM_ADDR		0x01	// Contains CS letters [5:8]
-#define CALLSIGN3_EEEPROM_ADDR 		0x02	// Contains CS letters [9:10]
-#define TX_FREQ_EEEPROM_ADDR		0x03	// Tx frequency (in Hz)
-#define RX_FREQ_EEEPROM_ADDR		0x04	// Rx frequency (in Hz)
-#define AV_MODE_EEEPROM_ADDR		0x05	// Contains Audio volume and mode
-#define CONFIG_BITS_EEEPROM_ADDR	0x06	// Configuration bool values
-
-
+static const uint8_t CALLSIGN1_EEEPROM_ADDR =		0x00;	// Contains CS letters [1:4]
+static const uint8_t CALLSIGN2_EEEPROM_ADDR =		0x01;	// Contains CS letters [5:8]
+static const uint8_t CALLSIGN3_EEEPROM_ADDR = 		0x02;	// Contains CS letters [9:10]
+static const uint8_t AV_MODE_EEEPROM_ADDR =			0x03;	// Contains Audio volume and reserved
+static const uint8_t CONFIG_BITS_EEEPROM_ADDR =		0x04;	// Configuration bool values
 
 EEEPROMHandle_t user_settings_eeeprom = {
 		.address_size = EEEPROM_ADDRESS_1BYTE,
@@ -61,7 +56,7 @@ EEEPROMHandle_t user_settings_eeeprom = {
 };
 
 static bool init_done = false;
-static settings_t cached_settings;
+static user_settings_t cached_settings;
 
 void user_settings_reset(){
 	bool res = EEEPROM_erase(&user_settings_eeeprom);
@@ -103,30 +98,13 @@ void user_settings_init()
 		cached_settings.callsign[8] = '\0';
 	}
 
-
-	// RX freq
-	if(EEEPROM_read_data(&user_settings_eeeprom, RX_FREQ_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		cached_settings.rx_freq = buffer;
-	}else{
-		cached_settings.rx_freq = 0;
-	}
-
-
-	// TX freq
-	if(EEEPROM_read_data(&user_settings_eeeprom, TX_FREQ_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		cached_settings.tx_freq = buffer;
-	}else{
-		cached_settings.tx_freq = 0;
-	}
-
-
-	// Audio volume and mode
+	// Audio volume
 	if(EEEPROM_read_data(&user_settings_eeeprom, AV_MODE_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		cached_settings.audio_vol = buffer & 0xFF;
-		cached_settings.mode = (buffer>>8) & 0xFF;
+		// cached_settings.reserved = (buffer>>8) & 0xFF;
 	}else{
 		cached_settings.audio_vol = 0;
-		cached_settings.mode = OpMode_FM;
+		// cached_settings.reserved = 0;
 	}
 
 	// config bits
@@ -143,7 +121,7 @@ void user_settings_init()
 	init_done = true;
 }
 
-void user_settings_save(const settings_t *settings)
+void user_settings_save(const user_settings_t *settings)
 {
 	uint32_t buffer;
 	if(strcmp(settings->callsign, cached_settings.callsign) != 0){
@@ -162,12 +140,13 @@ void user_settings_save(const settings_t *settings)
 		memcpy(cached_settings.callsign, settings->callsign, 10);
 	}
 
-	if( (cached_settings.audio_vol != settings->audio_vol)
-			|| (cached_settings.mode != settings->mode) ){
-		buffer = settings->audio_vol + ( ( (uint16_t)settings->mode ) << 8 );
+	if( (cached_settings.audio_vol != settings->audio_vol) ){
+			//|| (cached_settings.reserved != settings->reserved) ){
+		//buffer = settings->audio_vol + ( ( (uint16_t)settings->reserved ) << 8 );
+		buffer = settings->audio_vol;
 		EEEPROM_write_data(&user_settings_eeeprom, AV_MODE_EEEPROM_ADDR, (void *)(&buffer));
 		cached_settings.audio_vol = settings->audio_vol;
-		cached_settings.mode = settings->mode;
+		//cached_settings.reserved = settings->reserved;
 	}
 
 	if( (cached_settings.use_freq_offset != settings->use_freq_offset)
@@ -181,19 +160,9 @@ void user_settings_save(const settings_t *settings)
 		cached_settings.split_mode = settings->split_mode;
 		cached_settings.use_soft_ptt = settings->use_soft_ptt;
 	}
-
-	if(cached_settings.rx_freq != settings->rx_freq){
-		EEEPROM_write_data(&user_settings_eeeprom, RX_FREQ_EEEPROM_ADDR, &(settings->rx_freq) );
-		cached_settings.rx_freq = settings->rx_freq;
-	}
-
-	if(cached_settings.tx_freq != settings->tx_freq){
-		EEEPROM_write_data(&user_settings_eeeprom, TX_FREQ_EEEPROM_ADDR, (void *)(&(settings->tx_freq)));
-		cached_settings.tx_freq = settings->tx_freq;
-	}
 }
 
-void user_settings_get(settings_t *settings)
+void user_settings_get(user_settings_t *settings)
 {
 
 	BSP_LED_Off(LED_ORANGE);
@@ -203,6 +172,16 @@ void user_settings_get(settings_t *settings)
 		user_settings_init();
 	}
 
-	memcpy(settings, &cached_settings, sizeof(settings_t));
+	memcpy(settings, &cached_settings, sizeof(user_settings_t));
 }
+
+const char * user_settings_callsign()
+{
+	if(!init_done){
+		user_settings_init();
+	}
+
+	return (const char *) cached_settings.callsign;
+}
+
 

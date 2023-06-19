@@ -25,6 +25,7 @@ extern "C" {
 
 #include "cps.h"
 #include "openht_types.h"
+#include "user_settings.h"
 
 #include "stm32469i_discovery.h" /* DISCOVERY includes component */
 #include "stm32469i_discovery_qspi.h"
@@ -39,9 +40,7 @@ typedef struct
 	uint8_t output_pwr; 	// AGC_PWR_MODE_EEEPROM_ADDR
 
 	openht_mode_t mode; 	// AGC_PWR_MODE_EEEPROM_ADDR
-	//uint8_t reserved; 	// AGC_PWR_MODE_EEEPROM_ADDR
 
-	char m17_callsign[10];	// M17_CALLSIGN[1][2][3]_EEEPROM_ADDR
 	char m17_dst[10];	 	// M17_DST[1][2][3]_EEEPROM_ADDR
 	m17Info_t m17_info;		// M17_INFO_EEEPROM_ADDR
 
@@ -50,8 +49,37 @@ typedef struct
 } __attribute__((packed)) radio_settings_t; // pack the struct into smallest data size
 
 void radio_settings_reset();
-void radio_settings_save(const radio_settings_t *settings);
-void radio_settings_get(radio_settings_t *settings);
+void radio_settings_init();
+void radio_settings_save();
+
+void radio_settings_set_rx_freq (freq_t freq);
+typedef void (*radio_setting_changed_func_t)();
+void radio_settings_subscribe_freq_changed();
+
+freq_t radio_settings_get_rx_freq (void);
+
+void radio_settings_set_tx_freq (freq_t freq);
+freq_t radio_settings_get_tx_freq (void);
+
+void radio_settings_set_agc_target (uint8_t agc_target);
+uint8_t radio_settings_get_agc_target (void);
+
+void radio_settings_set_output_pwr (uint8_t output_pwr);
+uint8_t radio_settings_get_output_pwr (void);
+
+void radio_settings_set_mode (openht_mode_t mode);
+openht_mode_t radio_settings_get_mode (void);
+
+const char * radio_settings_get_m17_callsign(void);
+
+void radio_settings_set_m17_dst (const char * m17_dst);
+const char * radio_settings_get_m17_dst (void);
+
+void radio_settings_set_m17_info (m17Info_t m17_info);
+m17Info_t radio_settings_get_m17_info (void);
+
+void radio_settings_set_fm_settings (fmInfo_t fm_settings);
+fmInfo_t radio_settings_get_fm_settings (void);
 
 #ifdef __cplusplus
 }
