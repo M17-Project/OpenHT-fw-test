@@ -98,6 +98,9 @@ QSPI_HandleTypeDef hqspi;
 
 RNG_HandleTypeDef hrng;
 
+SAI_HandleTypeDef hsai_BlockA1;
+DMA_HandleTypeDef hdma_sai1_a;
+
 SD_HandleTypeDef hsd;
 DMA_HandleTypeDef hdma_sdio;
 
@@ -184,6 +187,7 @@ static void MX_TIM4_Init(void);
 static void MX_CRC_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_RNG_Init(void);
+static void MX_SAI1_Init(void);
 void StartGeneralTask(void *argument);
 void StartLVGLTask(void *argument);
 extern void StartMicrophonesTask(void *argument);
@@ -244,6 +248,7 @@ int main(void)
   MX_CRC_Init();
   MX_I2C2_Init();
   MX_RNG_Init();
+  MX_SAI1_Init();
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(MAIN_KILL_GPIO_Port, MAIN_KILL_Pin, GPIO_PIN_SET);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
@@ -413,11 +418,16 @@ void PeriphCommonClock_Config(void)
 
   /** Initializes the peripherals clock
   */
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SDIO|RCC_PERIPHCLK_CLK48
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2S|RCC_PERIPHCLK_SAI_PLLI2S
+                              |RCC_PERIPHCLK_SDIO|RCC_PERIPHCLK_CLK48
                               |RCC_PERIPHCLK_LTDC;
+  PeriphClkInitStruct.PLLI2S.PLLI2SN = 192;
+  PeriphClkInitStruct.PLLI2S.PLLI2SR = 5;
+  PeriphClkInitStruct.PLLI2S.PLLI2SQ = 5;
   PeriphClkInitStruct.PLLSAI.PLLSAIN = 240;
   PeriphClkInitStruct.PLLSAI.PLLSAIR = 7;
   PeriphClkInitStruct.PLLSAI.PLLSAIP = RCC_PLLSAIP_DIV8;
+  PeriphClkInitStruct.PLLI2SDivQ = 1;
   PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_2;
   PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48CLKSOURCE_PLLSAIP;
   PeriphClkInitStruct.SdioClockSelection = RCC_SDIOCLKSOURCE_CLK48;
@@ -786,6 +796,56 @@ static void MX_RNG_Init(void)
 }
 
 /**
+  * @brief SAI1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SAI1_Init(void)
+{
+
+  /* USER CODE BEGIN SAI1_Init 0 */
+
+  /* USER CODE END SAI1_Init 0 */
+
+  /* USER CODE BEGIN SAI1_Init 1 */
+
+  /* USER CODE END SAI1_Init 1 */
+  hsai_BlockA1.Instance = SAI1_Block_A;
+  hsai_BlockA1.Init.Protocol = SAI_FREE_PROTOCOL;
+  hsai_BlockA1.Init.AudioMode = SAI_MODEMASTER_TX;
+  hsai_BlockA1.Init.DataSize = SAI_DATASIZE_16;
+  hsai_BlockA1.Init.FirstBit = SAI_FIRSTBIT_MSB;
+  hsai_BlockA1.Init.ClockStrobing = SAI_CLOCKSTROBING_FALLINGEDGE;
+  hsai_BlockA1.Init.Synchro = SAI_ASYNCHRONOUS;
+  hsai_BlockA1.Init.OutputDrive = SAI_OUTPUTDRIVE_ENABLE;
+  hsai_BlockA1.Init.NoDivider = SAI_MASTERDIVIDER_ENABLE;
+  hsai_BlockA1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_1QF;
+  hsai_BlockA1.Init.ClockSource = SAI_CLKSOURCE_PLLI2S;
+  hsai_BlockA1.Init.AudioFrequency = SAI_AUDIO_FREQUENCY_8K;
+  hsai_BlockA1.Init.SynchroExt = SAI_SYNCEXT_DISABLE;
+  hsai_BlockA1.Init.MonoStereoMode = SAI_MONOMODE;
+  hsai_BlockA1.Init.CompandingMode = SAI_NOCOMPANDING;
+  hsai_BlockA1.Init.TriState = SAI_OUTPUT_NOTRELEASED;
+  hsai_BlockA1.FrameInit.FrameLength = 32;
+  hsai_BlockA1.FrameInit.ActiveFrameLength = 1;
+  hsai_BlockA1.FrameInit.FSDefinition = SAI_FS_STARTFRAME;
+  hsai_BlockA1.FrameInit.FSPolarity = SAI_FS_ACTIVE_LOW;
+  hsai_BlockA1.FrameInit.FSOffset = SAI_FS_FIRSTBIT;
+  hsai_BlockA1.SlotInit.FirstBitOffset = 0;
+  hsai_BlockA1.SlotInit.SlotSize = SAI_SLOTSIZE_DATASIZE;
+  hsai_BlockA1.SlotInit.SlotNumber = 2;
+  hsai_BlockA1.SlotInit.SlotActive = 0x00000003;
+  if (HAL_SAI_Init(&hsai_BlockA1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SAI1_Init 2 */
+
+  /* USER CODE END SAI1_Init 2 */
+
+}
+
+/**
   * @brief SDIO Initialization Function
   * @param None
   * @retval None
@@ -998,6 +1058,9 @@ static void MX_DMA_Init(void)
   /* DMA2_Stream0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+  /* DMA2_Stream1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
   /* DMA2_Stream3_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
@@ -1138,7 +1201,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOJ_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, SPKR_HP_Pin|audio_rst_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, SPKR_HP_Pin|AUDIO_RST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOG, MAIN_KILL_Pin|LED1_Pin, GPIO_PIN_RESET);
@@ -1161,8 +1224,8 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : SPKR_HP_Pin audio_rst_Pin */
-  GPIO_InitStruct.Pin = SPKR_HP_Pin|audio_rst_Pin;
+  /*Configure GPIO pins : SPKR_HP_Pin AUDIO_RST_Pin */
+  GPIO_InitStruct.Pin = SPKR_HP_Pin|AUDIO_RST_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -1213,14 +1276,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PG7 */
-  GPIO_InitStruct.Pin = GPIO_PIN_7;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF6_SAI1;
-  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LED1_Pin */
   GPIO_InitStruct.Pin = LED1_Pin;

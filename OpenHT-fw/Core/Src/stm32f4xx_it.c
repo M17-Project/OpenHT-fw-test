@@ -65,8 +65,11 @@ volatile uint32_t gpio_port_g_state;
 extern DMA_HandleTypeDef hdma_memtomem_dma2_stream0;
 extern DMA2D_HandleTypeDef hdma2d;
 extern DSI_HandleTypeDef hdsi;
+extern I2C_HandleTypeDef hi2c2;
 extern DMA_HandleTypeDef hdma_spi3_rx;
 extern LTDC_HandleTypeDef hltdc;
+extern DMA_HandleTypeDef hdma_sai1_a;
+extern SAI_HandleTypeDef hsai_BlockA1;
 extern DMA_HandleTypeDef hdma_sdio;
 extern SD_HandleTypeDef hsd;
 extern DMA_HandleTypeDef hdma_spi1_tx;
@@ -241,6 +244,20 @@ void EXTI9_5_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles I2C2 event interrupt.
+  */
+void I2C2_EV_IRQHandler(void)
+{
+  /* USER CODE BEGIN I2C2_EV_IRQn 0 */
+
+  /* USER CODE END I2C2_EV_IRQn 0 */
+  HAL_I2C_EV_IRQHandler(&hi2c2);
+  /* USER CODE BEGIN I2C2_EV_IRQn 1 */
+
+  /* USER CODE END I2C2_EV_IRQn 1 */
+}
+
+/**
   * @brief This function handles SPI1 global interrupt.
   */
 void SPI1_IRQHandler(void)
@@ -325,6 +342,20 @@ void DMA2_Stream0_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles DMA2 stream1 global interrupt.
+  */
+void DMA2_Stream1_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream1_IRQn 0 */
+
+  /* USER CODE END DMA2_Stream1_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_sai1_a);
+  /* USER CODE BEGIN DMA2_Stream1_IRQn 1 */
+
+  /* USER CODE END DMA2_Stream1_IRQn 1 */
+}
+
+/**
   * @brief This function handles DMA2 stream3 global interrupt.
   */
 void DMA2_Stream3_IRQHandler(void)
@@ -350,6 +381,20 @@ void DMA2_Stream5_IRQHandler(void)
   /* USER CODE BEGIN DMA2_Stream5_IRQn 1 */
 
   /* USER CODE END DMA2_Stream5_IRQn 1 */
+}
+
+/**
+  * @brief This function handles SAI1 global interrupt.
+  */
+void SAI1_IRQHandler(void)
+{
+  /* USER CODE BEGIN SAI1_IRQn 0 */
+
+  /* USER CODE END SAI1_IRQn 0 */
+  HAL_SAI_IRQHandler(&hsai_BlockA1);
+  /* USER CODE BEGIN SAI1_IRQn 1 */
+
+  /* USER CODE END SAI1_IRQn 1 */
 }
 
 /**

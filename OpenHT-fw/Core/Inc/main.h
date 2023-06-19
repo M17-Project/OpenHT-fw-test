@@ -71,8 +71,8 @@ void wait_spi_xfer_done(uint32_t timeout);
 /* Private defines -----------------------------------------------------------*/
 #define SPKR_HP_Pin GPIO_PIN_3
 #define SPKR_HP_GPIO_Port GPIOE
-#define audio_rst_Pin GPIO_PIN_2
-#define audio_rst_GPIO_Port GPIOE
+#define AUDIO_RST_Pin GPIO_PIN_2
+#define AUDIO_RST_GPIO_Port GPIOE
 #define IO1_Pin GPIO_PIN_14
 #define IO1_GPIO_Port GPIOG
 #define IO1_EXTI_IRQn EXTI15_10_IRQn
