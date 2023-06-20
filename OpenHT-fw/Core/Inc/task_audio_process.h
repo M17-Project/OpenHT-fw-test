@@ -25,9 +25,9 @@
 /* This task will do the codecs computations but will also manage
  * the audio inputs/outputs for the different modes */
 
-void init();
+void audio_process_init();
 
-void set_mode(openht_mode_t mode);
+void audio_process_set_mode(openht_mode_t mode);
 
 uint32_t write_voice_samples(uint16_t *samples, uint32_t number);
 

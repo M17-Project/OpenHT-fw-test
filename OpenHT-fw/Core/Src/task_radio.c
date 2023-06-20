@@ -56,6 +56,7 @@ extern osMutexId_t 			SPI1AccessHandle;
 extern osMutexId_t 			NORAccessHandle;
 extern user_settings_t		user_settings;
 
+volatile bool				radio_enabled = false;
 osThreadId_t 				FPGA_thread_id 			= NULL;
 uint32_t 					bitstream_load_address 	= 0x80000000;
 uint32_t 					bitstream_load_offset 	= 0;
@@ -140,7 +141,14 @@ void StartTaskRadio(void *argument) {
 	HAL_NVIC_SetPriority(EXTI4_IRQn, 5, 0);
 	HAL_NVIC_EnableIRQ(EXTI4_IRQn);
 
+	if(HAL_GPIO_ReadPin(FPGA_INITN_GPIO_Port, FPGA_INITN_Pin) == GPIO_PIN_SET){
+		radio_INITn_it();
+	}
+
 	ptt_debounce_timer = osTimerNew(_ptt_timer_expired, osTimerOnce, NULL, &ptt_debounce_timer_attr);
+
+	// For now we init this here. It will be in it's own thread later on
+	audio_process_init();
 
 	// init
 	radio_settings_init();
@@ -413,6 +421,7 @@ void StartTaskRadio(void *argument) {
 				HAL_GPIO_WritePin(RF_RST_GPIO_Port, RF_RST_Pin, GPIO_PIN_RESET);
 				set_fpga_status(FPGA_Offline);
 				LOG(CLI_LOG_RADIO, "PoC powered off.\r\n");
+				radio_enabled = false;
 			}else if( (initn == GPIO_PIN_SET) \
 					  && (done == GPIO_PIN_RESET))
 			{
@@ -428,6 +437,7 @@ void StartTaskRadio(void *argument) {
 				set_fpga_status(FPGA_Online);
 				xcvr_init();
 				LOG(CLI_LOG_RADIO, "PoC powered on.\r\n");
+				radio_enabled = false;
 			}else if( (initn == GPIO_PIN_RESET) \
 					  && (done == GPIO_PIN_SET) ){
 				LOG(CLI_LOG_RADIO, "INITN and DONE pins are in an inconsistent state...\r\n");
@@ -450,6 +460,8 @@ void StartTaskRadio(void *argument) {
 			uint8_t bufferRX[8] = {0};
 
 			// First set PROGRAMN low
+			HAL_GPIO_WritePin(FPGA_PROGRAMN_GPIO_Port, FPGA_PROGRAMN_Pin, GPIO_PIN_SET);
+			osDelay(2);
 			HAL_GPIO_WritePin(FPGA_PROGRAMN_GPIO_Port, FPGA_PROGRAMN_Pin, GPIO_PIN_RESET);
 			osDelay(2); // Must wait for at least 50ns
 
@@ -959,8 +971,10 @@ void radio_config(){
 }
 
 void radio_send_samples(){
-	uint32_t result = osThreadFlagsSet(FPGA_thread_id, FPGA_SEND_SAMPLES);
-	if(result >= (1<<31)){
-		LOG(CLI_LOG_RADIO, "Could send samples: osThreadFlagSet returned %lu.\r\n", result);
+	if(radio_enabled){
+		uint32_t result = osThreadFlagsSet(FPGA_thread_id, FPGA_SEND_SAMPLES);
+			if(result >= (1<<31)){
+				LOG(CLI_LOG_RADIO, "Could send samples: osThreadFlagSet returned %lu.\r\n", result);
+			}
 	}
 }

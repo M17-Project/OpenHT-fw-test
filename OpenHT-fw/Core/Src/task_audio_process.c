@@ -29,12 +29,12 @@
 // Because CMSIS-OS2 does not provide anything resembling stream buffers, we use the ones from FreeRTOS
 StreamBufferHandle_t audio_in_buffer = NULL;
 
-void init(){
+void audio_process_init(){
 	/* 16 samples = 32 bytes. Total size = 32 samples */
 	audio_in_buffer = xStreamBufferGenericCreate(64, 32, pdFALSE);
 }
 
-void set_mode(openht_mode_t mode){
+void audio_process_set_mode(openht_mode_t mode){
 	DBG("Not implemented yet.\r\n");
 }
 
