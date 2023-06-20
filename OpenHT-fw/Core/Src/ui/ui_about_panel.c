@@ -19,6 +19,7 @@
 #include "ui/ui_about_panel.h"
 
 #include "ui/openht_ui.h"
+#include "utils/date_ver.h"
 
 #include <lvgl.h>
 
@@ -35,7 +36,7 @@ void init_about_panel(void)
 	about_tabview = lv_tabview_create(ui_about_tab_panel, LV_DIR_TOP, 40);
     lv_obj_set_style_bg_color(about_tabview, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_t * tab_btns = lv_tabview_get_tab_btns(about_tabview);
+    lv_obj_t *tab_btns = lv_tabview_get_tab_btns(about_tabview);
 //    lv_obj_set_style_bg_color(tab_btns, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
 //    lv_obj_set_style_text_color(tab_btns, lv_palette_lighten(LV_PALETTE_GREY, 5), 0);
     lv_obj_set_style_text_font(tab_btns, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -70,6 +71,15 @@ void init_about_panel(void)
 	lv_obj_set_parent(ui_about_hw_text_area, capes_tab);
 	lv_obj_clear_flag(ui_about_hw_text_area, LV_OBJ_FLAG_HIDDEN);
 
+	lv_obj_t *credits_tab = lv_tabview_add_tab(about_tabview, "Credits");
+    lv_obj_set_style_pad_left(credits_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(credits_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(credits_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(credits_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	lv_obj_set_parent(ui_about_credits_text_area, credits_tab);
+	lv_obj_clear_flag(ui_about_credits_text_area, LV_OBJ_FLAG_HIDDEN);
+
 	// END ABOUT TABVIEW UI INIT
 
 }
@@ -77,10 +87,17 @@ void init_about_panel(void)
 void on_about_clicked(lv_event_t *e)
 {
 	if (about_tabview != NULL) {
-    //lv_obj_set_y(ui_about_panel, 0);
-	lv_tabview_set_act(about_tabview, 0, LV_ANIM_OFF);
-	lv_obj_clear_flag(ui_about_panel, LV_OBJ_FLAG_HIDDEN);
-	lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
+		// update data
+		lv_label_set_text_fmt(ui_fw_ver_label, "%d.%d", OPENHT_MAJOR_VER, OPENHT_MINOR_VER);
+
+		lv_label_set_text_fmt(ui_fw_build_date_label, "%s", BUILD_DATE_VERSION);
+		maj_min_rev_t fpga_rev = radio_settings_get_fpga_rev();
+		lv_label_set_text_fmt(ui_fpga_rev_label, "%d.%d", fpga_rev.maj_rev, fpga_rev.min_rev);
+
+		//lv_obj_set_y(ui_about_panel, 0);
+		lv_tabview_set_act(about_tabview, 0, LV_ANIM_OFF);
+		lv_obj_clear_flag(ui_about_panel, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
 	}
 }
 

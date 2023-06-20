@@ -30,6 +30,11 @@ extern "C" {
 #include "stm32469i_discovery.h" /* DISCOVERY includes component */
 #include "stm32469i_discovery_qspi.h"
 
+typedef struct
+{
+	uint8_t maj_rev;
+	uint8_t min_rev;
+} __attribute__((packed)) maj_min_rev_t;
 
 typedef struct
 {
@@ -46,19 +51,23 @@ typedef struct
 
 	fmInfo_t fm_settings;	// FM_SETTINGS_EEEPROM_ADDR
 
+	// FPGA data...not stored in NOR FLASH
+	maj_min_rev_t fpga_revision;
+
 } __attribute__((packed)) radio_settings_t; // pack the struct into smallest data size
 
 void radio_settings_reset();
 void radio_settings_init();
 void radio_settings_save();
 
-void radio_settings_set_rx_freq (freq_t freq);
 typedef void (*radio_setting_changed_func_t)();
-void radio_settings_subscribe_freq_changed();
 
+void radio_settings_set_rx_freq (freq_t freq);
+void radio_settings_sub_rx_freq_cb(radio_setting_changed_func_t cb);
 freq_t radio_settings_get_rx_freq (void);
 
 void radio_settings_set_tx_freq (freq_t freq);
+void radio_settings_sub_tx_freq_cb(radio_setting_changed_func_t cb);
 freq_t radio_settings_get_tx_freq (void);
 
 void radio_settings_set_agc_target (uint8_t agc_target);
@@ -80,6 +89,9 @@ m17Info_t radio_settings_get_m17_info (void);
 
 void radio_settings_set_fm_settings (fmInfo_t fm_settings);
 fmInfo_t radio_settings_get_fm_settings (void);
+
+void radio_settings_set_fpga_rev(maj_min_rev_t fpga_revision);
+maj_min_rev_t radio_settings_get_fpga_rev();
 
 #ifdef __cplusplus
 }

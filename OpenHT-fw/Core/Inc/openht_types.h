@@ -29,6 +29,10 @@ extern "C" {
 #include <stdio.h>
 #include <stdbool.h>
 
+// Version defines for the FW version as displayed in UI About
+static const uint8_t OPENHT_MAJOR_VER = 0;
+static const uint8_t OPENHT_MINOR_VER = 1;
+
 typedef enum
 {
 	OPENHT_OK = 0, /* (0) Succeeded */
