@@ -39,8 +39,7 @@ void init_mode_change_panel(void)
 		label += mode_str_len;
 	}
 
-    //lv_roller_set_options(ui_mode_roller, labels, LV_ROLLER_MODE_NORMAL);
-
+    lv_roller_set_options(ui_mode_roller, labels, LV_ROLLER_MODE_INFINITE);
 	lv_roller_set_selected(ui_mode_roller, radio_settings_get_mode(), LV_ANIM_OFF);
 }
 
@@ -67,6 +66,7 @@ void on_mode_ok_clicked(lv_event_t *e)
 	lv_roller_get_selected_str(ui_mode_roller, roller_str, sizeof(roller_str));
 	lv_label_set_text_fmt(ui_header_mode_label, "%s%s", mode_prefix, roller_str);
 
-	radio_settings_set_mode(lv_roller_get_selected(ui_mode_roller));
+	uint16_t selected_item = lv_roller_get_selected(ui_mode_roller);
+	radio_settings_set_mode((uint8_t)selected_item);
 	radio_settings_save();
 }

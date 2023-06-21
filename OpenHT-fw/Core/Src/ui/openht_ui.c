@@ -54,6 +54,10 @@ static int32_t _screen_capture(lv_obj_t *scr, const char * filename);
 
 void custom_ui_init(void)
 {
+	// GET STORED SETTINGS
+	radio_settings_init();
+	user_settings_get(&user_settings);
+
 	// SquareLine designer add widgets to screens, however, we want to use
 	// these as top layer widgets. So we can still use the designer
 	// but then need to set the parent to the top layer for each widget
@@ -128,10 +132,7 @@ void custom_ui_init(void)
     lv_dropdown_set_options_static(ui_ctcss_tx_dropdown, ctcss_options_str);
     lv_dropdown_set_options_static(ui_ctcss_rx_dropdown, ctcss_options_str);
 
-
-	// GET STORED SETTINGS AND UPDATE UI
-	radio_settings_init(); //get(&radio_settings);
-	user_settings_get(&user_settings);
+    // UPDATE UI from stored settings
 
 	char rx_buffer[10];
 	//get_str_from_freq(user_settings.rx_freq, rx_buffer, -1);
