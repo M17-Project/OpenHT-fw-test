@@ -23,47 +23,21 @@
 
 #include <stdlib.h>
 
+typedef enum{
+	SAMPLES_IRQ,
+	UPLOAD_BITSTREAM,
+	DOWNLOAD_BITSTREAM,
+	FPGA_SOFT_RESET,
+	ERASE_BITSTREAM_STORAGE,
+	INITN_IRQ,
+	CONFIG,
+	PTT_IRQ,
+	START_RX,
+	START_TX
+} task_radio_event_t;
+
 void StartTaskRadio(void *argument);
 
-/**
- * Loads a binary image from the SD card to the NOR flash.
- *
- * @return bool		EXIT_SUCCESS in case of success, EXIT_FAILURE in case of failure
- */
-bool download_fpga_binary_file();
-
-/**
- * Erase the FPGA binary storage
- *
- * @return bool		EXIT_SUCCESS in case of success, EXIT_FAILURE in case of failure
- */
-bool erase_fpga_storage();
-
-/**
- * Soft-reset the FPGA (i.e. return the internal state of the FPGA to default)
- *
- * @note 	All the internal registers of the FPGA are reset to their default value meaning that
- * 			the configurations must be sent again
- *
- * @return bool		EXIT_SUCCESS in case of success, EXIT_FAILURE in case of failure
- */
-bool fpga_soft_reset();
-
-/**
- *
- */
-bool upload_fpga_binary();
-
-void radio_INITn_it();
-
-bool xcvr_init();
-
-void ptt_toggled();
-
-void radio_soft_ptt(bool pressed);
-
-void radio_config();
-
-void radio_send_samples();
+uint32_t task_radio_event(task_radio_event_t event);
 
 #endif /* INC_TASK_RADIO_H_ */

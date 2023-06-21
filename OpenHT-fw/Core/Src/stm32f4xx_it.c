@@ -233,8 +233,7 @@ void DMA1_Stream0_IRQHandler(void)
 void EXTI9_5_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI9_5_IRQn 0 */
-	ptt_toggled();
-
+	task_radio_event(PTT_IRQ);
   /* USER CODE END EXTI9_5_IRQn 0 */
   /* USER CODE BEGIN EXTI9_5_IRQn 1 */
 
@@ -292,7 +291,7 @@ void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
 	/* Only PG14 (IO1) */
-	radio_send_samples();
+	task_radio_event(SAMPLES_IRQ);
   /* USER CODE END EXTI15_10_IRQn 0 */
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
 	__HAL_GPIO_EXTI_CLEAR_IT(IO1_Pin);
@@ -444,6 +443,6 @@ void DSI_IRQHandler(void)
 // Pins 4 configured as EXTI: PC4
 void EXTI4_IRQHandler(void){
 	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_4);
-	radio_INITn_it();
+	task_radio_event(INITN_IRQ);
 }
 /* USER CODE END 1 */
