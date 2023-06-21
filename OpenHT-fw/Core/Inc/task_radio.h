@@ -60,6 +60,8 @@ bool xcvr_init();
 
 void ptt_toggled();
 
+void radio_soft_ptt(bool pressed);
+
 void radio_config();
 
 void radio_send_samples();

@@ -50,6 +50,7 @@ extern osMutexId_t 			NORAccessHandle;
 
 volatile bool				radio_enabled = false;
 volatile bool				tx_nRx = false; 						// 0 when RX, 1 when TX
+volatile bool				sw_ptt = false; 						// 0 when not pressed, 1 when pressed
 osThreadId_t 				FPGA_thread_id 			= NULL;
 uint32_t 					bitstream_load_address 	= 0x80000000;
 uint32_t 					bitstream_load_offset 	= 0;
@@ -73,9 +74,11 @@ void 			_ptt_timer_expired(void *argument);
 #define XCVR_CONFIG			(1 << 8)
 #define RADIO_PTT_START_TIMER	(1 << 9)
 #define RADIO_PTT			(1<<10)
+#define RADIO_SW_PTT		(1<<11)
 
 #define RADIO_ALL_FLAGS		(FPGA_SEND_SAMPLES | FPGA_FETCH_IQ | FPGA_UPLOAD_BIN | FPGA_DOWNLOAD_BIN | FPGA_RESET |\
-							 FPGA_ERASE_STORAGE | RADIO_INITN_CHANGED | XCVR_INIT | XCVR_CONFIG | RADIO_PTT_START_TIMER | RADIO_PTT)
+							 FPGA_ERASE_STORAGE | RADIO_INITN_CHANGED | XCVR_INIT | XCVR_CONFIG |\
+							 RADIO_PTT_START_TIMER | RADIO_PTT | RADIO_SW_PTT)
 
 void rx_changed_cb()
 {
@@ -186,10 +189,27 @@ void StartTaskRadio(void *argument) {
 			// SET means released
 			if(ptt == GPIO_PIN_RESET){
 				LOG(CLI_LOG_RADIO, "PTT pressed.\r\n");
+				BSP_LED_On(LED_RED);
 				tx_nRx = true;
 				radio_configure_tx(tx_freq, ppm, mode, fm_info, tx_power);
 			}else{
 				LOG(CLI_LOG_RADIO, "PTT released.\r\n");
+				BSP_LED_Off(LED_RED);
+				tx_nRx = false;
+				radio_configure_rx(rx_freq, ppm, mode, fm_info, agc);
+			}
+		}else if(flag & RADIO_SW_PTT){
+			osThreadFlagsClear(RADIO_SW_PTT);
+
+			// SET means released
+			if(sw_ptt){
+				LOG(CLI_LOG_RADIO, "Soft PTT pressed.\r\n");
+				BSP_LED_On(LED_RED);
+				tx_nRx = true;
+				radio_configure_tx(tx_freq, ppm, mode, fm_info, tx_power);
+			}else{
+				LOG(CLI_LOG_RADIO, "Soft PTT released.\r\n");
+				BSP_LED_Off(LED_RED);
 				tx_nRx = false;
 				radio_configure_rx(rx_freq, ppm, mode, fm_info, agc);
 			}
@@ -557,6 +577,14 @@ void ptt_toggled(){
 	uint32_t result = osThreadFlagsSet(FPGA_thread_id, RADIO_PTT_START_TIMER);
 	if(result >= (1<<31)){
 		ERR("Could not start PTT debounce timer: osThreadFlagSet returned 0x%08lx.\r\n", result);
+	}
+}
+
+void radio_soft_ptt(bool pressed){
+	sw_ptt = pressed;
+	uint32_t result = osThreadFlagsSet(FPGA_thread_id, RADIO_SW_PTT);
+	if(result >= (1<<31)){
+		ERR("Could not process Soft PTT: osThreadFlagSet returned 0x%08lx.\r\n", result);
 	}
 }
 
