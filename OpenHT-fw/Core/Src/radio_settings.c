@@ -65,6 +65,7 @@ static radio_settings_t cached_settings;
 static radio_settings_t saved_settings;
 static user_callsign_func_t callsign_cb = NULL; // function which provides user callsign
 static radio_setting_changed_func_t radio_settings_rx_changed_cb = NULL; // function which is called when rx has changed
+static radio_setting_changed_func_t radio_settings_tx_changed_cb = NULL; // function which is called when tx has changed
 
 void radio_settings_reset(){
 	bool res = EEEPROM_erase(&radio_settings_eeeprom);
@@ -149,6 +150,9 @@ void radio_settings_init()
 		saved_settings.fm_settings.raw = 0;
 	}
 
+	// FPGA data. Not stored in NOR Flash
+	*(uint16_t *)(&saved_settings.fpga_revision) = 0;
+
 	// set the saved_settings (which represents the contents of the EEEPROM) and the
 	// cached_settings (which is the volatile settings) to be equal
 	memcpy(&cached_settings, &saved_settings, sizeof(radio_settings_t));
@@ -212,7 +216,7 @@ void radio_settings_save()
 	memcpy(&saved_settings, &cached_settings, sizeof(radio_settings_t));
 }
 
-void radio_settings_subscribe_freq_changed(radio_setting_changed_func_t cb)
+void radio_settings_sub_rx_freq_cb(radio_setting_changed_func_t cb)
 {
 	radio_settings_rx_changed_cb = cb;
 }
@@ -231,9 +235,18 @@ freq_t radio_settings_get_rx_freq (void)
 	return cached_settings.rx_freq;
 }
 
+void radio_settings_sub_tx_freq_cb(radio_setting_changed_func_t cb)
+{
+	radio_settings_tx_changed_cb = cb;
+}
+
 void radio_settings_set_tx_freq (freq_t freq)
 {
 	cached_settings.tx_freq = freq;
+
+	if (radio_settings_tx_changed_cb != NULL) {
+		radio_settings_tx_changed_cb();
+	}
 }
 
 freq_t radio_settings_get_tx_freq (void)
@@ -308,4 +321,14 @@ void radio_settings_set_fm_settings (fmInfo_t fm_settings)
 fmInfo_t radio_settings_get_fm_settings (void)
 {
 	return cached_settings.fm_settings;
+}
+
+void radio_settings_set_fpga_rev(maj_min_rev_t fpga_revision)
+{
+	cached_settings.fpga_revision = fpga_revision;
+}
+
+maj_min_rev_t radio_settings_get_fpga_rev()
+{
+	return cached_settings.fpga_revision;
 }

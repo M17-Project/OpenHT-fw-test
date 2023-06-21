@@ -68,12 +68,18 @@ extern lv_obj_t * ui_about_panel;
 extern lv_obj_t * ui_about_tab_panel;
 extern lv_obj_t * ui_about_text_area;
 extern lv_obj_t * ui_about_hw_text_area;
+extern lv_obj_t * ui_about_credits_text_area;
 void ui_event_about_ok_btn(lv_event_t * e);
 extern lv_obj_t * ui_about_ok_btn;
 extern lv_obj_t * ui_Label6;
 extern lv_obj_t * ui_about_logo;
 extern lv_obj_t * ui_about_openht_logo;
-extern lv_obj_t * ui_Label9;
+extern lv_obj_t * ui_fw_txt_label;
+extern lv_obj_t * ui_fw_ver_label;
+extern lv_obj_t * ui_fpga_txt_label;
+extern lv_obj_t * ui_fpga_rev_label;
+extern lv_obj_t * ui_fw_build_date_txt_label;
+extern lv_obj_t * ui_fw_build_date_label;
 // SCREEN: ui_screen_scratchpad_2
 void ui_screen_scratchpad_2_screen_init(void);
 extern lv_obj_t * ui_screen_scratchpad_2;
@@ -85,6 +91,7 @@ extern lv_obj_t * ui_Label7;
 void ui_event_mode_cancel_button(lv_event_t * e);
 extern lv_obj_t * ui_mode_cancel_button;
 extern lv_obj_t * ui_Label8;
+extern lv_obj_t * ui_Label9;
 // SCREEN: ui_screen_scratchpad_3
 void ui_screen_scratchpad_3_screen_init(void);
 extern lv_obj_t * ui_screen_scratchpad_3;
@@ -141,6 +148,7 @@ extern lv_obj_t * ui_callsign_cancel_btn;
 extern lv_obj_t * ui_Label20;
 void ui_event_text_area_callsign(lv_event_t * e);
 extern lv_obj_t * ui_text_area_callsign;
+extern lv_obj_t * ui_Label29;
 // SCREEN: ui_screen_scratchpad_5
 void ui_screen_scratchpad_5_screen_init(void);
 extern lv_obj_t * ui_screen_scratchpad_5;

@@ -136,7 +136,7 @@ void StartTaskRadio(void *argument) {
 
 	// init
 	radio_settings_init();
-	radio_settings_subscribe_freq_changed(rx_changed_cb);
+	radio_settings_sub_rx_freq_cb(rx_changed_cb);
 
 	for(;;){
 		uint32_t flag = osThreadFlagsWait(RADIO_ALL_FLAGS, osFlagsNoClear, osWaitForever);
@@ -326,6 +326,11 @@ void StartTaskRadio(void *argument) {
 
 			FPGA_read_reg(SR_1, (uint16_t *)bufferRX);
 			DBG("FPGA revision is %u.%u.\r\n", bufferRX[1], bufferRX[0]);
+			maj_min_rev_t fpga_revision;
+			fpga_revision.maj_rev = bufferRX[1];
+			fpga_revision.min_rev = bufferRX[0];
+			radio_settings_set_fpga_rev(fpga_revision);
+
 
 			uint8_t read = 0;
 			XCVR_read_reg(RF_PN, &read);

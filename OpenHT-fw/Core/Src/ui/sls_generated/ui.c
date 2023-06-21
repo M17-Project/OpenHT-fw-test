@@ -64,12 +64,18 @@ lv_obj_t * ui_about_panel;
 lv_obj_t * ui_about_tab_panel;
 lv_obj_t * ui_about_text_area;
 lv_obj_t * ui_about_hw_text_area;
+lv_obj_t * ui_about_credits_text_area;
 void ui_event_about_ok_btn(lv_event_t * e);
 lv_obj_t * ui_about_ok_btn;
 lv_obj_t * ui_Label6;
 lv_obj_t * ui_about_logo;
 lv_obj_t * ui_about_openht_logo;
-lv_obj_t * ui_Label9;
+lv_obj_t * ui_fw_txt_label;
+lv_obj_t * ui_fw_ver_label;
+lv_obj_t * ui_fpga_txt_label;
+lv_obj_t * ui_fpga_rev_label;
+lv_obj_t * ui_fw_build_date_txt_label;
+lv_obj_t * ui_fw_build_date_label;
 
 // SCREEN: ui_screen_scratchpad_2
 void ui_screen_scratchpad_2_screen_init(void);
@@ -82,6 +88,7 @@ lv_obj_t * ui_Label7;
 void ui_event_mode_cancel_button(lv_event_t * e);
 lv_obj_t * ui_mode_cancel_button;
 lv_obj_t * ui_Label8;
+lv_obj_t * ui_Label9;
 
 // SCREEN: ui_screen_scratchpad_3
 void ui_screen_scratchpad_3_screen_init(void);
@@ -140,6 +147,7 @@ lv_obj_t * ui_callsign_cancel_btn;
 lv_obj_t * ui_Label20;
 void ui_event_text_area_callsign(lv_event_t * e);
 lv_obj_t * ui_text_area_callsign;
+lv_obj_t * ui_Label29;
 
 // SCREEN: ui_screen_scratchpad_5
 void ui_screen_scratchpad_5_screen_init(void);

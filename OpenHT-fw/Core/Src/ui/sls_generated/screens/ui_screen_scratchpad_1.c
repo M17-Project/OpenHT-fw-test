@@ -39,7 +39,7 @@ void ui_screen_scratchpad_1_screen_init(void)
     lv_obj_set_width(ui_about_text_area, lv_pct(100));
     lv_obj_set_height(ui_about_text_area, lv_pct(100));
     lv_textarea_set_text(ui_about_text_area,
-                         "OpenHT is an Open Source handheld two-way radio designed by and for Amateur Radio operators. It showcases freely available open source digital protocols for voice and data. FreeDV and M17 are first class citizens with additional support for FM/AM/SSB.\n\nThis is the Unicorn you've been waiting for, so what are you waiting for?\n\n73,\nM17 Project");
+                         "OpenHT is an Open Source handheld two-way radio designed by and for Amateur Radio operators. It showcases freely available open source digital protocols for voice and data. FreeDV and M17 are first class citizens with additional support for FM/AM/SSB.\n\nThis is the Unicorn you've been waiting for, so what are you waiting for?\n\n73,\nM17 Project\nhttps://m17project.org");
     lv_obj_clear_flag(ui_about_text_area,
                       LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
                       LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
@@ -69,6 +69,24 @@ void ui_screen_scratchpad_1_screen_init(void)
     lv_obj_set_style_bg_color(ui_about_hw_text_area, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_about_hw_text_area, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_about_hw_text_area, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_about_credits_text_area = lv_textarea_create(ui_about_tab_panel);
+    lv_obj_set_width(ui_about_credits_text_area, lv_pct(100));
+    lv_obj_set_height(ui_about_credits_text_area, lv_pct(100));
+    lv_textarea_set_text(ui_about_credits_text_area,
+                         "The software running on OpenHT is (c) M17 Project contributors and licensed under the GPLv2. Sources are available on the M17 Project page on Github.\n\nContributors to this release include:\n- Wojciech SP5WWP\n- Morgan ON4MOD\n- Jae K5JAE\n- Alvaro EA4HGZ");
+    lv_obj_add_flag(ui_about_credits_text_area, LV_OBJ_FLAG_HIDDEN);     /// Flags
+    lv_obj_clear_flag(ui_about_credits_text_area,
+                      LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
+                      LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
+                      LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+    lv_obj_set_scrollbar_mode(ui_about_credits_text_area, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_style_text_color(ui_about_credits_text_area, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_about_credits_text_area, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_about_credits_text_area, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_about_credits_text_area, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_about_credits_text_area, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_about_credits_text_area, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_about_ok_btn = lv_btn_create(ui_about_panel);
     lv_obj_set_width(ui_about_ok_btn, 100);
@@ -108,13 +126,53 @@ void ui_screen_scratchpad_1_screen_init(void)
     lv_obj_add_flag(ui_about_openht_logo, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_about_openht_logo, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
-    ui_Label9 = lv_label_create(ui_about_panel);
-    lv_obj_set_width(ui_Label9, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Label9, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Label9, 102);
-    lv_obj_set_y(ui_Label9, -227);
-    lv_obj_set_align(ui_Label9, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label9, "FW ver 0.0.1\nFPGA ver: 1337\nBuild Date: 230401");
+    ui_fw_txt_label = lv_label_create(ui_about_panel);
+    lv_obj_set_width(ui_fw_txt_label, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_fw_txt_label, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_fw_txt_label, 185);
+    lv_obj_set_y(ui_fw_txt_label, 60);
+    lv_label_set_text(ui_fw_txt_label, "FW Version:");
+    lv_obj_set_style_text_font(ui_fw_txt_label, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_fw_ver_label = lv_label_create(ui_about_panel);
+    lv_obj_set_width(ui_fw_ver_label, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_fw_ver_label, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_fw_ver_label, 285);
+    lv_obj_set_y(ui_fw_ver_label, 60);
+    lv_label_set_text(ui_fw_ver_label, "?.?");
+    lv_obj_set_style_text_font(ui_fw_ver_label, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_fpga_txt_label = lv_label_create(ui_about_panel);
+    lv_obj_set_width(ui_fpga_txt_label, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_fpga_txt_label, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_fpga_txt_label, 185);
+    lv_obj_set_y(ui_fpga_txt_label, 94);
+    lv_label_set_text(ui_fpga_txt_label, "FPGA Rev:");
+    lv_obj_set_style_text_font(ui_fpga_txt_label, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_fpga_rev_label = lv_label_create(ui_about_panel);
+    lv_obj_set_width(ui_fpga_rev_label, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_fpga_rev_label, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_fpga_rev_label, 275);
+    lv_obj_set_y(ui_fpga_rev_label, 94);
+    lv_label_set_text(ui_fpga_rev_label, "?.?");
+    lv_obj_set_style_text_font(ui_fpga_rev_label, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_fw_build_date_txt_label = lv_label_create(ui_about_panel);
+    lv_obj_set_width(ui_fw_build_date_txt_label, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_fw_build_date_txt_label, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_fw_build_date_txt_label, 185);
+    lv_obj_set_y(ui_fw_build_date_txt_label, 77);
+    lv_label_set_text(ui_fw_build_date_txt_label, "FW Build Date:");
+    lv_obj_set_style_text_font(ui_fw_build_date_txt_label, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_fw_build_date_label = lv_label_create(ui_about_panel);
+    lv_obj_set_width(ui_fw_build_date_label, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_fw_build_date_label, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_fw_build_date_label, 310);
+    lv_obj_set_y(ui_fw_build_date_label, 77);
+    lv_label_set_text(ui_fw_build_date_label, "2023????");
+    lv_obj_set_style_text_font(ui_fw_build_date_label, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_about_ok_btn, ui_event_about_ok_btn, LV_EVENT_ALL, NULL);
 

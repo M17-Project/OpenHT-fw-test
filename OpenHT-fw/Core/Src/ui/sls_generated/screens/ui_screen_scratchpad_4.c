@@ -14,7 +14,7 @@ void ui_screen_scratchpad_4_screen_init(void)
     lv_obj_set_width(ui_callsign_change_panel, 449);
     lv_obj_set_height(ui_callsign_change_panel, 237);
     lv_obj_set_x(ui_callsign_change_panel, 0);
-    lv_obj_set_y(ui_callsign_change_panel, 50);
+    lv_obj_set_y(ui_callsign_change_panel, 93);
     lv_obj_set_align(ui_callsign_change_panel, LV_ALIGN_TOP_MID);
     lv_obj_clear_flag(ui_callsign_change_panel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_callsign_change_panel, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -83,6 +83,16 @@ void ui_screen_scratchpad_4_screen_init(void)
     lv_obj_set_style_text_font(ui_text_area_callsign, &ui_font_number_60, LV_PART_CURSOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_text_area_callsign, lv_color_hex(0x37B9F5), LV_PART_CURSOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_text_area_callsign, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
+
+    ui_Label29 = lv_label_create(ui_callsign_change_panel);
+    lv_obj_set_width(ui_Label29, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label29, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_Label29, LV_ALIGN_TOP_MID);
+    lv_label_set_text(ui_Label29, "Change Callsign");
+    lv_obj_set_style_text_color(ui_Label29, lv_color_hex(0xD2CDC8), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Label29, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_Label29, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label29, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_callsign_ok_btn, ui_event_callsign_ok_btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_callsign_cancel_btn, ui_event_callsign_cancel_btn, LV_EVENT_ALL, NULL);

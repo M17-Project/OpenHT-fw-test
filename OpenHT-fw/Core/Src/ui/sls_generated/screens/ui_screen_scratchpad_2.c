@@ -12,7 +12,7 @@ void ui_screen_scratchpad_2_screen_init(void)
 
     ui_mode_change_panel = lv_obj_create(ui_screen_scratchpad_2);
     lv_obj_set_width(ui_mode_change_panel, 323);
-    lv_obj_set_height(ui_mode_change_panel, 379);
+    lv_obj_set_height(ui_mode_change_panel, 420);
     lv_obj_set_align(ui_mode_change_panel, LV_ALIGN_CENTER);
     lv_obj_clear_flag(ui_mode_change_panel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_mode_change_panel, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -21,10 +21,11 @@ void ui_screen_scratchpad_2_screen_init(void)
     lv_obj_set_style_border_opa(ui_mode_change_panel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_mode_roller = lv_roller_create(ui_mode_change_panel);
+    lv_roller_set_options(ui_mode_roller, "FM\nNFM\nM17\nFreeDV", LV_ROLLER_MODE_INFINITE);
     lv_obj_set_height(ui_mode_roller, 254);
     lv_obj_set_width(ui_mode_roller, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_x(ui_mode_roller, 0);
-    lv_obj_set_y(ui_mode_roller, -30);
+    lv_obj_set_y(ui_mode_roller, -10);
     lv_obj_set_align(ui_mode_roller, LV_ALIGN_CENTER);
     lv_obj_set_style_text_color(ui_mode_roller, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_mode_roller, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -73,6 +74,16 @@ void ui_screen_scratchpad_2_screen_init(void)
     lv_obj_set_align(ui_Label8, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label8, "Cancel");
     lv_obj_set_style_text_font(ui_Label8, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Label9 = lv_label_create(ui_mode_change_panel);
+    lv_obj_set_width(ui_Label9, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label9, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_Label9, LV_ALIGN_TOP_MID);
+    lv_label_set_text(ui_Label9, "Change Mode");
+    lv_obj_set_style_text_color(ui_Label9, lv_color_hex(0xD2CDC8), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Label9, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_Label9, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label9, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_mode_ok_button, ui_event_mode_ok_button, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_mode_cancel_button, ui_event_mode_cancel_button, LV_EVENT_ALL, NULL);
