@@ -214,7 +214,7 @@ void StartTaskRadio(void *argument) {
 				set_fpga_status(FPGA_Online);
 				xcvr_init();
 				LOG(CLI_LOG_RADIO, "PoC powered on.\r\n");
-				radio_enabled = false;
+				radio_enabled = true;
 			}else if( (initn == GPIO_PIN_RESET) \
 					  && (done == GPIO_PIN_SET) ){
 				LOG(CLI_LOG_RADIO, "INITN and DONE pins are in an inconsistent state...\r\n");
