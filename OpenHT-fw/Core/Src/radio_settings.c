@@ -65,7 +65,7 @@ static radio_settings_t cached_settings;
 static radio_settings_t saved_settings;
 static user_callsign_func_t callsign_cb = NULL; // function which provides user callsign
 static radio_setting_changed_func_t radio_settings_rx_changed_cb = NULL; // function which is called when rx has changed
-static radio_setting_changed_func_t radio_settings_tx_changed_cb = NULL; // function which is called when tx has changed
+static radio_setting_changed_func_t radio_settings_mode_changed_cb = NULL; // function which is called when tx has changed
 
 void radio_settings_reset(){
 	bool res = EEEPROM_erase(&radio_settings_eeeprom);
@@ -104,11 +104,11 @@ void radio_settings_init()
 
 	// AGC and Power output
 	if(EEEPROM_read_data(&radio_settings_eeeprom, AGC_PWR_MODE_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		saved_settings.agc_target = buffer & 0xFF;
+		saved_settings.radio_agc = buffer & 0xFF;
 		saved_settings.output_pwr = (buffer>>8) & 0xFF;
 		saved_settings.mode = (buffer>>16) & 0xFF;
 	}else{
-		saved_settings.agc_target = 0;
+		saved_settings.radio_agc = 0;
 		saved_settings.output_pwr = 0;
 		saved_settings.mode = 0;
 	}
@@ -174,10 +174,10 @@ void radio_settings_save()
 	}
 
 	// AGC, Power output, OpMode
-	if( (saved_settings.agc_target != cached_settings.agc_target) ||
+	if( (saved_settings.radio_agc != cached_settings.radio_agc) ||
 		(saved_settings.output_pwr != cached_settings.output_pwr) ||
 		(saved_settings.mode != cached_settings.mode) ){
-		buffer = cached_settings.agc_target +
+		buffer = cached_settings.radio_agc +
 				( ( (uint16_t)cached_settings.output_pwr ) << 8 ) +
 				( ( (uint32_t)cached_settings.mode ) << 16 );
 		EEEPROM_write_data(&radio_settings_eeeprom, AGC_PWR_MODE_EEEPROM_ADDR, (void *)(&buffer));
@@ -235,17 +235,12 @@ freq_t radio_settings_get_rx_freq (void)
 	return cached_settings.rx_freq;
 }
 
-void radio_settings_sub_tx_freq_cb(radio_setting_changed_func_t cb)
-{
-	radio_settings_tx_changed_cb = cb;
-}
-
 void radio_settings_set_tx_freq (freq_t freq)
 {
 	cached_settings.tx_freq = freq;
 
-	if (radio_settings_tx_changed_cb != NULL) {
-		radio_settings_tx_changed_cb();
+	if (radio_settings_mode_changed_cb != NULL) {
+		radio_settings_mode_changed_cb();
 	}
 }
 
@@ -254,14 +249,14 @@ freq_t radio_settings_get_tx_freq (void)
 	return cached_settings.tx_freq;
 }
 
-void radio_settings_set_agc_target (uint8_t agc_target)
+void radio_settings_set_radio_agc (openht_radio_agc agc_target)
 {
-	cached_settings.agc_target = agc_target;
+	cached_settings.radio_agc = agc_target;
 }
 
-uint8_t radio_settings_get_agc_target (void)
+openht_radio_agc radio_settings_get_radio_agc (void)
 {
-	return cached_settings.agc_target;
+	return cached_settings.radio_agc;
 }
 
 void radio_settings_set_output_pwr (uint8_t output_pwr)
@@ -272,6 +267,11 @@ void radio_settings_set_output_pwr (uint8_t output_pwr)
 uint8_t radio_settings_get_output_pwr (void)
 {
 	return cached_settings.output_pwr;
+}
+
+void radio_settings_sub_mode_cb(radio_setting_changed_func_t cb)
+{
+	radio_settings_mode_changed_cb = cb;
 }
 
 void radio_settings_set_mode (openht_mode_t mode)

@@ -26,6 +26,7 @@ extern "C" {
 #include "cps.h"
 #include "openht_types.h"
 #include "user_settings.h"
+#include "../radio/radio_hal.h"
 
 #include "stm32469i_discovery.h" /* DISCOVERY includes component */
 #include "stm32469i_discovery_qspi.h"
@@ -38,18 +39,18 @@ typedef struct
 
 typedef struct
 {
-	freq_t rx_freq;			// RX_FREQ_EEEPROM_ADDR
-	freq_t tx_freq;			// TX_FREQ_EEEPROM_ADDR
+	freq_t rx_freq;				// RX_FREQ_EEEPROM_ADDR
+	freq_t tx_freq;				// TX_FREQ_EEEPROM_ADDR
 
-	uint8_t agc_target;		// AGC_PWR_MODE_EEEPROM_ADDR
-	uint8_t output_pwr; 	// AGC_PWR_MODE_EEEPROM_ADDR
+	openht_radio_agc radio_agc;	// AGC_PWR_MODE_EEEPROM_ADDR
+	uint8_t output_pwr; 		// AGC_PWR_MODE_EEEPROM_ADDR
 
-	openht_mode_t mode; 	// AGC_PWR_MODE_EEEPROM_ADDR
+	openht_mode_t mode; 		// AGC_PWR_MODE_EEEPROM_ADDR
 
-	char m17_dst[10];	 	// M17_DST[1][2][3]_EEEPROM_ADDR
-	m17Info_t m17_info;		// M17_INFO_EEEPROM_ADDR
+	char m17_dst[10];	 		// M17_DST[1][2][3]_EEEPROM_ADDR
+	m17Info_t m17_info;			// M17_INFO_EEEPROM_ADDR
 
-	fmInfo_t fm_settings;	// FM_SETTINGS_EEEPROM_ADDR
+	fmInfo_t fm_settings;		// FM_SETTINGS_EEEPROM_ADDR
 
 	// FPGA data...not stored in NOR FLASH
 	maj_min_rev_t fpga_revision;
@@ -62,20 +63,20 @@ void radio_settings_save();
 
 typedef void (*radio_setting_changed_func_t)();
 
-void radio_settings_set_rx_freq (freq_t freq);
 void radio_settings_sub_rx_freq_cb(radio_setting_changed_func_t cb);
+void radio_settings_set_rx_freq (freq_t freq);
 freq_t radio_settings_get_rx_freq (void);
 
 void radio_settings_set_tx_freq (freq_t freq);
-void radio_settings_sub_tx_freq_cb(radio_setting_changed_func_t cb);
 freq_t radio_settings_get_tx_freq (void);
 
-void radio_settings_set_agc_target (uint8_t agc_target);
-uint8_t radio_settings_get_agc_target (void);
+void radio_settings_set_radio_agc (openht_radio_agc agc_target);
+openht_radio_agc radio_settings_get_radio_agc (void);
 
 void radio_settings_set_output_pwr (uint8_t output_pwr);
 uint8_t radio_settings_get_output_pwr (void);
 
+void radio_settings_sub_mode_cb(radio_setting_changed_func_t cb);
 void radio_settings_set_mode (openht_mode_t mode);
 openht_mode_t radio_settings_get_mode (void);
 

@@ -83,6 +83,12 @@ void rx_changed_cb()
 	radio_config();
 }
 
+void mode_changed_cb()
+{
+	LOG(CLI_LOG_RADIO, "Mode settings changed. Updating them.\r\n");
+	radio_config();
+}
+
 void StartTaskRadio(void *argument) {
 	FPGA_thread_id = osThreadGetId();
 
@@ -101,11 +107,17 @@ void StartTaskRadio(void *argument) {
 	};
 
 	// Radio settings
+
+	// init
+	radio_settings_init();
+	radio_settings_sub_rx_freq_cb(rx_changed_cb);
+	radio_settings_sub_mode_cb(mode_changed_cb);
+
 	openht_mode_t 		mode 		= radio_settings_get_mode();
 	freq_t 				rx_freq 	= radio_settings_get_rx_freq();
 	freq_t 				tx_freq 	= radio_settings_get_tx_freq();
 	fmInfo_t 			fm_info 	= radio_settings_get_fm_settings();
-	openht_radio_agc	agc 		= AGC_OFF; 	// TODO implement it in radio_settings according to an enum
+	openht_radio_agc	agc 		= radio_settings_get_radio_agc();
 	uint8_t				tx_power	= radio_settings_get_output_pwr();
 
 	float			ppm 		= 0;
@@ -134,10 +146,6 @@ void StartTaskRadio(void *argument) {
 	// For now we init this here. It will be in it's own thread later on
 	audio_process_init();
 
-	// init
-	radio_settings_init();
-	radio_settings_sub_rx_freq_cb(rx_changed_cb);
-
 	for(;;){
 		uint32_t flag = osThreadFlagsWait(RADIO_ALL_FLAGS, osFlagsNoClear, osWaitForever);
 
@@ -161,7 +169,7 @@ void StartTaskRadio(void *argument) {
 			rx_freq 	= radio_settings_get_rx_freq();
 			tx_freq 	= radio_settings_get_tx_freq();
 			fm_info 	= radio_settings_get_fm_settings();
-			agc			= AGC_OFF;
+			agc			= radio_settings_get_radio_agc();
 			tx_power	= radio_settings_get_output_pwr();
 
 			// Simulate a PTT press to re-send all settings
