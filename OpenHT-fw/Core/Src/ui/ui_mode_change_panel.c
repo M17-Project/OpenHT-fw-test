@@ -39,7 +39,7 @@ void init_mode_change_panel(void)
 		label += mode_str_len;
 	}
 
-    lv_roller_set_options(ui_mode_roller, labels, LV_ROLLER_MODE_NORMAL);
+    //lv_roller_set_options(ui_mode_roller, labels, LV_ROLLER_MODE_NORMAL);
 
 	lv_roller_set_selected(ui_mode_roller, radio_settings_get_mode(), LV_ANIM_OFF);
 }

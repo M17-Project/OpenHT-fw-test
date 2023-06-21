@@ -88,6 +88,7 @@ lv_obj_t * ui_Label7;
 void ui_event_mode_cancel_button(lv_event_t * e);
 lv_obj_t * ui_mode_cancel_button;
 lv_obj_t * ui_Label8;
+lv_obj_t * ui_Label9;
 
 // SCREEN: ui_screen_scratchpad_3
 void ui_screen_scratchpad_3_screen_init(void);
@@ -146,6 +147,7 @@ lv_obj_t * ui_callsign_cancel_btn;
 lv_obj_t * ui_Label20;
 void ui_event_text_area_callsign(lv_event_t * e);
 lv_obj_t * ui_text_area_callsign;
+lv_obj_t * ui_Label29;
 
 // SCREEN: ui_screen_scratchpad_5
 void ui_screen_scratchpad_5_screen_init(void);
