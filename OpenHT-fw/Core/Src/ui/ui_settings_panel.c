@@ -49,6 +49,11 @@ void on_settings_erase_radio_clicked(lv_event_t *e)
 	radio_settings_reset();
 }
 
+void on_settings_reboot_clicked(lv_event_t *e)
+{
+	NVIC_SystemReset();
+}
+
 void on_settings_load_fpga_clicked(lv_event_t *e)
 {
 	download_fpga_binary_file();

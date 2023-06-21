@@ -99,6 +99,10 @@ extern lv_obj_t * ui_settings_panel;
 void ui_event_settings_erase_user_btn(lv_event_t * e);
 extern lv_obj_t * ui_settings_erase_user_btn;
 extern lv_obj_t * ui_Label11;
+void ui_event_settings_reboot_btn(lv_event_t * e);
+extern lv_obj_t * ui_settings_reboot_btn;
+extern lv_obj_t * ui_Label30;
+extern lv_obj_t * ui_Label31;
 void ui_event_settings_load_fpga_btn(lv_event_t * e);
 extern lv_obj_t * ui_settings_load_fpga_btn;
 extern lv_obj_t * ui_Label12;
@@ -202,9 +206,9 @@ LV_IMG_DECLARE(ui_img_gear_w_png);    // assets/gear_w.png
 LV_IMG_DECLARE(ui_img_m17_logo_sm_png);    // assets/m17_logo_sm.png
 LV_IMG_DECLARE(ui_img_openht_logo_png);    // assets/openht_logo.png
 
-LV_FONT_DECLARE(ui_font_RobotoBold);
 LV_FONT_DECLARE(ui_font_number_50);
 LV_FONT_DECLARE(ui_font_number_60);
+LV_FONT_DECLARE(ui_font_RobotoBold);
 
 void ui_init(void);
 

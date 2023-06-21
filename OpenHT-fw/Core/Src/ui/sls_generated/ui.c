@@ -97,6 +97,10 @@ lv_obj_t * ui_settings_panel;
 void ui_event_settings_erase_user_btn(lv_event_t * e);
 lv_obj_t * ui_settings_erase_user_btn;
 lv_obj_t * ui_Label11;
+void ui_event_settings_reboot_btn(lv_event_t * e);
+lv_obj_t * ui_settings_reboot_btn;
+lv_obj_t * ui_Label30;
+lv_obj_t * ui_Label31;
 void ui_event_settings_load_fpga_btn(lv_event_t * e);
 lv_obj_t * ui_settings_load_fpga_btn;
 lv_obj_t * ui_Label12;
@@ -337,6 +341,14 @@ void ui_event_settings_erase_user_btn(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
         on_settings_erase_usr_clicked(e);
+    }
+}
+void ui_event_settings_reboot_btn(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        on_settings_reboot_clicked(e);
     }
 }
 void ui_event_settings_load_fpga_btn(lv_event_t * e)

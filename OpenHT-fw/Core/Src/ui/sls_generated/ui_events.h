@@ -28,6 +28,7 @@ void on_about_ok_clicked(lv_event_t * e);
 void on_mode_ok_clicked(lv_event_t * e);
 void on_mode_cancel_clicked(lv_event_t * e);
 void on_settings_erase_usr_clicked(lv_event_t * e);
+void on_settings_reboot_clicked(lv_event_t * e);
 void on_settings_load_fpga_clicked(lv_event_t * e);
 void on_settings_erase_fpga_clicked(lv_event_t * e);
 void on_settings_a_clicked(lv_event_t * e);

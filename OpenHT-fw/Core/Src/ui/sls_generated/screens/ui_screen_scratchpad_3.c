@@ -41,10 +41,41 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_label_set_text(ui_Label11, "Erase User Settings");
     lv_obj_set_style_text_font(ui_Label11, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_settings_reboot_btn = lv_btn_create(ui_settings_panel);
+    lv_obj_set_width(ui_settings_reboot_btn, 120);
+    lv_obj_set_height(ui_settings_reboot_btn, 100);
+    lv_obj_set_x(ui_settings_reboot_btn, 280);
+    lv_obj_set_y(ui_settings_reboot_btn, -5);
+    lv_obj_add_flag(ui_settings_reboot_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_settings_reboot_btn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_settings_reboot_btn, lv_color_hex(0x191C26), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_settings_reboot_btn, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_settings_reboot_btn, lv_color_hex(0x37B9F5), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_opa(ui_settings_reboot_btn, 255, LV_PART_MAIN | LV_STATE_PRESSED);
+
+    ui_Label30 = lv_label_create(ui_settings_reboot_btn);
+    lv_obj_set_width(ui_Label30, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label30, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_Label30, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label30, "Reboot\nRadio");
+    lv_obj_set_style_text_align(ui_Label30, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label30, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Label31 = lv_label_create(ui_settings_panel);
+    lv_obj_set_width(ui_Label31, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label31, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label31, 0);
+    lv_obj_set_y(ui_Label31, 122);
+    lv_label_set_text(ui_Label31, "FPGA:");
+    lv_obj_set_style_text_color(ui_Label31, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Label31, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_Label31, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label31, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
     ui_settings_load_fpga_btn = lv_btn_create(ui_settings_panel);
     lv_obj_set_width(ui_settings_load_fpga_btn, 156);
     lv_obj_set_height(ui_settings_load_fpga_btn, 50);
-    lv_obj_set_x(ui_settings_load_fpga_btn, 0);
+    lv_obj_set_x(ui_settings_load_fpga_btn, 70);
     lv_obj_set_y(ui_settings_load_fpga_btn, 110);
     lv_obj_add_flag(ui_settings_load_fpga_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_settings_load_fpga_btn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -57,13 +88,13 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_width(ui_Label12, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Label12, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_Label12, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label12, "Load FPGA");
+    lv_label_set_text(ui_Label12, "SD to NOR");
     lv_obj_set_style_text_font(ui_Label12, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_settings_erase_fpga_btn = lv_btn_create(ui_settings_panel);
     lv_obj_set_width(ui_settings_erase_fpga_btn, 156);
     lv_obj_set_height(ui_settings_erase_fpga_btn, 50);
-    lv_obj_set_x(ui_settings_erase_fpga_btn, 180);
+    lv_obj_set_x(ui_settings_erase_fpga_btn, 240);
     lv_obj_set_y(ui_settings_erase_fpga_btn, 110);
     lv_obj_add_flag(ui_settings_erase_fpga_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_settings_erase_fpga_btn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -76,7 +107,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_width(ui_Label13, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Label13, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_Label13, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label13, "Erase FPGA");
+    lv_label_set_text(ui_Label13, "Erase NOR");
     lv_obj_set_style_text_font(ui_Label13, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_settings_a_btn = lv_btn_create(ui_settings_panel);
@@ -95,7 +126,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_width(ui_Label14, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Label14, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_Label14, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label14, "Button A");
+    lv_label_set_text(ui_Label14, "Upload BIN");
     lv_obj_set_style_text_font(ui_Label14, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_settings_b_btn = lv_btn_create(ui_settings_panel);
@@ -310,6 +341,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_style_text_font(ui_Label28, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_settings_erase_user_btn, ui_event_settings_erase_user_btn, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_settings_reboot_btn, ui_event_settings_reboot_btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_settings_load_fpga_btn, ui_event_settings_load_fpga_btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_settings_erase_fpga_btn, ui_event_settings_erase_fpga_btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_settings_a_btn, ui_event_settings_a_btn, LV_EVENT_ALL, NULL);
