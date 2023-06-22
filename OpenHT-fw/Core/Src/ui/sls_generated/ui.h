@@ -173,7 +173,7 @@ extern lv_obj_t * ui_label_tx;
 void ui_event_tx_freq_ta(lv_event_t * e);
 extern lv_obj_t * ui_tx_freq_ta;
 extern lv_obj_t * ui_offset_tx_panel;
-extern lv_obj_t * ui_label_tx1;
+extern lv_obj_t * ui_label_offset;
 extern lv_obj_t * ui_tx_offset_ta;
 void ui_event_split_freq_cb(lv_event_t * e);
 extern lv_obj_t * ui_split_freq_cb;
@@ -206,9 +206,9 @@ LV_IMG_DECLARE(ui_img_gear_w_png);    // assets/gear_w.png
 LV_IMG_DECLARE(ui_img_m17_logo_sm_png);    // assets/m17_logo_sm.png
 LV_IMG_DECLARE(ui_img_openht_logo_png);    // assets/openht_logo.png
 
+LV_FONT_DECLARE(ui_font_RobotoBold);
 LV_FONT_DECLARE(ui_font_number_50);
 LV_FONT_DECLARE(ui_font_number_60);
-LV_FONT_DECLARE(ui_font_RobotoBold);
 
 void ui_init(void);
 

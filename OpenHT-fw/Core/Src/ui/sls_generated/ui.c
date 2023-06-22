@@ -173,7 +173,7 @@ lv_obj_t * ui_label_tx;
 void ui_event_tx_freq_ta(lv_event_t * e);
 lv_obj_t * ui_tx_freq_ta;
 lv_obj_t * ui_offset_tx_panel;
-lv_obj_t * ui_label_tx1;
+lv_obj_t * ui_label_offset;
 lv_obj_t * ui_tx_offset_ta;
 void ui_event_split_freq_cb(lv_event_t * e);
 lv_obj_t * ui_split_freq_cb;

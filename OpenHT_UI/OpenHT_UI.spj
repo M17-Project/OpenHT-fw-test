@@ -7417,7 +7417,7 @@
                     "InheritedType": 7
                   },
                   {
-                    "nid": -369554444,
+                    "nid": -522530579,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7430,7 +7430,7 @@
                 "strval": "CHECKED",
                 "childs": [
                   {
-                    "nid": 1558928390,
+                    "nid": 1607197107,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7443,7 +7443,7 @@
                 "strval": "PRESSED",
                 "childs": [
                   {
-                    "nid": -1692756948,
+                    "nid": -94930445,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7456,7 +7456,7 @@
                 "strval": "CHECKED|PRESSED",
                 "childs": [
                   {
-                    "nid": 1293678886,
+                    "nid": -55300435,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7469,7 +7469,7 @@
                 "strval": "DISABLED",
                 "childs": [
                   {
-                    "nid": 2001866991,
+                    "nid": 1596547781,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7482,7 +7482,7 @@
                 "strval": "USER_1",
                 "childs": [
                   {
-                    "nid": -1405243834,
+                    "nid": 1704404558,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7495,7 +7495,7 @@
                 "strval": "USER_2",
                 "childs": [
                   {
-                    "nid": -405098240,
+                    "nid": 89989679,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7508,7 +7508,7 @@
                 "strval": "USER_3",
                 "childs": [
                   {
-                    "nid": -535866725,
+                    "nid": 549474204,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7521,7 +7521,7 @@
                 "strval": "USER_4",
                 "childs": [
                   {
-                    "nid": 1620984533,
+                    "nid": -1228546595,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -29144,7 +29144,7 @@
                     "strtype": "OBJECT/Size",
                     "intarray": [
                       390,
-                      84
+                      70
                     ],
                     "InheritedType": 7
                   },
@@ -29366,7 +29366,7 @@
                           {
                             "nid": -1472278425,
                             "strtype": "_style/Text_Font",
-                            "strval": "number_60",
+                            "strval": "RobotoBold",
                             "InheritedType": 3
                           },
                           {
@@ -29425,7 +29425,7 @@
                           {
                             "nid": 1322179630,
                             "strtype": "_style/Text_Font",
-                            "strval": "number_60",
+                            "strval": "RobotoBold",
                             "InheritedType": 3
                           },
                           {
@@ -31680,7 +31680,7 @@
                         "flags": 17,
                         "strtype": "OBJECT/Position",
                         "intarray": [
-                          -405,
+                          20,
                           0
                         ],
                         "InheritedType": 7
@@ -31698,7 +31698,7 @@
                       {
                         "nid": 768373145,
                         "strtype": "OBJECT/Align",
-                        "strval": "RIGHT_MID",
+                        "strval": "LEFT_MID",
                         "InheritedType": 3
                       },
                       {
@@ -31920,7 +31920,7 @@
                               {
                                 "nid": -1934790424,
                                 "strtype": "_style/Text_Font",
-                                "strval": "montserrat_42",
+                                "strval": "montserrat_20",
                                 "InheritedType": 3
                               }
                             ],
@@ -31980,7 +31980,7 @@
                         "flags": 17,
                         "strtype": "OBJECT/Position",
                         "intarray": [
-                          35,
+                          60,
                           0
                         ],
                         "InheritedType": 7
@@ -31990,15 +31990,15 @@
                         "flags": 49,
                         "strtype": "OBJECT/Size",
                         "intarray": [
-                          390,
-                          84
+                          405,
+                          70
                         ],
                         "InheritedType": 7
                       },
                       {
                         "nid": 615675310,
                         "strtype": "OBJECT/Align",
-                        "strval": "CENTER",
+                        "strval": "LEFT_MID",
                         "InheritedType": 3
                       },
                       {
@@ -32117,7 +32117,7 @@
                       {
                         "nid": 282615921,
                         "strtype": "OBJECT/Scrollbar_mode",
-                        "strval": "AUTO",
+                        "strval": "OFF",
                         "InheritedType": 3
                       },
                       {
@@ -32213,7 +32213,7 @@
                               {
                                 "nid": -1019263880,
                                 "strtype": "_style/Text_Font",
-                                "strval": "number_60",
+                                "strval": "RobotoBold",
                                 "InheritedType": 3
                               },
                               {
@@ -32283,7 +32283,7 @@
                               {
                                 "nid": -347476928,
                                 "strtype": "_style/Text_Font",
-                                "strval": "number_60",
+                                "strval": "RobotoBold",
                                 "InheritedType": 3
                               }
                             ],
@@ -32306,7 +32306,7 @@
                       {
                         "nid": -812071179,
                         "strtype": "TEXTAREA/Placeholder",
-                        "strval": "Placeholder...",
+                        "strval": "",
                         "InheritedType": 10
                       },
                       {
@@ -32399,7 +32399,8 @@
                         "InheritedType": 4
                       }
                     ],
-                    "saved_objtypeKey": "TEXTAREA"
+                    "saved_objtypeKey": "TEXTAREA",
+                    "tree_closed": true
                   }
                 ],
                 "locked": false,
@@ -32692,8 +32693,7 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "PANEL",
-                "tree_closed": true
+                "saved_objtypeKey": "PANEL"
               },
               {
                 "guid": "GUID89552106-579633S1352156",
@@ -32738,7 +32738,7 @@
                         "flags": 17,
                         "strtype": "OBJECT/Position",
                         "intarray": [
-                          -405,
+                          20,
                           0
                         ],
                         "InheritedType": 7
@@ -32756,7 +32756,7 @@
                       {
                         "nid": -111632490,
                         "strtype": "OBJECT/Align",
-                        "strval": "RIGHT_MID",
+                        "strval": "LEFT_MID",
                         "InheritedType": 3
                       },
                       {
@@ -32978,7 +32978,7 @@
                               {
                                 "nid": 1153936875,
                                 "strtype": "_style/Text_Font",
-                                "strval": "montserrat_42",
+                                "strval": "montserrat_20",
                                 "InheritedType": 3
                               }
                             ],
@@ -33038,7 +33038,7 @@
                         "flags": 17,
                         "strtype": "OBJECT/Position",
                         "intarray": [
-                          35,
+                          60,
                           0
                         ],
                         "InheritedType": 7
@@ -33048,15 +33048,15 @@
                         "flags": 49,
                         "strtype": "OBJECT/Size",
                         "intarray": [
-                          390,
-                          84
+                          405,
+                          70
                         ],
                         "InheritedType": 7
                       },
                       {
                         "nid": 1442680464,
                         "strtype": "OBJECT/Align",
-                        "strval": "CENTER",
+                        "strval": "LEFT_MID",
                         "InheritedType": 3
                       },
                       {
@@ -33175,7 +33175,7 @@
                       {
                         "nid": -1086761323,
                         "strtype": "OBJECT/Scrollbar_mode",
-                        "strval": "AUTO",
+                        "strval": "OFF",
                         "InheritedType": 3
                       },
                       {
@@ -33271,7 +33271,7 @@
                               {
                                 "nid": -2061690877,
                                 "strtype": "_style/Text_Font",
-                                "strval": "number_60",
+                                "strval": "RobotoBold",
                                 "InheritedType": 3
                               },
                               {
@@ -33341,7 +33341,7 @@
                               {
                                 "nid": -1940266002,
                                 "strtype": "_style/Text_Font",
-                                "strval": "number_60",
+                                "strval": "RobotoBold",
                                 "InheritedType": 3
                               }
                             ],
@@ -33364,7 +33364,7 @@
                       {
                         "nid": -1177565762,
                         "strtype": "TEXTAREA/Placeholder",
-                        "strval": "Placeholder...",
+                        "strval": "",
                         "InheritedType": 10
                       },
                       {
@@ -33497,7 +33497,7 @@
                     "strtype": "OBJECT/Position",
                     "intarray": [
                       0,
-                      74
+                      80
                     ],
                     "InheritedType": 7
                   },
@@ -33525,7 +33525,7 @@
                   {
                     "nid": -1630970734,
                     "strtype": "OBJECT/Hidden",
-                    "strval": "False",
+                    "strval": "True",
                     "InheritedType": 2
                   },
                   {
@@ -33749,8 +33749,7 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "PANEL",
-                "tree_closed": true
+                "saved_objtypeKey": "PANEL"
               },
               {
                 "guid": "GUID67819353-587007S692156",
@@ -33764,7 +33763,7 @@
                       {
                         "nid": -617966371,
                         "strtype": "OBJECT/Name",
-                        "strval": "label tx1",
+                        "strval": "label offset",
                         "InheritedType": 10
                       },
                       {
@@ -34010,7 +34009,7 @@
                       {
                         "nid": -314339510,
                         "strtype": "LABEL/Text",
-                        "strval": "TX Offset:",
+                        "strval": "TX\\nOffset:",
                         "InheritedType": 10
                       },
                       {
@@ -34033,9 +34032,15 @@
                                 "InheritedType": 7
                               },
                               {
+                                "nid": -279311589,
+                                "strtype": "_style/Text_Align",
+                                "strval": "CENTER",
+                                "InheritedType": 3
+                              },
+                              {
                                 "nid": 1281521452,
                                 "strtype": "_style/Text_Font",
-                                "strval": "montserrat_42",
+                                "strval": "montserrat_20",
                                 "InheritedType": 3
                               }
                             ],
@@ -34095,30 +34100,29 @@
                         "flags": 17,
                         "strtype": "OBJECT/Position",
                         "intarray": [
-                          61,
-                          -5
+                          90,
+                          0
                         ],
                         "InheritedType": 7
                       },
                       {
                         "nid": 117873504,
-                        "flags": 17,
+                        "flags": 49,
                         "strtype": "OBJECT/Size",
                         "intarray": [
-                          150,
-                          54
+                          375,
+                          70
                         ],
                         "InheritedType": 7
                       },
                       {
                         "nid": -706523138,
                         "strtype": "OBJECT/Align",
-                        "strval": "CENTER",
+                        "strval": "LEFT_MID",
                         "InheritedType": 3
                       },
                       {
                         "nid": 1563492680,
-                        "flags": 1048576,
                         "strtype": "OBJECT/Flags",
                         "InheritedType": 1
                       },
@@ -34149,7 +34153,7 @@
                       {
                         "nid": -1620926932,
                         "strtype": "OBJECT/Click_focusable",
-                        "strval": "True",
+                        "strval": "False",
                         "InheritedType": 2
                       },
                       {
@@ -34197,7 +34201,7 @@
                       {
                         "nid": 376442437,
                         "strtype": "OBJECT/Scrollable",
-                        "strval": "True",
+                        "strval": "False",
                         "InheritedType": 2
                       },
                       {
@@ -34233,7 +34237,7 @@
                       {
                         "nid": 257475323,
                         "strtype": "OBJECT/Scrollbar_mode",
-                        "strval": "AUTO",
+                        "strval": "OFF",
                         "InheritedType": 3
                       },
                       {
@@ -34304,12 +34308,66 @@
                       {
                         "nid": -380497592,
                         "strtype": "TEXTAREA/Text",
-                        "strval": "",
+                        "strval": "-__.___.___",
                         "InheritedType": 10
                       },
                       {
                         "part": "lv.PART.MAIN",
-                        "childs": [],
+                        "childs": [
+                          {
+                            "nid": -663016112,
+                            "strtype": "_style/StyleState",
+                            "strval": "DEFAULT",
+                            "childs": [
+                              {
+                                "nid": -2127609664,
+                                "strtype": "_style/Text_Color",
+                                "intarray": [
+                                  255,
+                                  255,
+                                  255,
+                                  255
+                                ],
+                                "InheritedType": 7
+                              },
+                              {
+                                "nid": 1067299237,
+                                "strtype": "_style/Text_Align",
+                                "strval": "CENTER",
+                                "InheritedType": 3
+                              },
+                              {
+                                "nid": -689687664,
+                                "strtype": "_style/Text_Font",
+                                "strval": "RobotoBold",
+                                "InheritedType": 3
+                              },
+                              {
+                                "nid": -461908255,
+                                "strtype": "_style/Bg_Color",
+                                "intarray": [
+                                  0,
+                                  0,
+                                  0,
+                                  255
+                                ],
+                                "InheritedType": 7
+                              },
+                              {
+                                "nid": -635579897,
+                                "strtype": "_style/Border_Color",
+                                "intarray": [
+                                  0,
+                                  0,
+                                  0,
+                                  255
+                                ],
+                                "InheritedType": 7
+                              }
+                            ],
+                            "InheritedType": 1
+                          }
+                        ],
                         "nid": -1368135352,
                         "strtype": "TEXTAREA/Style_main",
                         "strval": "lv.PART.MAIN, Text, Rectangle, Pad",
@@ -34348,7 +34406,7 @@
                       {
                         "nid": -529560432,
                         "strtype": "TEXTAREA/One_line_mode",
-                        "strval": "False",
+                        "strval": "True",
                         "InheritedType": 2
                       },
                       {
@@ -34410,7 +34468,7 @@
                     "strtype": "OBJECT/Position",
                     "intarray": [
                       0,
-                      74
+                      80
                     ],
                     "InheritedType": 7
                   },
@@ -34439,7 +34497,7 @@
                   {
                     "nid": -1873335682,
                     "strtype": "OBJECT/Hidden",
-                    "strval": "True",
+                    "strval": "False",
                     "InheritedType": 2
                   },
                   {
@@ -34663,8 +34721,7 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "PANEL",
-                "tree_closed": true
+                "saved_objtypeKey": "PANEL"
               },
               {
                 "guid": "GUID34914486-83863S9092157",
@@ -36742,7 +36799,8 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "PANEL"
+                "saved_objtypeKey": "PANEL",
+                "tree_closed": true
               },
               {
                 "guid": "GUID35974348-987844S9352161",
@@ -40463,7 +40521,8 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "PANEL"
+                "saved_objtypeKey": "PANEL",
+                "tree_closed": true
               }
             ],
             "locked": false,
@@ -41048,7 +41107,7 @@
     "theme_color2": 0,
     "exportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/ui/sls_generated",
     "projectExportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/ui/sls_generated",
-    "backup_cnt": 233,
+    "backup_cnt": 243,
     "autosave_cnt": 0,
     "lvgl_version": "8.3.6",
     "callfuncsexport": "C_FILE",

@@ -21,6 +21,7 @@
 #include "ui/openht_ui.h"
 #include "ui/lvht_numpad.h"
 #include "utils/str_formatting.h"
+#include "../shell/inc/sys_command_line.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -211,7 +212,7 @@ void numpad_btnmatrix_event_cb(lv_event_t *e)
 		uint32_t id = lv_btnmatrix_get_selected_btn(obj);
 		const char *txt = lv_btnmatrix_get_btn_text(obj, id);
 
-		LV_LOG_USER("%s was pressed\n", txt);
+		LOG(CLI_LOG_GUI, "%s was pressed\r\n", txt);
 
 		if (current_freq_ta == NULL)
 			return;
@@ -260,19 +261,32 @@ void numpad_btnmatrix_event_cb(lv_event_t *e)
 	}
 }
 
-// based on the split mode the tx text area is either active or inactive
+// based on the split mode the tx text area or tx offset text area are either active or inactive
 bool update_split_mode()
 {
 	bool split = false;
 	if (lv_obj_has_state(ui_split_freq_cb, LV_STATE_CHECKED)) {
 		split = true;
+		// ui_tx_freq_ta
 		lv_obj_add_flag(ui_tx_freq_ta, LV_OBJ_FLAG_CLICKABLE);
 	    lv_obj_set_style_text_color(ui_tx_freq_ta, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
 	    lv_obj_set_style_text_color(ui_label_tx, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	    // ui_offset_ta
+		lv_obj_add_flag(ui_tx_offset_ta, LV_OBJ_FLAG_CLICKABLE);
+	    lv_obj_set_style_text_color(ui_tx_offset_ta, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+	    lv_obj_set_style_text_color(ui_label_offset, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+
 	} else {
+		// ui_tx_freq_ta
 		lv_obj_clear_flag(ui_tx_freq_ta, LV_OBJ_FLAG_CLICKABLE);
 	    lv_obj_set_style_text_color(ui_tx_freq_ta, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
 	    lv_obj_set_style_text_color(ui_label_tx, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	    // ui_offset_ta
+	    lv_obj_clear_flag(ui_tx_offset_ta, LV_OBJ_FLAG_CLICKABLE);
+	    lv_obj_set_style_text_color(ui_tx_offset_ta, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
+	    lv_obj_set_style_text_color(ui_label_offset, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
 	}
 
 	return split;
