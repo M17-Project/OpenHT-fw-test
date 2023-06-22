@@ -56,19 +56,17 @@ void on_settings_reboot_clicked(lv_event_t *e)
 
 void on_settings_load_fpga_clicked(lv_event_t *e)
 {
-	download_fpga_binary_file();
+	task_radio_event(DOWNLOAD_BITSTREAM);
 }
 
 void on_settings_erase_fpga_clicked(lv_event_t *e)
 {
-	erase_fpga_storage();
+	task_radio_event(ERASE_BITSTREAM_STORAGE);
 }
 
 void on_settings_a_clicked(lv_event_t *e)
 {
-	// TODO: add button a
-	upload_fpga_binary();
-
+	task_radio_event(UPLOAD_BITSTREAM);
 }
 
 void on_settings_b_clicked(lv_event_t *e)

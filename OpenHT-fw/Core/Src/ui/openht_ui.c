@@ -183,16 +183,12 @@ void on_screen_pressed(lv_event_t *e)
 
 void on_xmit_button_press(lv_event_t *e)
 {
-	radio_soft_ptt(true);
-
-	start_microphone_acquisition();
+	task_radio_event(START_TX);
 }
 
 void on_xmit_button_release(lv_event_t *e)
 {
-	radio_soft_ptt(false);
-
-	stop_microphone_acquisition();
+	task_radio_event(START_RX);
 }
 
 void on_vol_changed(lv_event_t *e)

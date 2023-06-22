@@ -29,6 +29,7 @@
 #include "../radio/at86rf215.h"
 #include "radio_settings.h"
 #include "task_audio_process.h"
+#include "task_microphone.h"
 #include "../radio/radio_hal.h"
 
 #include "../shell/inc/sys_command_line.h"
@@ -63,33 +64,34 @@ UINT 			fatfs_bitstream_stream		(const BYTE *p, UINT btf);
 void 			_ptt_timer_expired(void *argument);
 
 /* Event flags */
-#define FPGA_SEND_SAMPLES	(1 << 0)
-#define FPGA_FETCH_IQ		(1 << 1)
-#define FPGA_UPLOAD_BIN		(1 << 2)
-#define FPGA_DOWNLOAD_BIN	(1 << 3)
-#define FPGA_RESET			(1 << 4)
-#define FPGA_ERASE_STORAGE	(1 << 5)
-#define RADIO_INITN_CHANGED (1 << 6)
-#define XCVR_INIT			(1 << 7)
-#define XCVR_CONFIG			(1 << 8)
-#define RADIO_PTT_START_TIMER	(1 << 9)
-#define RADIO_PTT			(1<<10)
-#define RADIO_SW_PTT		(1<<11)
+#define FPGA_SEND_SAMPLES		(1 << 0)
+#define FPGA_READ_SAMPLES		(1 << 1)
+#define FPGA_FETCH_IQ			(1 << 2)
+#define FPGA_UPLOAD_BIN			(1 << 3)
+#define FPGA_DOWNLOAD_BIN		(1 << 4)
+#define FPGA_RESET				(1 << 5)
+#define FPGA_ERASE_STORAGE		(1 << 6)
+#define RADIO_INITN_CHANGED 	(1 << 7)
+#define XCVR_INIT				(1 << 8)
+#define XCVR_CONFIG				(1 << 9)
+#define RADIO_PTT_START_TIMER	(1 << 10)
+#define RADIO_START_TX			(1 << 11)
+#define RADIO_START_RX			(1 << 12)
 
-#define RADIO_ALL_FLAGS		(FPGA_SEND_SAMPLES | FPGA_FETCH_IQ | FPGA_UPLOAD_BIN | FPGA_DOWNLOAD_BIN | FPGA_RESET |\
-							 FPGA_ERASE_STORAGE | RADIO_INITN_CHANGED | XCVR_INIT | XCVR_CONFIG |\
-							 RADIO_PTT_START_TIMER | RADIO_PTT | RADIO_SW_PTT)
+#define RADIO_ALL_FLAGS		(FPGA_SEND_SAMPLES | FPGA_READ_SAMPLES | FPGA_FETCH_IQ | FPGA_UPLOAD_BIN |\
+							 FPGA_DOWNLOAD_BIN | FPGA_RESET | FPGA_ERASE_STORAGE | RADIO_INITN_CHANGED |\
+							 XCVR_INIT | XCVR_CONFIG | RADIO_PTT_START_TIMER | RADIO_START_TX | RADIO_START_RX)
 
 void rx_changed_cb()
 {
 	LOG(CLI_LOG_RADIO, "RX settings changed. Updating them.\r\n");
-	radio_config();
+	task_radio_event(CONFIG);
 }
 
 void mode_changed_cb()
 {
 	LOG(CLI_LOG_RADIO, "Mode settings changed. Updating them.\r\n");
-	radio_config();
+	task_radio_event(CONFIG);
 }
 
 void StartTaskRadio(void *argument) {
@@ -141,7 +143,7 @@ void StartTaskRadio(void *argument) {
 	HAL_NVIC_EnableIRQ(EXTI4_IRQn);
 
 	if(HAL_GPIO_ReadPin(FPGA_INITN_GPIO_Port, FPGA_INITN_Pin) == GPIO_PIN_SET){
-		radio_INITn_it();
+		task_radio_event(INITN_IRQ);
 	}
 
 	ptt_debounce_timer = osTimerNew(_ptt_timer_expired, osTimerOnce, NULL, &ptt_debounce_timer_attr);
@@ -159,7 +161,11 @@ void StartTaskRadio(void *argument) {
 			read_voice_samples((uint16_t *)(samples+2), 16);
 			HAL_SPI_Transmit_IT(&hspi1, samples, 33);
 			wait_spi_xfer_done(WAIT_TIMEOUT);
+		}else if(flag & FPGA_READ_SAMPLES){
+			osThreadFlagsClear(FPGA_READ_SAMPLES);
+
 		}else if(flag & FPGA_FETCH_IQ){
+			osThreadFlagsClear(FPGA_FETCH_IQ);
 
 		}else if(flag & XCVR_CONFIG){
 			osThreadFlagsClear(XCVR_CONFIG);
@@ -181,39 +187,20 @@ void StartTaskRadio(void *argument) {
 		}else if(flag & RADIO_PTT_START_TIMER){
 			osThreadFlagsClear(RADIO_PTT_START_TIMER);
 			osTimerStart(ptt_debounce_timer, 5);
-		}else if(flag & RADIO_PTT){
-			osThreadFlagsClear(RADIO_PTT);
-
-			GPIO_PinState ptt = HAL_GPIO_ReadPin(PTT_GPIO_Port, PTT_Pin);
-
-			// SET means released
-			if(ptt == GPIO_PIN_RESET){
-				LOG(CLI_LOG_RADIO, "PTT pressed.\r\n");
-				BSP_LED_On(LED_RED);
-				tx_nRx = true;
-				radio_configure_tx(tx_freq, ppm, mode, fm_info, tx_power);
-			}else{
-				LOG(CLI_LOG_RADIO, "PTT released.\r\n");
-				BSP_LED_Off(LED_RED);
-				tx_nRx = false;
-				radio_configure_rx(rx_freq, ppm, mode, fm_info, agc);
-			}
-		}else if(flag & RADIO_SW_PTT){
-			osThreadFlagsClear(RADIO_SW_PTT);
-
-			// SET means released
-			if(sw_ptt){
-				LOG(CLI_LOG_RADIO, "Soft PTT pressed.\r\n");
-				BSP_LED_On(LED_RED);
-				tx_nRx = true;
-				radio_configure_tx(tx_freq, ppm, mode, fm_info, tx_power);
-			}else{
-				LOG(CLI_LOG_RADIO, "Soft PTT released.\r\n");
-				BSP_LED_Off(LED_RED);
-				tx_nRx = false;
-				radio_configure_rx(rx_freq, ppm, mode, fm_info, agc);
-			}
-
+		}else if(flag & RADIO_START_RX){
+			osThreadFlagsClear(RADIO_START_RX);
+			BSP_LED_Off(LED_RED);
+			tx_nRx = false;
+			radio_configure_rx(rx_freq, ppm, mode, fm_info, agc);
+		}else if(flag & RADIO_START_TX){
+			osThreadFlagsClear(RADIO_START_TX);
+			start_microphone_acquisition();
+			BSP_LED_On(LED_RED);
+			tx_nRx = true;
+			osDelay(8);
+			radio_configure_tx(tx_freq, ppm, mode, fm_info, tx_power);
+			uint8_t voice[64];
+			read_voice_samples((uint16_t *)voice, 32);
 		}else if(flag & RADIO_INITN_CHANGED){
 			osThreadFlagsClear(RADIO_INITN_CHANGED);
 			GPIO_PinState initn 	= HAL_GPIO_ReadPin(FPGA_INITN_GPIO_Port, FPGA_INITN_Pin);
@@ -232,7 +219,7 @@ void StartTaskRadio(void *argument) {
 				// Looks like the PoC was powered on!
 				radio_on();
 				set_fpga_status(FPGA_Online);
-				xcvr_init();
+				task_radio_event(INIT);
 				LOG(CLI_LOG_RADIO, "PoC powered on.\r\n");
 				radio_enabled = true;
 			}else if( (initn == GPIO_PIN_RESET) \
@@ -248,7 +235,7 @@ void StartTaskRadio(void *argument) {
 			}
 			HAL_GPIO_WritePin(RF_RST_GPIO_Port, RF_RST_Pin, GPIO_PIN_SET);
 			osDelay(5);
-			upload_fpga_binary();
+			task_radio_event(UPLOAD_BITSTREAM);
 		}else if(flag & FPGA_UPLOAD_BIN){
 			osThreadFlagsClear(FPGA_UPLOAD_BIN);				// Clear the flag
 			if(!radio_enabled){
@@ -373,7 +360,7 @@ void StartTaskRadio(void *argument) {
 			// Tell the XCVR that we will be using the IQ interface
 			XCVR_write_reg(RF_IQIFC1, RF_IQIFC1_RF | RF_IQIFC1_SKEWDRV39);
 
-			radio_config();
+			task_radio_event(CONFIG);
 
 			// Release SPI mutex and restore thread priority
 			osMutexRelease(SPI1AccessHandle);
@@ -492,58 +479,58 @@ void StartTaskRadio(void *argument) {
 
 }
 
-bool upload_fpga_binary(){
-	uint32_t result = osThreadFlagsSet(FPGA_thread_id, FPGA_UPLOAD_BIN);
-	if(result < (1<<31)){
-		return EXIT_SUCCESS;
-	}else{
-		ERR("Could not upload FPGA binary: osThreadFlagsSet returned 0x%08lx.\r\n", result);
+uint32_t task_radio_event(task_radio_event_t event){
+	uint32_t result;
+
+	switch(event){
+	case SAMPLES_IRQ:
+		if(tx_nRx && radio_enabled){
+			result = osThreadFlagsSet(FPGA_thread_id, FPGA_SEND_SAMPLES);
+		}else if(radio_enabled){
+			result = osThreadFlagsSet(FPGA_thread_id, FPGA_READ_SAMPLES);
+		}
+		break;
+	case UPLOAD_BITSTREAM:
+		result = osThreadFlagsSet(FPGA_thread_id, FPGA_UPLOAD_BIN);
+		break;
+	case DOWNLOAD_BITSTREAM:
+		result = osThreadFlagsSet(FPGA_thread_id, FPGA_DOWNLOAD_BIN);
+		break;
+	case FPGA_SOFT_RESET:
+		result = osThreadFlagsSet(FPGA_thread_id, FPGA_RESET);
+		break;
+	case ERASE_BITSTREAM_STORAGE:
+		result = osThreadFlagsSet(FPGA_thread_id, FPGA_ERASE_STORAGE);
+		break;
+	case INITN_IRQ:
+		result = osThreadFlagsSet(FPGA_thread_id, RADIO_INITN_CHANGED);
+		break;
+	case INIT:
+		result = osThreadFlagsSet(FPGA_thread_id, XCVR_INIT);
+		break;
+	case CONFIG:
+		result = osThreadFlagsSet(FPGA_thread_id, XCVR_CONFIG);
+		break;
+	case PTT_IRQ:
+		result = osThreadFlagsSet(FPGA_thread_id, RADIO_PTT_START_TIMER);
+		break;
+	case START_RX:
+		result = osThreadFlagsSet(FPGA_thread_id, RADIO_START_RX);
+		break;
+	case START_TX:
+		result = osThreadFlagsSet(FPGA_thread_id, RADIO_START_TX);
+		break;
+	default:
+		LOG(CLI_LOG_RADIO, "Unknown event %d.\r\n", event);
+		return EXIT_FAILURE;
 	}
 
-
-	return EXIT_FAILURE;
-}
-
-bool download_fpga_binary_file(){
-	uint32_t result = osThreadFlagsSet(FPGA_thread_id, FPGA_DOWNLOAD_BIN);
-	if(result < (1<<31)){
-		return EXIT_SUCCESS;
-	}else{
-		ERR("Could not download FPGA binary: osThreadFlagsSet returned 0x%08lx.\r\n", result);
+	if(result >= (1 << 31)){
+		LOG(CLI_LOG_RADIO, "Error while processing event %d. osThreadFlagsSet returned 0x%02lx.\r\n", event, result);
+		return EXIT_FAILURE;
 	}
 
-	return EXIT_FAILURE;
-}
-
-bool erase_fpga_storage(){
-	uint32_t result = osThreadFlagsSet(FPGA_thread_id, FPGA_ERASE_STORAGE);
-	if(result < (1<<31)){
-		return EXIT_SUCCESS;
-	}else{
-		ERR("Could not erase FPGA storage: osThreadFlagsSet returned 0x%08lx.\r\n", result);
-	}
-	return EXIT_FAILURE;
-}
-
-bool fpga_soft_reset(){
-	uint32_t result = osThreadFlagsSet(FPGA_thread_id, FPGA_RESET);
-	if(result < (1<<31)){
-		return EXIT_SUCCESS;
-	}else{
-		ERR("Could not soft reset FPGA: osThreadFlagsSet returned 0x%08lx.\r\n", result);
-	}
-
-	return EXIT_FAILURE;
-}
-
-bool xcvr_init() {
-	uint32_t result = osThreadFlagsSet(FPGA_thread_id, XCVR_INIT);
-	if(result < (1<<31)){
-		return EXIT_SUCCESS;
-	}else{
-		ERR("Could not start transceiver initialization: osThreadFlagsSet returned 0x%08lx.\r\n", result);
-	}
-	return EXIT_FAILURE;
+	return EXIT_SUCCESS;
 }
 
 UINT fatfs_bitstream_stream(const BYTE *p, UINT btf){
@@ -564,49 +551,13 @@ UINT fatfs_bitstream_stream(const BYTE *p, UINT btf){
 	return 0;
 }
 
-
-
-void radio_INITn_it(){
-	uint32_t result = osThreadFlagsSet(FPGA_thread_id, RADIO_INITN_CHANGED);
-	if(result >= (1<<31)){
-		LOG(CLI_LOG_RADIO, "Could not process INITN changed: osThreadFlagSet returned %lu.\r\n", result);
-	}
-}
-
-void ptt_toggled(){
-	uint32_t result = osThreadFlagsSet(FPGA_thread_id, RADIO_PTT_START_TIMER);
-	if(result >= (1<<31)){
-		ERR("Could not start PTT debounce timer: osThreadFlagSet returned 0x%08lx.\r\n", result);
-	}
-}
-
-void radio_soft_ptt(bool pressed){
-	sw_ptt = pressed;
-	uint32_t result = osThreadFlagsSet(FPGA_thread_id, RADIO_SW_PTT);
-	if(result >= (1<<31)){
-		ERR("Could not process Soft PTT: osThreadFlagSet returned 0x%08lx.\r\n", result);
-	}
-}
-
 void _ptt_timer_expired(void *argument){
-	uint32_t result = osThreadFlagsSet(FPGA_thread_id, RADIO_PTT);
-	if(result >= (1<<31)){
-		ERR("Could not process PTT pin change: osThreadFlagSet returned 0x%08lx.\r\n", result);
-	}
-}
+	GPIO_PinState ptt = HAL_GPIO_ReadPin(PTT_GPIO_Port, PTT_Pin);
 
-void radio_config(){
-	uint32_t result = osThreadFlagsSet(FPGA_thread_id, XCVR_CONFIG);
-	if(result >= (1<<31)){
-		LOG(CLI_LOG_RADIO, "Could configure transceiver: osThreadFlagSet returned %lu.\r\n", result);
-	}
-}
-
-void radio_send_samples(){
-	if(radio_enabled && tx_nRx){
-		uint32_t result = osThreadFlagsSet(FPGA_thread_id, FPGA_SEND_SAMPLES);
-			if(result >= (1<<31)){
-				LOG(CLI_LOG_RADIO, "Could send samples: osThreadFlagSet returned %lu.\r\n", result);
-			}
+	// SET means released
+	if(ptt == GPIO_PIN_RESET){
+		task_radio_event(START_TX);
+	}else{
+		task_radio_event(START_RX);
 	}
 }
