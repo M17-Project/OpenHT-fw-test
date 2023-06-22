@@ -219,7 +219,7 @@ void StartTaskRadio(void *argument) {
 				// Looks like the PoC was powered on!
 				radio_on();
 				set_fpga_status(FPGA_Online);
-				task_radio_event(CONFIG);
+				task_radio_event(INIT);
 				LOG(CLI_LOG_RADIO, "PoC powered on.\r\n");
 				radio_enabled = true;
 			}else if( (initn == GPIO_PIN_RESET) \
@@ -484,9 +484,9 @@ uint32_t task_radio_event(task_radio_event_t event){
 
 	switch(event){
 	case SAMPLES_IRQ:
-		if(tx_nRx){
+		if(tx_nRx && radio_enabled){
 			result = osThreadFlagsSet(FPGA_thread_id, FPGA_SEND_SAMPLES);
-		}else{
+		}else if(radio_enabled){
 			result = osThreadFlagsSet(FPGA_thread_id, FPGA_READ_SAMPLES);
 		}
 		break;
@@ -504,6 +504,9 @@ uint32_t task_radio_event(task_radio_event_t event){
 		break;
 	case INITN_IRQ:
 		result = osThreadFlagsSet(FPGA_thread_id, RADIO_INITN_CHANGED);
+		break;
+	case INIT:
+		result = osThreadFlagsSet(FPGA_thread_id, XCVR_INIT);
 		break;
 	case CONFIG:
 		result = osThreadFlagsSet(FPGA_thread_id, XCVR_CONFIG);
