@@ -17,6 +17,7 @@ extern "C" {
 // SCREEN: ui_main_screen
 void ui_main_screen_screen_init(void);
 extern lv_obj_t * ui_main_screen;
+void ui_event_main_panel(lv_event_t * e);
 extern lv_obj_t * ui_main_panel;
 extern lv_obj_t * ui_header_panel;
 void ui_event_title_image(lv_event_t * e);
@@ -47,6 +48,12 @@ extern lv_obj_t * ui_Label3;
 extern lv_obj_t * ui_vol_label;
 void ui_event_vol_slider(lv_event_t * e);
 extern lv_obj_t * ui_vol_slider;
+// SCREEN: ui_log_screen
+void ui_log_screen_screen_init(void);
+extern lv_obj_t * ui_log_screen;
+void ui_event_Panel2(lv_event_t * e);
+extern lv_obj_t * ui_Panel2;
+extern lv_obj_t * ui_log_label;
 // SCREEN: ui_screen_num_freq_pads
 void ui_screen_num_freq_pads_screen_init(void);
 void ui_event_screen_num_freq_pads(lv_event_t * e);

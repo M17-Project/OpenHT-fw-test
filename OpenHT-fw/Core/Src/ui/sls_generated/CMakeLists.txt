@@ -1,4 +1,5 @@
 SET(SOURCES screens/ui_main_screen.c
+    screens/ui_log_screen.c
     screens/ui_screen_num_freq_pads.c
     screens/ui_screen_scratchpad_1.c
     screens/ui_screen_scratchpad_2.c

@@ -152,6 +152,11 @@ osMutexId_t NORAccessHandle;
 const osMutexAttr_t NORAccess_attributes = {
   .name = "NORAccess"
 };
+/* Definitions for GUIAccess */
+osMutexId_t GUIAccessHandle;
+const osMutexAttr_t GUIAccess_attributes = {
+  .name = "GUIAccess"
+};
 /* Definitions for microphoneEvents */
 osEventFlagsId_t microphoneEventsHandle;
 const osEventFlagsAttr_t microphoneEvents_attributes = {
@@ -297,6 +302,9 @@ int main(void)
 
   /* creation of NORAccess */
   NORAccessHandle = osMutexNew(&NORAccess_attributes);
+
+  /* creation of GUIAccess */
+  GUIAccessHandle = osMutexNew(&GUIAccess_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */

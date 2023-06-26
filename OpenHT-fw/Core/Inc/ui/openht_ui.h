@@ -62,6 +62,8 @@ bool validate_freq(uint32_t *freq);
 void on_userbutton_press(void);
 void on_userbutton_release(void);
 
+void ui_log_add(const char *fmt,...);
+
 #ifdef __cplusplus
 }
 #endif

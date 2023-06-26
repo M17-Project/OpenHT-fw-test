@@ -19,6 +19,7 @@
 #include "radio_hal.h"
 
 #include "main.h"
+#include "ui/openht_ui.h"
 #include "openht_types.h"
 #include "at86rf215.h"
 #include "fpga_reg_defs.h"
@@ -66,6 +67,7 @@ void radio_configure_rx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 
 	if(freq > 1e9){
 		LOG(CLI_LOG_RADIO, "Radio set in RX 2.4G.\r\n");
+		ui_log_add("[RADIO]: Radio set in RX 2.4G.\n");
 
 		// Configure switch
 		radio_sw_24();
@@ -123,6 +125,8 @@ void radio_configure_rx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 
 	}else{
 		LOG(CLI_LOG_RADIO, "Radio set in RX Sub-GHz.\r\n");
+		ui_log_add("[RADIO]: Radio set in RX Sub-GHz.\n");
+
 		// Sub GHz
 		// Disable 2.4G transceiver
 		XCVR_write_reg(RF24_CMD, RFn_CMD_TRXOFF);
@@ -174,6 +178,7 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 
 	if(freq>1e9){
 		LOG(CLI_LOG_RADIO, "Radio set in TX 2.4G.\r\n");
+		ui_log_add("[RADIO]: Radio set in TX 2.4G.\n");
 
 		// Configure switch
 		radio_sw_24();
@@ -205,6 +210,7 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		XCVR_write_reg(RF24_CMD, RFn_CMD_TX);
 	}else{
 		LOG(CLI_LOG_RADIO, "Radio set in TX Sub-GHz.\r\n");
+		ui_log_add("[RADIO]: Radio set in TX Sub-GHz.\n");
 
 		// Configure switch
 		radio_sw_09();
@@ -280,10 +286,12 @@ void FPGA_send_bitstream(uint32_t address, size_t length){
 		uint16_t to_send = (UINT16_MAX < bytes_left)?UINT16_MAX:bytes_left;
 		HAL_SPI_Transmit_DMA(&hspi1, start_addr + sent, to_send);
 		LOG(CLI_LOG_FPGA, "Sent %lu bitstream bytes.\r\n", sent);
+		ui_log_add("[FPGA]: Sent %lu bitstream bytes.\n", sent);
 		wait_spi_xfer_done(WAIT_TIMEOUT);
 		sent += to_send;
 	}
 	LOG(CLI_LOG_FPGA, "Sent %lu bitstream bytes.\r\n", sent);
+	ui_log_add("[FPGA]: Sent %lu bitstream bytes.\n", sent);
 	FPGA_chip_select(false);
 }
 
@@ -396,6 +404,9 @@ uint32_t FPGA_check_status_register(uint8_t *reg, bool print){
 	if(print){
 		LOG(CLI_LOG_FPGA, "Status register is 0x%02x%02x%02x%02x%02x%02x%02x%02x.\r\n",
 					rx[4], rx[5], rx[6], rx[7], rx[8], rx[9], rx[10], rx[11]);
+		ui_log_add("[FPGA]: Status register is 0x%02x%02x%02x%02x%02x%02x%02x%02x.\n",
+					rx[4], rx[5], rx[6], rx[7], rx[8], rx[9], rx[10], rx[11]);
+
 	}
 
 	if(reg != NULL){

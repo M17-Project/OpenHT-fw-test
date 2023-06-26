@@ -34,6 +34,7 @@
 #include "ui/lvht_qwertypad.h"
 #include "utils/str_builder.h"
 #include "utils/str_formatting.h"
+#include "../shell/inc/sys_command_line.h"
 
 #include "fatfs.h"
 #include <lvgl.h>
@@ -50,7 +51,45 @@ char * callsign_prefix = NULL;
 char * mode_prefix = NULL;
 char * ctcss_options_str;
 
+static lv_timer_t * update_timer = NULL;
+
 static int32_t _screen_capture(lv_obj_t *scr, const char * filename);
+
+#define UI_LOG_LENGTH  2048
+#define UI_LOG_MAX_LINE 82
+
+static void _ui_log_add(const char * fmt, va_list va_args);
+char txt_log[UI_LOG_LENGTH + 1];
+extern osMutexId_t GUIAccessHandle;
+volatile bool log_changed = false;
+
+static void _update_timer(lv_timer_t * timer)
+{
+    //osMutexAcquire(GUIAccessHandle, WAIT_TIMEOUT);
+    if (log_changed) {
+
+    	// this will invoke a refresh
+    	lv_label_set_text_static(ui_log_label, txt_log);
+
+		lv_coord_t self_height = lv_obj_get_self_height(ui_log_label);
+		lv_coord_t display_height = lv_obj_get_height(ui_log_label);
+
+		//Calculate the "out of view" y size
+		lv_coord_t outside_view = self_height - display_height;
+		lv_coord_t current_scroll_pos = lv_obj_get_scroll_y(ui_log_label);
+
+		//Calculate the difference between the required scroll pos and the current scroll pos
+		lv_coord_t scroll_diff = outside_view - current_scroll_pos;
+
+		// if the view is at the bottom, scroll it
+		if (scroll_diff < 40) {
+			lv_obj_scroll_to_y(ui_log_label, self_height, LV_ANIM_OFF);
+		}
+
+		log_changed = false;
+    }
+    //osMutexRelease(GUIAccessHandle);
+}
 
 void custom_ui_init(void)
 {
@@ -173,13 +212,16 @@ void custom_ui_init(void)
 	strcpy(mode_prefix, label_str);
 
 	lv_label_set_text_fmt(ui_header_mode_label, "%s%s", mode_prefix, openht_get_mode_str(radio_settings_get_mode()));
+
+	// update timer
+    update_timer = lv_timer_create(_update_timer, 150,  NULL);
+    ui_log_add("GUI: Loading...\n");
 }
 
 void on_screen_pressed(lv_event_t *e)
 {
 	// TBD
 }
-
 
 void on_xmit_button_press(lv_event_t *e)
 {
@@ -194,7 +236,6 @@ void on_xmit_button_release(lv_event_t *e)
 void on_vol_changed(lv_event_t *e)
 {
 }
-
 
 
 bool display_toggle = false;
@@ -279,6 +320,76 @@ void update_callsign()
     strcpy(user_settings.callsign, callsign_str);
 	user_settings_save(&user_settings);
 }
+
+void ui_log_add(const char *fmt,...)
+{
+    va_list ap;
+   	va_start(ap, fmt);
+   	_ui_log_add(fmt, ap);
+   	va_end(ap);
+}
+
+void _ui_log_add(const char * fmt, va_list va_args)
+{
+//    if (osMutexAcquire(GUIAccessHandle, WAIT_TIMEOUT) == osOK) {
+
+	char buffer[UI_LOG_MAX_LINE];
+	char* text_in = (char*)buffer;
+
+	vsnprintf(text_in, UI_LOG_MAX_LINE - 1, fmt, va_args);
+	//LOG(CLI_LOG_GUI, "Logging: %s\r\n", text_in);
+
+    uint16_t txt_len = strlen(text_in);
+    uint16_t old_len = strlen(txt_log);
+
+    // If the data is longer then the log length, remove the first part
+    if(txt_len > UI_LOG_LENGTH) {
+    	text_in += (txt_len - UI_LOG_LENGTH);
+        txt_len = UI_LOG_LENGTH;
+        old_len = 0;
+    }
+
+    // If the text become too long 'forget' the oldest lines
+    else if(old_len + txt_len > UI_LOG_LENGTH) {
+        uint16_t new_start;
+        for(new_start = 0; new_start < old_len; new_start++) {
+            if(txt_log[new_start] == '\n') {
+                // If there is enough space break
+                if(new_start >= txt_len) {
+                    // Ignore line breaks
+                    while(txt_log[new_start] == '\n' || txt_log[new_start] == '\r') new_start++;
+                    break;
+                }
+            }
+        }
+
+        // If it wasn't able to make enough space on line breaks
+        // simply forget the oldest characters
+        if(new_start == old_len) {
+            new_start = old_len - (UI_LOG_LENGTH - txt_len);
+        }
+
+        // Move the remaining text to the beginning
+        uint16_t j;
+        for(j = new_start; j < old_len; j++) {
+            txt_log[j - new_start] = txt_log[j];
+        }
+        old_len = old_len - new_start;
+        txt_log[old_len] = '\0';
+
+    }
+
+    memcpy(&txt_log[old_len], text_in, txt_len);
+    txt_log[old_len + txt_len] = '\0';
+    log_changed = true;
+
+//    osMutexRelease(GUIAccessHandle);
+//    } else {
+//    	LOG(CLI_LOG_GUI, "mutex error\r\n");
+//
+//    }
+}
+
 
 // assign buffer to SDRAM since we are limited on SRAM
 __attribute__((section(".sdram")))  static uint8_t img_buffer[480 * 800 * 3]; // 480px * 800px * 3 bytes per pixel

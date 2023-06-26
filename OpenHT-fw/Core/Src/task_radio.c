@@ -24,6 +24,7 @@
 #include "nor_map.h"
 #include "ui/ui_mode_change_panel.h"
 #include "ui/ui_fpga_status_panel.h"
+#include "ui/openht_ui.h"
 #include "openht_types.h"
 #include "../radio/fpga_reg_defs.h"
 #include "../radio/at86rf215.h"
@@ -170,6 +171,8 @@ void StartTaskRadio(void *argument) {
 		}else if(flag & XCVR_CONFIG){
 			osThreadFlagsClear(XCVR_CONFIG);
 			LOG(CLI_LOG_RADIO, "Configuring XCVR.\r\n");
+			ui_log_add("[RADIO]: Configuring XCVR.\n");
+
 
 			// TODO: M17 mode support. This will get user callsign:
 			//const char * test = radio_settings_get_m17_callsign();
@@ -212,6 +215,8 @@ void StartTaskRadio(void *argument) {
 				radio_off();
 				set_fpga_status(FPGA_Offline);
 				LOG(CLI_LOG_RADIO, "PoC powered off.\r\n");
+				ui_log_add("[RADIO]: PoC powered off.\n");
+
 				radio_enabled = false;
 			}else if( (initn == GPIO_PIN_SET) \
 					  && (done == GPIO_PIN_RESET))
@@ -221,10 +226,13 @@ void StartTaskRadio(void *argument) {
 				set_fpga_status(FPGA_Online);
 				task_radio_event(INIT);
 				LOG(CLI_LOG_RADIO, "PoC powered on.\r\n");
+				ui_log_add("[RADIO]: PoC powered on.\n");
 				radio_enabled = true;
 			}else if( (initn == GPIO_PIN_RESET) \
 					  && (done == GPIO_PIN_SET) ){
 				LOG(CLI_LOG_RADIO, "INITN and DONE pins are in an inconsistent state...\r\n");
+				ui_log_add("[RADIO]: NITN and DONE pins are in an inconsistent state...\n");
+
 				set_fpga_status(FPGA_Error);
 			}
 
@@ -245,6 +253,7 @@ void StartTaskRadio(void *argument) {
 			osThreadSetPriority(NULL, osPriorityBelowNormal);
 			set_fpga_status(FPGA_Loading);
 			LOG(CLI_LOG_FPGA, "Started FPGA bitstream upload\r\n");
+			ui_log_add("[FPGA]: Started FPGA bitstream upload\n");
 
 			uint8_t bufferTX[8] = {0};	// Used for data to TX
 			uint8_t bufferRX[8] = {0};
@@ -256,6 +265,7 @@ void StartTaskRadio(void *argument) {
 			bufferTX[0] = 0xE0;
 			FPGA_config_classA(8, bufferTX, bufferRX);
 			LOG(CLI_LOG_FPGA, "FPGA IDCODE is 0x%02x%02x%02x%02x.\r\n", bufferRX[4], bufferRX[5], bufferRX[6], bufferRX[7]);
+			ui_log_add("[FPGA]: FPGA IDCODE is 0x%02x%02x%02x%02x.\n", bufferRX[4], bufferRX[5], bufferRX[6], bufferRX[7]);
 
 			if(*(uint32_t *)(bufferRX+4) != 0x43100F11){
 				ERR("Wrong FPGA IDCODE. Aborting upload.\r\n");
@@ -268,10 +278,12 @@ void StartTaskRadio(void *argument) {
 
 			// ISC-Enable
 			LOG(CLI_LOG_FPGA, "Sending ISC_ENABLE.\r\n");
+			ui_log_add("[FPGA]: Sending ISC_ENABLE.\n");
 			FPGA_config_classC(0xC6);
 
 			// ISC-Erase
 			LOG(CLI_LOG_FPGA, "Sending ISC_ERASE.\r\n");
+			ui_log_add("[FPGA]: Sending ISC_ERASE.\n");
 			FPGA_config_classC(0x0E);
 			FPGA_wait_busy();
 
@@ -322,6 +334,7 @@ void StartTaskRadio(void *argument) {
 				set_fpga_status(FPGA_Error);
 			}else{
 				LOG(CLI_LOG_FPGA, "FPGA upload done.\r\n");
+				ui_log_add("[FPGA]: FPGA upload done.\n");
 				set_fpga_status(FPGA_Running);
 				HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
 			}
@@ -331,6 +344,7 @@ void StartTaskRadio(void *argument) {
 				osDelay(5);
 			}
 			LOG(CLI_LOG_FPGA, "FPGA configuration finished.\r\n");
+			ui_log_add("[FPGA]: FPGA configuration finished.\n");
 
 			// Wait for IO3 to signal that the internal PLLs are
 			// locked and the device is ready for operation
@@ -338,6 +352,7 @@ void StartTaskRadio(void *argument) {
 				osDelay(5);
 			}
 			LOG(CLI_LOG_FPGA, "FPGA PLL is locked. Querying revision number.\r\n");
+			ui_log_add("[FPGA]: FPGA PLL is locked. Querying revision number.\n");
 
 			FPGA_read_reg(SR_1, (uint16_t *)bufferRX);
 			DBG("FPGA revision is %u.%u.\r\n", bufferRX[1], bufferRX[0]);
@@ -345,14 +360,16 @@ void StartTaskRadio(void *argument) {
 			fpga_revision.maj_rev = bufferRX[1];
 			fpga_revision.min_rev = bufferRX[0];
 			radio_settings_set_fpga_rev(fpga_revision);
-
+			ui_log_add("[FPGA]: FPGA revision is %u.%u.\n", bufferRX[1], bufferRX[0]);
 
 			uint8_t read = 0;
 			XCVR_read_reg(RF_PN, &read);
 			LOG(CLI_LOG_RADIO, "XCVR PN is 0x%02x.\r\n", read);
+			ui_log_add("[RADIO]: XCVR PN is 0x%02x.\n", read);
 			osDelay(1);
 			XCVR_read_reg(RF_VN, &read);
 			LOG(CLI_LOG_RADIO, "XCVR VN is 0x%02x.\r\n", read);
+			ui_log_add("[RADIO]: XCVR VN is 0x%02x.\n", read);
 
 			// Set XCVR to IEEE lvds mode
 			XCVR_write_reg(RF_IQIFC0, RF_IQIFC0_CMV1V2 | RF_IQIFC0_DRV3);
@@ -365,12 +382,14 @@ void StartTaskRadio(void *argument) {
 			// Release SPI mutex and restore thread priority
 			osMutexRelease(SPI1AccessHandle);
 			LOG(CLI_LOG_FPGA, "Done!\r\n");
+			ui_log_add("[FPGA]: Done!\n");
 			osThreadSetPriority(FPGA_thread_id, prev_prio);
 		}else if(flag & FPGA_DOWNLOAD_BIN){
 			osThreadFlagsClear(FPGA_DOWNLOAD_BIN);				// Clear the flag
 			osPriority_t prev_prio = osThreadGetPriority(NULL); // Lower task's priority
 			osThreadSetPriority(NULL, osPriorityBelowNormal);
 			LOG(CLI_LOG_FPGA, "Started FPGA bitstream download...\r\n");
+			ui_log_add("[FPGA]: Started FPGA bitstream download...\n");
 
 			// Download BIN image from SD card to NOR flash
 			// Open bitstream file
