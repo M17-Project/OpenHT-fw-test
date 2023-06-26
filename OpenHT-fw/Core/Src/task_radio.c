@@ -51,7 +51,6 @@ extern osMutexId_t 			NORAccessHandle;
 
 volatile bool				radio_enabled = false;
 volatile bool				tx_nRx = false; 						// 0 when RX, 1 when TX
-volatile bool				sw_ptt = false; 						// 0 when not pressed, 1 when pressed
 osThreadId_t 				FPGA_thread_id 			= NULL;
 uint32_t 					bitstream_load_address 	= 0x80000000;
 uint32_t 					bitstream_load_offset 	= 0;
@@ -157,10 +156,13 @@ void StartTaskRadio(void *argument) {
 		if(flag & FPGA_SEND_SAMPLES){
 			osThreadFlagsClear(FPGA_SEND_SAMPLES);
 			uint8_t samples[34];
-			*(uint16_t *)samples = MOD_IN;
+			*(uint16_t *)samples = MOD_IN & REG_WR;
 			read_voice_samples((uint16_t *)(samples+2), 16);
-			HAL_SPI_Transmit_IT(&hspi1, samples, 33);
+			FPGA_chip_select(true);
+			HAL_SPI_Transmit_IT(&hspi1, samples, sizeof(samples));
+			printf("(x)");
 			wait_spi_xfer_done(WAIT_TIMEOUT);
+			FPGA_chip_select(false);
 		}else if(flag & FPGA_READ_SAMPLES){
 			osThreadFlagsClear(FPGA_READ_SAMPLES);
 
@@ -189,6 +191,7 @@ void StartTaskRadio(void *argument) {
 			osTimerStart(ptt_debounce_timer, 5);
 		}else if(flag & RADIO_START_RX){
 			osThreadFlagsClear(RADIO_START_RX);
+			stop_microphone_acquisition();
 			BSP_LED_Off(LED_RED);
 			tx_nRx = false;
 			radio_configure_rx(rx_freq, ppm, mode, fm_info, agc);
@@ -199,8 +202,17 @@ void StartTaskRadio(void *argument) {
 			tx_nRx = true;
 			osDelay(8);
 			radio_configure_tx(tx_freq, ppm, mode, fm_info, tx_power);
-			uint8_t voice[64];
-			read_voice_samples((uint16_t *)voice, 32);
+			uint8_t voice[66];
+			//read_voice_samples((uint16_t *)(voice+2), 32);
+			memset(voice+2, 0x55, 64);
+			*(uint16_t *)(voice) = MOD_IN & REG_WR;
+			FPGA_chip_select(true);
+			HAL_SPI_Transmit_IT(&hspi1, voice, sizeof(voice));
+			wait_spi_xfer_done(WAIT_TIMEOUT);
+			FPGA_chip_select(false);
+			uint8_t readback = 0;
+			XCVR_read_reg(RF_IQIFC2, &readback);
+			LOG(CLI_LOG_RADIO, "RF_IQIFC2 is 0x%02x.\r\n", readback);
 		}else if(flag & RADIO_INITN_CHANGED){
 			osThreadFlagsClear(RADIO_INITN_CHANGED);
 			GPIO_PinState initn 	= HAL_GPIO_ReadPin(FPGA_INITN_GPIO_Port, FPGA_INITN_Pin);
@@ -480,10 +492,11 @@ void StartTaskRadio(void *argument) {
 }
 
 uint32_t task_radio_event(task_radio_event_t event){
-	uint32_t result;
+	uint32_t result = 0;
 
 	switch(event){
 	case SAMPLES_IRQ:
+		printf("(y)");
 		if(tx_nRx && radio_enabled){
 			result = osThreadFlagsSet(FPGA_thread_id, FPGA_SEND_SAMPLES);
 		}else if(radio_enabled){
