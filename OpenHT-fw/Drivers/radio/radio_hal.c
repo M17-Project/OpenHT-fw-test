@@ -216,7 +216,7 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		radio_sw_09();
 
 		// Configure SubGHZ Transceiver
-		XCVR_write_reg(RF09_PAC, RFn_PAC_PACUR_MAX | RFn_PAC_TXPWR_MAX);
+		XCVR_write_reg(RF09_PAC, RFn_PAC_PACUR_MAX | power);
 
 		/* Set frequency */
 		uint32_t val = freq * (1.0f+ppm/1e6);

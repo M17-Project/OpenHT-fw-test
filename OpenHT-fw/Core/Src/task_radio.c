@@ -123,6 +123,7 @@ void StartTaskRadio(void *argument) {
 	fmInfo_t 			fm_info 	= radio_settings_get_fm_settings();
 	openht_radio_agc	agc 		= radio_settings_get_radio_agc();
 	uint8_t				tx_power	= radio_settings_get_output_pwr();
+	tx_power = 0x1F;
 
 	float			ppm 		= 0;
 
@@ -182,6 +183,8 @@ void StartTaskRadio(void *argument) {
 			fm_info 	= radio_settings_get_fm_settings();
 			agc			= radio_settings_get_radio_agc();
 			tx_power	= radio_settings_get_output_pwr();
+
+			tx_power = 0x1F;
 
 			// Simulate a PTT press to re-send all settings
 			_ptt_timer_expired(NULL);
