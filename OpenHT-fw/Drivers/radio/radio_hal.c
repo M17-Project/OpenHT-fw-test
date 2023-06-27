@@ -199,8 +199,14 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		osDelay(5);
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
 
-		FPGA_write_reg(CR_1, MOD_FM | ((uint16_t)0b010<<9) | PD_ON | DEM_FM | BAND_24);
+		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_24);
 		FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_W | ctcss | STATE_TX);
+
+		uint16_t readback;
+		FPGA_read_reg(CR_1, &readback);
+		LOG(CLI_LOG_RADIO, "CR_1 readback is 0x%02x.\r\n", readback);
+		FPGA_read_reg(CR_2, &readback);
+		LOG(CLI_LOG_RADIO, "CR_2 readback is 0x%02x.\r\n", readback);
 
 		XCVR_write_reg(RF24_CMD, RFn_CMD_TX);
 	}else{
@@ -210,12 +216,10 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		radio_sw_09();
 
 		// Configure SubGHZ Transceiver
-		XCVR_write_reg(RF09_CMD, RFn_CMD_TRXOFF);
-
-		XCVR_write_reg(RF09_PAC, RFn_PAC_TXPWR_MAX | RFn_PAC_PACUR_MAX);
+		XCVR_write_reg(RF09_PAC, RFn_PAC_PACUR_MAX | RFn_PAC_TXPWR_MAX);
 
 		/* Set frequency */
-		uint32_t val = freq * (1+ppm/1e6);
+		uint32_t val = freq * (1.0f+ppm/1e6);
 		val = round((val-377000000)/(203125.0/2048.0));
 		XCVR_write_reg(RF09_CCF0L, (uint8_t)(val>>8));
 		XCVR_write_reg(RF09_CCF0H, (uint8_t)(val>>16));
@@ -228,11 +232,18 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		XCVR_write_reg(RF09_CMD, RFn_CMD_TXPREP);
 
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_RESET);
-		osDelay(5);
+		osDelay(2);
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
+		osDelay(2);
 
-		FPGA_write_reg(CR_1, MOD_FM | ((uint16_t)0b010<<9) | PD_ON | DEM_FM | BAND_09);
-		FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_W | ctcss | STATE_TX);
+		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_09);
+		FPGA_write_reg(CR_2, (1 << 11) | CH_RX_12_5 | FM_TX_N | ctcss | STATE_TX);
+
+		uint16_t readback;
+		FPGA_read_reg(CR_1, &readback);
+		LOG(CLI_LOG_RADIO, "CR_1 readback is 0x%04x.\r\n", readback);
+		FPGA_read_reg(CR_2, &readback);
+		LOG(CLI_LOG_RADIO, "CR_2 readback is 0x%04x.\r\n", readback);
 
 		XCVR_write_reg(RF09_CMD, RFn_CMD_TX);
 	}

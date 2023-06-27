@@ -55,6 +55,7 @@ extern "C" {
 	X(FPGA, true) \
 	X(RADIO, true) \
 	X(GENERAL, true) \
+	X(MIC, true) \
 
 /* USER CODE END EM */
 
