@@ -53,6 +53,7 @@ extern "C" {
 	X(RADIO, true) \
 	X(GUI, true) \
 	X(GENERAL, true) \
+	X(MIC, true) \
 
 /* USER CODE END EM */
 

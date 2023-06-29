@@ -24,6 +24,7 @@
 #include "cmsis_os2.h"
 #include "pdm2pcm.h"
 #include "fatfs.h"
+#include "../shell/inc/sys_command_line.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -139,13 +140,16 @@ void StartMicrophonesTask(void *argument)
 
 void start_microphone_acquisition() {
 	// Start DMA acquisition
+	save_file = false;
 	HAL_I2S_Receive_DMA(&hi2s3, (uint16_t *)pdm_buffer, PDM_SAMPLES*2);
+	LOG(CLI_LOG_MIC, "Start mic acquisition.\r\n");
 }
 
 void stop_microphone_acquisition() {
 	save_file = true;
 	HAL_I2S_DMAStop(&hi2s3);
 	osEventFlagsSet(microphoneEventsHandle, ACQ_DONE_FLAG);
+	LOG(CLI_LOG_MIC, "Stop mic acquisition.\r\n");
 }
 
 void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hdma){
