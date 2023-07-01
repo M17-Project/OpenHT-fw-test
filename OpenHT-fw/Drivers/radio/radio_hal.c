@@ -119,7 +119,7 @@ void radio_configure_rx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
 
 		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_24);
-		FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_W | ctcss | STATE_RX);
+		FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_N | ctcss | STATE_RX);
 
 		XCVR_write_reg(RF24_CMD, RFn_CMD_RX);
 
@@ -156,7 +156,7 @@ void radio_configure_rx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
 
 		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_09);
-		FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_W | ctcss | STATE_RX);
+		FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_N | ctcss | STATE_RX);
 
 		XCVR_write_reg(RF09_CMD, RFn_CMD_RX);
 
@@ -205,7 +205,7 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
 
 		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_24);
-		FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_W | ctcss | STATE_TX);
+		FPGA_write_reg(CR_2, (1 << 11) | CH_RX_12_5 | FM_TX_N | ctcss | STATE_TX);
 
 		uint16_t readback;
 		FPGA_read_reg(CR_1, &readback);

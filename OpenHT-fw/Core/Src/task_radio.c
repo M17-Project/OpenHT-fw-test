@@ -209,9 +209,9 @@ void StartTaskRadio(void *argument) {
 			osDelay(8);
 			radio_configure_tx(tx_freq, ppm, mode, fm_info, tx_power);
 			uint8_t voice[66];
-			//read_voice_samples((uint16_t *)(voice+2), 32);
-			memset(voice+2, 0x55, 64);
-			*(uint16_t *)(voice) = MOD_IN & REG_WR;
+			read_voice_samples((uint16_t *)(voice+2), 32);
+			//memset(voice+2, 0x00, 64);
+			*(uint16_t *)(voice) = MOD_IN | REG_WR;
 			FPGA_chip_select(true);
 			HAL_SPI_Transmit_IT(&hspi1, voice, sizeof(voice));
 			wait_spi_xfer_done(WAIT_TIMEOUT);
