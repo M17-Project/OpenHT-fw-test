@@ -19,6 +19,7 @@
 #include "task_general.h"
 
 #include "main.h"
+#include "cli_commands.h"
 #include "ui/openht_ui.h"
 
 #include "../shell/inc/sys_command_line.h"
@@ -74,6 +75,10 @@ void StartGeneralTask(void *argument)
 	HAL_GPIO_Init(GPIOG, &uSD_DetectGpio);
 	HAL_NVIC_SetPriority(EXTI2_IRQn, 5, 0);
 	HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+
+	// Add commands
+	CLI_ADD_CMD("nor", nor_help, cli_nor_cmd);
+	CLI_ADD_CMD("radio", radio_help, cli_radio_cmd);
 
 	/* Infinite loop */
 	for(;;)
