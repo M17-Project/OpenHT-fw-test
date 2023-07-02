@@ -52,6 +52,7 @@ extern osMutexId_t 			NORAccessHandle;
 
 volatile bool				radio_enabled = false;
 volatile bool				tx_nRx = false; 						// 0 when RX, 1 when TX
+
 osThreadId_t 				FPGA_thread_id 			= NULL;
 uint32_t 					bitstream_load_address 	= 0x80000000;
 uint32_t 					bitstream_load_offset 	= 0;
@@ -162,7 +163,7 @@ void StartTaskRadio(void *argument) {
 			read_voice_samples((int16_t *)(samples+2), 16, 0);
 			FPGA_chip_select(true);
 			HAL_SPI_Transmit_IT(&hspi1, samples, sizeof(samples));
-			printf("(x)");
+			printf("(x)\n");
 			wait_spi_xfer_done(WAIT_TIMEOUT);
 			FPGA_chip_select(false);
 		}else if(flag & FPGA_READ_SAMPLES){
@@ -534,7 +535,7 @@ uint32_t task_radio_event(task_radio_event_t event){
 
 	switch(event){
 	case SAMPLES_IRQ:
-		printf("(y)");
+		printf("(y)\n");
 		if(tx_nRx && radio_enabled){
 			result = osThreadFlagsSet(FPGA_thread_id, FPGA_SEND_SAMPLES);
 		}else if(radio_enabled){
