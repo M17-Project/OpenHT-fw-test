@@ -310,7 +310,6 @@ uint32_t FPGA_write_reg(uint16_t addr, uint16_t data){
 	uint8_t buffer[4];
 
 	FPGA_chip_select(true);
-	osDelay(1);
 	*(uint16_t *)buffer = addr | REG_WR;
 	buffer[2] = (data>>8) & 0xFF;
 	buffer[3] = (uint8_t)data;
@@ -326,7 +325,6 @@ uint32_t FPGA_read_reg(uint16_t addr, uint16_t *data){
 	uint8_t bufferRX[4] = {0};
 
 	FPGA_chip_select(true);
-	osDelay(1);
 	*(uint16_t *)bufferTX = addr;
 	*(uint16_t *)(bufferTX + 2) = 0;
 	HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 4);
@@ -341,12 +339,10 @@ uint32_t XCVR_write_reg(uint16_t addr, uint8_t data){
 	uint8_t buffer[3];
 
 	XCVR_chip_select(true);
-	osDelay(1);
 	*(uint16_t *)buffer = addr | (1<<7);
 	buffer[2] = data;
 	HAL_SPI_Transmit_IT(&hspi1, buffer, 3);
 	wait_spi_xfer_done(WAIT_TIMEOUT);
-	osDelay(1);
 	XCVR_chip_select(false);
 
 	return EXIT_SUCCESS;
@@ -357,13 +353,11 @@ uint32_t XCVR_read_reg(uint16_t addr, uint8_t *data){
 	uint8_t bufferRX[3] = {0};
 
 	XCVR_chip_select(true);
-	osDelay(1);
 	*(uint16_t *)bufferTX = addr;
 	bufferTX[2] = 0;
 	HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 3);
 	wait_spi_xfer_done(WAIT_TIMEOUT);
 	*data = bufferRX[2];
-	osDelay(1);
 	XCVR_chip_select(false);
 
 	return EXIT_SUCCESS;
