@@ -1360,6 +1360,7 @@ static void MX_GPIO_Init(void)
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
+  	HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
 
 	/* Configure PA.00 pin (Blue User button) as input floating */
 	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
