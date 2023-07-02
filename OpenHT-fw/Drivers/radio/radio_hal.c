@@ -207,12 +207,6 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_24);
 		FPGA_write_reg(CR_2, (1 << 11) | CH_RX_12_5 | FM_TX_N | ctcss | STATE_TX);
 
-		uint16_t readback;
-		FPGA_read_reg(CR_1, &readback);
-		LOG(CLI_LOG_RADIO, "CR_1 readback is 0x%02x.\r\n", readback);
-		FPGA_read_reg(CR_2, &readback);
-		LOG(CLI_LOG_RADIO, "CR_2 readback is 0x%02x.\r\n", readback);
-
 		XCVR_write_reg(RF24_CMD, RFn_CMD_TX);
 	}else{
 		LOG(CLI_LOG_RADIO, "Radio set in TX Sub-GHz.\r\n");
@@ -244,12 +238,6 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 
 		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_09);
 		FPGA_write_reg(CR_2, (1 << 11) | CH_RX_12_5 | FM_TX_N | ctcss | STATE_TX);
-
-		uint16_t readback;
-		FPGA_read_reg(CR_1, &readback);
-		LOG(CLI_LOG_RADIO, "CR_1 readback is 0x%04x.\r\n", readback);
-		FPGA_read_reg(CR_2, &readback);
-		LOG(CLI_LOG_RADIO, "CR_2 readback is 0x%04x.\r\n", readback);
 
 		XCVR_write_reg(RF09_CMD, RFn_CMD_TX);
 	}

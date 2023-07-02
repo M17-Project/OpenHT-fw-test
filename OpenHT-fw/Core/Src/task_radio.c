@@ -230,9 +230,8 @@ void StartTaskRadio(void *argument) {
 			HAL_SPI_Transmit_IT(&hspi1, voice, sizeof(voice));
 			wait_spi_xfer_done(WAIT_TIMEOUT);
 			FPGA_chip_select(false);
-			uint8_t readback = 0;
-			XCVR_read_reg(RF_IQIFC2, &readback);
-			LOG(CLI_LOG_RADIO, "RF_IQIFC2 is 0x%02x.\r\n", readback);
+
+
 		}else if(flag & RADIO_INITN_CHANGED){
 			osThreadFlagsClear(RADIO_INITN_CHANGED);
 			GPIO_PinState initn 	= HAL_GPIO_ReadPin(FPGA_INITN_GPIO_Port, FPGA_INITN_Pin);
