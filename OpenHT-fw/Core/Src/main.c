@@ -1212,7 +1212,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOE, SPKR_HP_Pin|AUDIO_RST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOG, MAIN_KILL_Pin|LED1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOG, IO1_Pin|MAIN_KILL_Pin|LED1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, LED3_Pin|LED2_Pin, GPIO_PIN_RESET);
@@ -1239,24 +1239,24 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : IO1_Pin */
-  GPIO_InitStruct.Pin = IO1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  /*Configure GPIO pins : IO1_Pin MAIN_KILL_Pin */
+  GPIO_InitStruct.Pin = IO1_Pin|MAIN_KILL_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(IO1_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : IO2_Pin IO3_Pin IO0_Pin uSD_Detect_Pin */
-  GPIO_InitStruct.Pin = IO2_Pin|IO3_Pin|IO0_Pin|uSD_Detect_Pin;
+  /*Configure GPIO pins : IO2_Pin IO0_Pin uSD_Detect_Pin */
+  GPIO_InitStruct.Pin = IO2_Pin|IO0_Pin|uSD_Detect_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : MAIN_KILL_Pin */
-  GPIO_InitStruct.Pin = MAIN_KILL_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  /*Configure GPIO pin : IO3_Pin */
+  GPIO_InitStruct.Pin = IO3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(MAIN_KILL_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(IO3_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED3_Pin LED2_Pin */
   GPIO_InitStruct.Pin = LED3_Pin|LED2_Pin;

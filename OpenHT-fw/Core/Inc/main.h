@@ -74,7 +74,6 @@ void wait_spi_xfer_done(uint32_t timeout);
 #define AUDIO_RST_GPIO_Port GPIOE
 #define IO1_Pin GPIO_PIN_14
 #define IO1_GPIO_Port GPIOG
-#define IO1_EXTI_IRQn EXTI15_10_IRQn
 #define FMC_NBL1_Pin GPIO_PIN_1
 #define FMC_NBL1_GPIO_Port GPIOE
 #define FMC_NBL0_Pin GPIO_PIN_0
@@ -101,6 +100,7 @@ void wait_spi_xfer_done(uint32_t timeout);
 #define MAIN_KILL_GPIO_Port GPIOG
 #define IO3_Pin GPIO_PIN_10
 #define IO3_GPIO_Port GPIOG
+#define IO3_EXTI_IRQn EXTI15_10_IRQn
 #define LED3_Pin GPIO_PIN_5
 #define LED3_GPIO_Port GPIOD
 #define IO6_Pin GPIO_PIN_3
