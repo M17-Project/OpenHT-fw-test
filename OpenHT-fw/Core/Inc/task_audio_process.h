@@ -29,9 +29,9 @@ void audio_process_init();
 
 void audio_process_set_mode(openht_mode_t mode);
 
-uint32_t write_voice_samples(uint16_t *samples, uint32_t number);
+uint32_t write_voice_samples(int16_t *samples, uint32_t number, uint32_t timeout);
 
-uint32_t read_voice_samples(uint16_t *samples, uint32_t number);
+uint32_t read_voice_samples(int16_t *samples, uint32_t number, uint32_t timeout);
 
 
 #endif /* INC_TASK_AUDIO_PROCESS_H_ */
