@@ -1,3 +1,4 @@
+/* USER CODE BEGIN Header */
 /*
  * Copyright (C) 2023 M17 Project and contributors
  *
@@ -15,7 +16,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+/* USER CODE END Header */
 
+/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __MAIN_H
 #define __MAIN_H
 
