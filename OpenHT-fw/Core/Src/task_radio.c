@@ -159,7 +159,7 @@ void StartTaskRadio(void *argument) {
 		if(flag & FPGA_SEND_SAMPLES){
 			osThreadFlagsClear(FPGA_SEND_SAMPLES);
 			uint8_t samples[34];
-			*(uint16_t *)samples = MOD_IN & REG_WR;
+			*(uint16_t *)samples = MOD_IN | REG_WR;
 			read_voice_samples((int16_t *)(samples+2), 16, 0);
 			FPGA_chip_select(true);
 			HAL_SPI_Transmit_IT(&hspi1, samples, sizeof(samples));
