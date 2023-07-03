@@ -111,6 +111,8 @@ void wait_spi_xfer_done(uint32_t timeout);
 #define D27_GPIO_Port GPIOI
 #define D26_Pin GPIO_PIN_2
 #define D26_GPIO_Port GPIOI
+#define TP_Pin GPIO_PIN_13
+#define TP_GPIO_Port GPIOC
 #define A0_Pin GPIO_PIN_0
 #define A0_GPIO_Port GPIOF
 #define FMC_NBL3_Pin GPIO_PIN_5
