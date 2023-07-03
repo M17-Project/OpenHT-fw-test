@@ -292,6 +292,7 @@ void FPGA_send_bitstream(uint32_t address, size_t length){
 	LOG(CLI_LOG_FPGA, "Sent %lu bitstream bytes.\r\n", sent);
 	ui_log_add("[FPGA]: Sent %lu bitstream bytes.\n", sent);
 	FPGA_chip_select(false);
+	LOG(CLI_LOG_FPGA, "FPGA Upload done!\r\n");
 }
 
 uint32_t FPGA_write_reg(uint16_t addr, uint16_t data){

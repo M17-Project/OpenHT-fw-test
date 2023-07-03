@@ -163,7 +163,7 @@ void StartTaskRadio(void *argument) {
 			read_voice_samples((int16_t *)(samples+2), 16, 0);
 			FPGA_chip_select(true);
 			HAL_SPI_Transmit_IT(&hspi1, samples, sizeof(samples));
-			printf("(x)\n");
+			printf("(x)\r\n");
 			wait_spi_xfer_done(WAIT_TIMEOUT);
 			FPGA_chip_select(false);
 		}else if(flag & FPGA_READ_SAMPLES){
@@ -398,7 +398,7 @@ void StartTaskRadio(void *argument) {
 			XCVR_read_reg(RF_PN, &read);
 			LOG(CLI_LOG_RADIO, "XCVR PN is 0x%02x.\r\n", read);
 			ui_log_add("[RADIO]: XCVR PN is 0x%02x.\n", read);
-			osDelay(1);
+
 			XCVR_read_reg(RF_VN, &read);
 			LOG(CLI_LOG_RADIO, "XCVR VN is 0x%02x.\r\n", read);
 			ui_log_add("[RADIO]: XCVR VN is 0x%02x.\n", read);
@@ -535,7 +535,7 @@ uint32_t task_radio_event(task_radio_event_t event){
 
 	switch(event){
 	case SAMPLES_IRQ:
-		printf("(y)\n");
+		//printf("(y)\r\n");
 		if(tx_nRx && radio_enabled){
 			result = osThreadFlagsSet(FPGA_thread_id, FPGA_SEND_SAMPLES);
 		}else if(radio_enabled){
