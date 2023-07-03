@@ -30,6 +30,7 @@
 #include "ui/openht_ui.h"
 #include "touch_sensor_driver.h"
 #include "screen_driver.h"
+#include "event_groups.h"
 
 #include "../shell/inc/sys_command_line.h"
 #include <lvgl.h>
@@ -139,8 +140,8 @@ const osThreadAttr_t microphones_attributes = {
 osThreadId_t radioHandle;
 const osThreadAttr_t radio_attributes = {
   .name = "radio",
-  .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityNormal1,
+  .stack_size = 768 * 4,
+  .priority = (osPriority_t) osPriorityRealtime1,
 };
 /* Definitions for SPI1Access */
 osMutexId_t SPI1AccessHandle;
@@ -162,15 +163,12 @@ osEventFlagsId_t microphoneEventsHandle;
 const osEventFlagsAttr_t microphoneEvents_attributes = {
   .name = "microphoneEvents"
 };
-/* Definitions for peripheralEvents */
-osEventFlagsId_t peripheralEventsHandle;
-const osEventFlagsAttr_t peripheralEvents_attributes = {
-  .name = "peripheralEvents"
-};
 /* USER CODE BEGIN PV */
 
 extern uint32_t gpio_port_a_state;
 extern uint32_t gpio_port_g_state;
+
+EventGroupHandle_t peripheralEventsGroup;
 
 /* USER CODE END PV */
 
@@ -342,10 +340,9 @@ int main(void)
   /* creation of microphoneEvents */
   microphoneEventsHandle = osEventFlagsNew(&microphoneEvents_attributes);
 
-  /* creation of peripheralEvents */
-  peripheralEventsHandle = osEventFlagsNew(&peripheralEvents_attributes);
-
   /* USER CODE BEGIN RTOS_EVENTS */
+  peripheralEventsGroup = xEventGroupCreate();
+
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
 
@@ -1408,25 +1405,23 @@ void greet(void){
 
 void spi_xfer_done_event(SPI_HandleTypeDef *hspi){
 	if(hspi->Instance == SPI1){
-		uint32_t result = osEventFlagsSet(peripheralEventsHandle, PERIPH_SPI1_DONE);
-		if(result >= (1<<31)){
-			DBG("SPI1 Transfer done: could not set the event flag, osEventFlagSet returned %ld.\r\n", (int32_t)result);
+		BaseType_t yield = pdFALSE;
+		BaseType_t res = xEventGroupSetBitsFromISR(peripheralEventsGroup, PERIPH_SPI1_DONE, &yield);
+		if(res == pdFAIL){
+			DBG("SPI1 Transfer done: could not set the event bit.\n");
+		}else{
+			portYIELD_FROM_ISR(yield);
 		}
 	}
 }
 
-void wait_spi_xfer_done(uint32_t timeout){
-	int32_t result = (int32_t)osEventFlagsWait(peripheralEventsHandle, PERIPH_SPI1_DONE, 0, timeout);
-	if(result == -2){
+void wait_spi_xfer_done(TickType_t timeout){
+	BaseType_t res = xEventGroupWaitBits(peripheralEventsGroup, PERIPH_SPI1_DONE, pdTRUE, pdFALSE, timeout);
+	if(!(res & PERIPH_SPI1_DONE)){
 		DBG("SPI1 transfer timed out.\r\n");
-	}else if(result & (1<<31)){
-		DBG("SPI1 Error while waiting for transfer to finish: osEventFlagsWait returned %ld.\r\n", result);
 	}
 }
 
-/*void reset_spi1_flag(){
-	osEventFlagsClear(peripheralEventsHandle, PERIPH_SPI1_DONE);
-}*/
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartGeneralTask */
