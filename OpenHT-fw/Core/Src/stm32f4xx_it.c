@@ -49,6 +49,7 @@
 /* USER CODE BEGIN PV */
 volatile uint32_t gpio_port_a_state;
 volatile uint32_t gpio_port_g_state;
+volatile uint8_t first_irq = 1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -291,7 +292,10 @@ void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
 	/* Only PG10 (IO3) */
-	task_radio_event(SAMPLES_IRQ);
+	if(!first_irq)
+		task_radio_event(SAMPLES_IRQ);
+	else
+		first_irq = 0;
   /* USER CODE END EXTI15_10_IRQn 0 */
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
 	__HAL_GPIO_EXTI_CLEAR_IT(IO3_Pin);

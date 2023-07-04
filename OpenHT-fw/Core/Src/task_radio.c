@@ -51,6 +51,7 @@ extern osMutexId_t 			SPI1AccessHandle;
 extern osMutexId_t 			NORAccessHandle;
 
 volatile bool				radio_enabled = false;
+volatile bool				startup_done = false;
 volatile bool				tx_nRx = false; 						// 0 when RX, 1 when TX
 
 osThreadId_t 				FPGA_thread_id 			= NULL;
@@ -162,10 +163,12 @@ void StartTaskRadio(void *argument) {
 			*(uint16_t *)samples = MOD_IN | REG_WR;
 			read_voice_samples((int16_t *)(samples+2), 16, 0);
 			FPGA_chip_select(true);
+			//GPIOC->BSRR|=(uint32_t)1<<(13+16); //TP low
 			HAL_SPI_Transmit_IT(&hspi1, samples, sizeof(samples));
 			printf("(x)\r\n");
 			wait_spi_xfer_done(WAIT_TIMEOUT);
-			FPGA_chip_select(false);
+			if(!startup_done)
+				FPGA_chip_select(false);
 		}else if(flag & FPGA_READ_SAMPLES){
 			osThreadFlagsClear(FPGA_READ_SAMPLES);
 
@@ -230,7 +233,8 @@ void StartTaskRadio(void *argument) {
 
 			HAL_SPI_Transmit_IT(&hspi1, voice, sizeof(voice));
 			wait_spi_xfer_done(WAIT_TIMEOUT);
-			FPGA_chip_select(false);
+			if(!startup_done)
+				FPGA_chip_select(false);
 
 
 		}else if(flag & RADIO_INITN_CHANGED){
@@ -245,6 +249,7 @@ void StartTaskRadio(void *argument) {
 				set_fpga_status(FPGA_Offline);
 				LOG(CLI_LOG_RADIO, "PoC powered off.\r\n");
 				ui_log_add("[RADIO]: PoC powered off.\n");
+				startup_done = false;
 
 				HAL_NVIC_ClearPendingIRQ(EXTI15_10_IRQn);
 				HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
@@ -415,6 +420,8 @@ void StartTaskRadio(void *argument) {
 			osMutexRelease(SPI1AccessHandle);
 			LOG(CLI_LOG_FPGA, "Done!\r\n");
 			ui_log_add("[FPGA]: Done!\n");
+			startup_done = true;
+
 			osThreadSetPriority(FPGA_thread_id, prev_prio);
 		}else if(flag & FPGA_DOWNLOAD_BIN){
 			osThreadFlagsClear(FPGA_DOWNLOAD_BIN);				// Clear the flag

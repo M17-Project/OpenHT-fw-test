@@ -170,6 +170,7 @@ extern uint32_t gpio_port_g_state;
 
 EventGroupHandle_t peripheralEventsGroup;
 
+extern volatile bool startup_done;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -1405,12 +1406,18 @@ void greet(void){
 
 void spi_xfer_done_event(SPI_HandleTypeDef *hspi){
 	if(hspi->Instance == SPI1){
+		//GPIOC->BSRR|=(uint32_t)1<<13; //TP high
 		BaseType_t yield = pdFALSE;
 		BaseType_t res = xEventGroupSetBitsFromISR(peripheralEventsGroup, PERIPH_SPI1_DONE, &yield);
 		if(res == pdFAIL){
 			DBG("SPI1 Transfer done: could not set the event bit.\n");
 		}else{
 			portYIELD_FROM_ISR(yield);
+		}
+		if(startup_done)
+		{
+			FPGA_chip_select(false);
+			XCVR_chip_select(false);
 		}
 	}
 }
