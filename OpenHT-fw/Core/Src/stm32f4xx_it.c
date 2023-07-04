@@ -292,10 +292,12 @@ void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
 	/* Only PG10 (IO3) */
+	//GPIOC->BSRR|=(uint32_t)1<<13;
 	if(!first_irq)
 		task_radio_event(SAMPLES_IRQ);
 	else
 		first_irq = 0;
+	//GPIOC->BSRR|=(uint32_t)1<<(13+16);
   /* USER CODE END EXTI15_10_IRQn 0 */
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
 	__HAL_GPIO_EXTI_CLEAR_IT(IO3_Pin);
