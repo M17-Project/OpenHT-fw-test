@@ -30,7 +30,7 @@
 #include <string.h>
 
 /* Lengths for one execution of the filter process*/
-#define DECIMATION 	(64)						// 64 pdm samples (bits) -> 1 PCM sample (16 bits)
+#define DECIMATION 	(128)						// 64 pdm samples (bits) -> 1 PCM sample (16 bits)
 #define PCM_SAMPLES (64)						/* 16 */
 #define PCM_BYTES	(PCM_SAMPLES*2)				/* 32 */
 #define PDM_SAMPLES (PCM_SAMPLES*DECIMATION/16) /* 64 */
@@ -76,7 +76,7 @@ void StartMicrophonesTask(void *argument)
 	};
 
 	PDM_Filter_Config_t pdm_config = {
-			.decimation_factor = PDM_FILTER_DEC_FACTOR_64,
+			.decimation_factor = PDM_FILTER_DEC_FACTOR_128,
 			.mic_gain = 24,
 			.output_samples_number = PCM_SAMPLES
 	};
