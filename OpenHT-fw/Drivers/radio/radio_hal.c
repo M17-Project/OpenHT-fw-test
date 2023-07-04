@@ -185,7 +185,7 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		radio_sw_24();
 
 		// Configure 2.4G transceiver
-		XCVR_write_reg(RF24_CMD, RFn_CMD_TRXOFF);
+		//XCVR_write_reg(RF24_CMD, RFn_CMD_TRXOFF);
 		XCVR_write_reg(RF24_PAC, RFn_PAC_PACUR_MAX | power);
 
 		/* Set frequency */ // TODO PPM
@@ -202,8 +202,9 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		XCVR_write_reg(RF24_CMD, RFn_CMD_TXPREP);
 
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_RESET);
-		osDelay(5);
+		osDelay(2);
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
+		osDelay(2);
 
 		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_24);
 		FPGA_write_reg(CR_2, (1 << 11) | CH_RX_12_5 | FM_TX_N | ctcss | STATE_TX);
