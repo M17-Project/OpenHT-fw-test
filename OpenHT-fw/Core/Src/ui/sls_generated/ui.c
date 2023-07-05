@@ -102,12 +102,17 @@ lv_obj_t * ui_Label9;
 void ui_screen_scratchpad_3_screen_init(void);
 lv_obj_t * ui_screen_scratchpad_3;
 lv_obj_t * ui_settings_panel;
+lv_obj_t * ui_settings_tabview_panel;
+lv_obj_t * ui_settings_tab_panel;
 void ui_event_settings_erase_user_btn(lv_event_t * e);
 lv_obj_t * ui_settings_erase_user_btn;
 lv_obj_t * ui_Label11;
 void ui_event_settings_reboot_btn(lv_event_t * e);
 lv_obj_t * ui_settings_reboot_btn;
 lv_obj_t * ui_Label30;
+void ui_event_settings_erase_radio_btn(lv_event_t * e);
+lv_obj_t * ui_settings_erase_radio_btn;
+lv_obj_t * ui_Label28;
 lv_obj_t * ui_Label31;
 void ui_event_settings_load_fpga_btn(lv_event_t * e);
 lv_obj_t * ui_settings_load_fpga_btn;
@@ -115,6 +120,14 @@ lv_obj_t * ui_Label12;
 void ui_event_settings_erase_fpga_btn(lv_event_t * e);
 lv_obj_t * ui_settings_erase_fpga_btn;
 lv_obj_t * ui_Label13;
+void ui_event_use_soft_ptt_cb(lv_event_t * e);
+lv_obj_t * ui_use_soft_ptt_cb;
+void ui_event_use_freq_offset_cb(lv_event_t * e);
+lv_obj_t * ui_use_freq_offset_cb;
+lv_obj_t * ui_Label18;
+void ui_event_display_brightness_slider(lv_event_t * e);
+lv_obj_t * ui_display_brightness_slider;
+lv_obj_t * ui_debug_tab_panel;
 void ui_event_settings_a_btn(lv_event_t * e);
 lv_obj_t * ui_settings_a_btn;
 lv_obj_t * ui_Label14;
@@ -127,25 +140,15 @@ lv_obj_t * ui_Label15;
 void ui_event_settings_d_btn(lv_event_t * e);
 lv_obj_t * ui_settings_d_btn;
 lv_obj_t * ui_Label17;
-lv_obj_t * ui_Label18;
-void ui_event_use_freq_offset_cb(lv_event_t * e);
-lv_obj_t * ui_use_freq_offset_cb;
-void ui_event_display_brightness_slider(lv_event_t * e);
-lv_obj_t * ui_display_brightness_slider;
-void ui_event_settings_ok_btn(lv_event_t * e);
-lv_obj_t * ui_settings_ok_btn;
-lv_obj_t * ui_Label10;
 void ui_event_settings_e_btn(lv_event_t * e);
 lv_obj_t * ui_settings_e_btn;
 lv_obj_t * ui_Label2;
 void ui_event_settings_f_btn(lv_event_t * e);
 lv_obj_t * ui_settings_f_btn;
 lv_obj_t * ui_Label24;
-void ui_event_use_soft_ptt_cb(lv_event_t * e);
-lv_obj_t * ui_use_soft_ptt_cb;
-void ui_event_settings_erase_radio_btn(lv_event_t * e);
-lv_obj_t * ui_settings_erase_radio_btn;
-lv_obj_t * ui_Label28;
+void ui_event_settings_ok_btn(lv_event_t * e);
+lv_obj_t * ui_settings_ok_btn;
+lv_obj_t * ui_Label10;
 
 // SCREEN: ui_screen_scratchpad_4
 void ui_screen_scratchpad_4_screen_init(void);
@@ -377,6 +380,14 @@ void ui_event_settings_reboot_btn(lv_event_t * e)
         on_settings_reboot_clicked(e);
     }
 }
+void ui_event_settings_erase_radio_btn(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        on_settings_erase_radio_clicked(e);
+    }
+}
 void ui_event_settings_load_fpga_btn(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -391,6 +402,30 @@ void ui_event_settings_erase_fpga_btn(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
         on_settings_erase_fpga_clicked(e);
+    }
+}
+void ui_event_use_soft_ptt_cb(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        on_use_soft_ptt_clicked(e);
+    }
+}
+void ui_event_use_freq_offset_cb(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        on_use_tx_offset_clicked(e);
+    }
+}
+void ui_event_display_brightness_slider(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_VALUE_CHANGED) {
+        on_disp_brightness_changed(e);
     }
 }
 void ui_event_settings_a_btn(lv_event_t * e)
@@ -425,30 +460,6 @@ void ui_event_settings_d_btn(lv_event_t * e)
         on_settings_d_clicked(e);
     }
 }
-void ui_event_use_freq_offset_cb(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_CLICKED) {
-        on_use_tx_offset_clicked(e);
-    }
-}
-void ui_event_display_brightness_slider(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_VALUE_CHANGED) {
-        on_disp_brightness_changed(e);
-    }
-}
-void ui_event_settings_ok_btn(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_CLICKED) {
-        on_settings_ok_clicked(e);
-    }
-}
 void ui_event_settings_e_btn(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -465,20 +476,12 @@ void ui_event_settings_f_btn(lv_event_t * e)
         on_settings_f_clicked(e);
     }
 }
-void ui_event_use_soft_ptt_cb(lv_event_t * e)
+void ui_event_settings_ok_btn(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        on_use_soft_ptt_clicked(e);
-    }
-}
-void ui_event_settings_erase_radio_btn(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_CLICKED) {
-        on_settings_erase_radio_clicked(e);
+        on_settings_ok_clicked(e);
     }
 }
 void ui_event_callsign_ok_btn(lv_event_t * e)

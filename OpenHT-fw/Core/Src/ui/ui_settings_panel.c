@@ -16,6 +16,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "ui/ui_about_panel.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
@@ -26,6 +28,51 @@
 
 #include "ui/ui_fpga_status_panel.h"
 #include "stm32469i_discovery_lcd.h"
+
+static lv_obj_t *settings_tabview = NULL;
+
+void init_settings_panel(void)
+{
+    // BEGIN SETTINGS TABVIEW UI INIT
+
+	settings_tabview = lv_tabview_create(ui_settings_tabview_panel, LV_DIR_TOP, 40);
+    lv_obj_set_style_bg_color(settings_tabview, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_t *tab_btns = lv_tabview_get_tab_btns(settings_tabview);
+    lv_obj_set_style_text_font(tab_btns, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(tab_btns, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(tab_btns, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(tab_btns, lv_color_hex(0x37B9F5), LV_PART_ITEMS | LV_STATE_CHECKED);
+    lv_obj_set_style_border_side(tab_btns, LV_BORDER_SIDE_BOTTOM, LV_PART_ITEMS | LV_STATE_CHECKED);
+
+
+    lv_obj_set_width(settings_tabview, lv_pct(100));
+    lv_obj_set_height(settings_tabview, lv_pct(100));
+    lv_obj_set_style_pad_left(settings_tabview, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(settings_tabview, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(settings_tabview, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(settings_tabview, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	lv_obj_t *settings_tab = lv_tabview_add_tab(settings_tabview, "Settings");
+    lv_obj_set_style_pad_left(settings_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(settings_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(settings_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(settings_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	lv_obj_set_parent(ui_settings_tab_panel, settings_tab);
+	lv_obj_clear_flag(ui_settings_tab_panel, LV_OBJ_FLAG_HIDDEN);
+
+	lv_obj_t *debug_tab = lv_tabview_add_tab(settings_tabview, "Debug");
+    lv_obj_set_style_pad_left(debug_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(debug_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(debug_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(debug_tab, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	lv_obj_set_parent(ui_debug_tab_panel, debug_tab);
+	lv_obj_clear_flag(ui_debug_tab_panel, LV_OBJ_FLAG_HIDDEN);
+
+	// END SETTINGS TABVIEW UI INIT
+}
 
 void on_settings_clicked(lv_event_t *e)
 {

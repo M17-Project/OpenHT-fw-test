@@ -114,6 +114,7 @@ void custom_ui_init(void)
 
 	lv_obj_set_parent(ui_settings_panel, lv_layer_top());
 	lv_obj_add_flag(ui_settings_panel, LV_OBJ_FLAG_HIDDEN);
+	init_settings_panel();
 
 	lv_obj_set_parent(ui_callsign_change_panel, lv_layer_top());
 	lv_obj_add_flag(ui_callsign_change_panel, LV_OBJ_FLAG_HIDDEN);
