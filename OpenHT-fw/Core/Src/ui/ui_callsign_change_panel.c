@@ -20,6 +20,7 @@
 
 #include "ui/lvht_qwertypad.h"
 #include "ui/openht_ui.h"
+#include "../shell/inc/sys_command_line.h"
 
 #include <lvgl.h>
 
@@ -107,7 +108,7 @@ void qwertypad_btnmatrix_event_cb(lv_event_t *e)
 		uint32_t id = lv_btnmatrix_get_selected_btn(obj);
 		const char *txt = lv_btnmatrix_get_btn_text(obj, id);
 
-		LV_LOG_USER("%s was pressed\n", txt);
+		LOG(CLI_LOG_GUI, "%s was pressed\r\n", txt);
 
 		// get current cursor position
 		uint32_t curs_pos = lv_textarea_get_cursor_pos(ui_text_area_callsign);

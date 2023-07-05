@@ -290,11 +290,13 @@ void USART3_IRQHandler(void)
 void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
-	/* Only PG14 (IO1) */
+	/* Only PG10 (IO3) */
+	__HAL_GPIO_EXTI_CLEAR_IT(IO3_Pin);
 	task_radio_event(SAMPLES_IRQ);
   /* USER CODE END EXTI15_10_IRQn 0 */
+
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
-	__HAL_GPIO_EXTI_CLEAR_IT(IO1_Pin);
+
   /* USER CODE END EXTI15_10_IRQn 1 */
 }
 

@@ -16,22 +16,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef INC_TASK_AUDIO_PROCESS_H_
-#define INC_TASK_AUDIO_PROCESS_H_
+#ifndef INC_CLI_COMMANDS_H_
+#define INC_CLI_COMMANDS_H_
 
 #include "main.h"
-#include "openht_types.h"
 
-/* This task will do the codecs computations but will also manage
- * the audio inputs/outputs for the different modes */
+#include <stdlib.h>
 
-void audio_process_init();
+extern char nor_help[];
+uint8_t cli_nor_cmd(int argc, char *argv[]);
 
-void audio_process_set_mode(openht_mode_t mode);
+extern char radio_help[];
+uint8_t cli_radio_cmd(int argc, char *argv[]);
 
-uint32_t write_voice_samples(int16_t *samples, uint32_t number, uint32_t timeout);
-
-uint32_t read_voice_samples(int16_t *samples, uint32_t number, uint32_t timeout);
-
-
-#endif /* INC_TASK_AUDIO_PROCESS_H_ */
+#endif /* INC_CLI_COMMANDS_H_ */

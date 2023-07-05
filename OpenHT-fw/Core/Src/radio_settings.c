@@ -46,6 +46,12 @@ static const uint8_t M17_INFO_EEEPROM_ADDR =		0x06;	// Contains M17 info struct
 
 static const uint8_t FM_SETTINGS_EEEPROM_ADDR =    	0x07;	// Contains FM settings struct
 
+static const uint8_t XCVR_SETTINGS1_EEEPROM_ADDR =  0x08;
+static const uint8_t XCVR_SETTINGS2_EEEPROM_ADDR =  0x09;
+static const uint8_t XCVR_SETTINGS3_EEEPROM_ADDR =  0x0A;
+static const uint8_t XCVR_SETTINGS4_EEEPROM_ADDR =  0x0B;
+static const uint8_t XCVR_SETTINGS5_EEEPROM_ADDR =  0x0C;
+
 
 EEEPROMHandle_t radio_settings_eeeprom = {
 		.address_size = EEEPROM_ADDRESS_1BYTE,
@@ -153,6 +159,52 @@ void radio_settings_init()
 	// FPGA data. Not stored in NOR Flash
 	*(uint16_t *)(&saved_settings.fpga_revision) = 0;
 
+
+	// XCVR Settings1
+	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS1_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
+		saved_settings.xcvr_settings.ppm = (uint16_t)buffer;
+		saved_settings.xcvr_settings.dpd1 = (buffer>>16) & 0xFF;
+	}else{
+		saved_settings.xcvr_settings.ppm = 0;
+		saved_settings.xcvr_settings.dpd1 = 0;
+	}
+
+	// XCVR Settings2
+	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS2_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
+		saved_settings.xcvr_settings.dpd2 = (uint16_t)buffer;
+		saved_settings.xcvr_settings.dpd3 = (buffer>>16) & 0xFF;
+	}else{
+		saved_settings.xcvr_settings.dpd2 = 0;
+		saved_settings.xcvr_settings.dpd3 = 0;
+	}
+
+	// XCVR Settings3
+	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS3_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
+		saved_settings.xcvr_settings.offset_i = (uint16_t)buffer;
+		saved_settings.xcvr_settings.offset_q = (buffer>>16) & 0xFF;
+	}else{
+		saved_settings.xcvr_settings.offset_i = 0;
+		saved_settings.xcvr_settings.offset_q = 0;
+	}
+
+	// XCVR Settings4
+	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS4_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
+		saved_settings.xcvr_settings.balance_i = (uint16_t)buffer;
+		saved_settings.xcvr_settings.balance_q = (buffer>>16) & 0xFF;
+	}else{
+		saved_settings.xcvr_settings.balance_i = 0;
+		saved_settings.xcvr_settings.balance_q = 0;
+	}
+
+	// XCVR Settings5
+	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS5_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
+		saved_settings.xcvr_settings.tx_pwr = (uint16_t)buffer;
+		saved_settings.xcvr_settings.phase_dither = (buffer>>16) & 0xFF;
+	}else{
+		saved_settings.xcvr_settings.tx_pwr = 0;
+		saved_settings.xcvr_settings.phase_dither = 0;
+	}
+
 	// set the saved_settings (which represents the contents of the EEEPROM) and the
 	// cached_settings (which is the volatile settings) to be equal
 	memcpy(&cached_settings, &saved_settings, sizeof(radio_settings_t));
@@ -210,6 +262,47 @@ void radio_settings_save()
 	// FM settings
 	if(saved_settings.fm_settings.raw != cached_settings.fm_settings.raw){
 		EEEPROM_write_data(&radio_settings_eeeprom, FM_SETTINGS_EEEPROM_ADDR, (void *)(&(cached_settings.fm_settings)));
+	}
+
+
+	// XCVR Settings 1
+	if( (saved_settings.xcvr_settings.ppm != cached_settings.xcvr_settings.ppm) ||
+		(saved_settings.xcvr_settings.dpd1 != cached_settings.xcvr_settings.dpd1) ){
+		buffer = cached_settings.xcvr_settings.ppm +
+				( ( (uint32_t)cached_settings.xcvr_settings.dpd1 ) << 16 );
+		EEEPROM_write_data(&radio_settings_eeeprom, XCVR_SETTINGS1_EEEPROM_ADDR, (void *)(&buffer));
+	}
+
+	// XCVR Settings 2
+	if( (saved_settings.xcvr_settings.dpd2 != cached_settings.xcvr_settings.dpd2) ||
+		(saved_settings.xcvr_settings.dpd3 != cached_settings.xcvr_settings.dpd3) ){
+		buffer = cached_settings.xcvr_settings.dpd2 +
+				( ( (uint32_t)cached_settings.xcvr_settings.dpd3 ) << 16 );
+		EEEPROM_write_data(&radio_settings_eeeprom, XCVR_SETTINGS2_EEEPROM_ADDR, (void *)(&buffer));
+	}
+
+	// XCVR Settings 3
+	if( (saved_settings.xcvr_settings.offset_i != cached_settings.xcvr_settings.offset_i) ||
+		(saved_settings.xcvr_settings.offset_q != cached_settings.xcvr_settings.offset_q) ){
+		buffer = cached_settings.xcvr_settings.offset_i +
+				( ( (uint32_t)cached_settings.xcvr_settings.offset_q ) << 16 );
+		EEEPROM_write_data(&radio_settings_eeeprom, XCVR_SETTINGS3_EEEPROM_ADDR, (void *)(&buffer));
+	}
+
+	// XCVR Settings 4
+	if( (saved_settings.xcvr_settings.balance_i != cached_settings.xcvr_settings.balance_i) ||
+		(saved_settings.xcvr_settings.balance_q != cached_settings.xcvr_settings.balance_q) ){
+		buffer = cached_settings.xcvr_settings.balance_i +
+				( ( (uint32_t)cached_settings.xcvr_settings.balance_q ) << 16 );
+		EEEPROM_write_data(&radio_settings_eeeprom, XCVR_SETTINGS4_EEEPROM_ADDR, (void *)(&buffer));
+	}
+
+	// XCVR Settings 5
+	if( (saved_settings.xcvr_settings.tx_pwr != cached_settings.xcvr_settings.tx_pwr) ||
+		(saved_settings.xcvr_settings.phase_dither != cached_settings.xcvr_settings.phase_dither) ){
+		buffer = cached_settings.xcvr_settings.tx_pwr +
+				( ( (uint32_t)cached_settings.xcvr_settings.phase_dither ) << 16 );
+		EEEPROM_write_data(&radio_settings_eeeprom, XCVR_SETTINGS5_EEEPROM_ADDR, (void *)(&buffer));
 	}
 
 	// update the saved_settings to be equal to cached_settings now that the EEEPROM has been updated.
@@ -332,3 +425,14 @@ maj_min_rev_t radio_settings_get_fpga_rev()
 {
 	return cached_settings.fpga_revision;
 }
+
+void radio_settings_set_xcvr_settings (xcvr_settings_t xcvr_settings)
+{
+	cached_settings.xcvr_settings = xcvr_settings;
+}
+
+xcvr_settings_t radio_settings_get_xcvr_settings (void)
+{
+	return cached_settings.xcvr_settings;
+}
+

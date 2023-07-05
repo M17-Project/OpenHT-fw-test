@@ -64,7 +64,7 @@ void ui_screen_scratchpad_4_screen_init(void)
 
     ui_text_area_callsign = lv_textarea_create(ui_callsign_change_panel);
     lv_obj_set_width(ui_text_area_callsign, 390);
-    lv_obj_set_height(ui_text_area_callsign, LV_SIZE_CONTENT);    /// 84
+    lv_obj_set_height(ui_text_area_callsign, LV_SIZE_CONTENT);    /// 70
     lv_obj_set_x(ui_text_area_callsign, 10);
     lv_obj_set_y(ui_text_area_callsign, 44);
     lv_textarea_set_max_length(ui_text_area_callsign, 9);
@@ -73,14 +73,14 @@ void ui_screen_scratchpad_4_screen_init(void)
     lv_obj_clear_flag(ui_text_area_callsign, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_text_color(ui_text_area_callsign, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_text_area_callsign, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_text_area_callsign, &ui_font_number_60, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_text_area_callsign, &ui_font_RobotoBold, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_text_area_callsign, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_text_area_callsign, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui_text_area_callsign, lv_color_hex(0x37B9F5), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_text_area_callsign, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_side(ui_text_area_callsign, LV_BORDER_SIDE_NONE, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_set_style_text_font(ui_text_area_callsign, &ui_font_number_60, LV_PART_CURSOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_text_area_callsign, &ui_font_RobotoBold, LV_PART_CURSOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_text_area_callsign, lv_color_hex(0x37B9F5), LV_PART_CURSOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_text_area_callsign, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
 

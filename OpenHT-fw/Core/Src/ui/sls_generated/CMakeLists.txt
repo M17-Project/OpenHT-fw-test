@@ -1,4 +1,5 @@
 SET(SOURCES screens/ui_main_screen.c
+    screens/ui_log_screen.c
     screens/ui_screen_num_freq_pads.c
     screens/ui_screen_scratchpad_1.c
     screens/ui_screen_scratchpad_2.c
@@ -13,8 +14,8 @@ SET(SOURCES screens/ui_main_screen.c
     images/ui_img_gear_w_png.c
     images/ui_img_m17_logo_sm_png.c
     images/ui_img_openht_logo_png.c
+    fonts/ui_font_RobotoBold.c
     fonts/ui_font_number_50.c
-    fonts/ui_font_number_60.c
-    fonts/ui_font_RobotoBold.c)
+    fonts/ui_font_number_60.c)
 
 add_library(ui ${SOURCES})

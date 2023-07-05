@@ -16,22 +16,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef INC_TASK_AUDIO_PROCESS_H_
-#define INC_TASK_AUDIO_PROCESS_H_
+#ifndef __UI_SETTINGS_PANEL_H
+#define __UI_SETTINGS_PANEL_H
 
-#include "main.h"
-#include "openht_types.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* This task will do the codecs computations but will also manage
- * the audio inputs/outputs for the different modes */
+#include <lvgl.h>
 
-void audio_process_init();
-
-void audio_process_set_mode(openht_mode_t mode);
-
-uint32_t write_voice_samples(int16_t *samples, uint32_t number, uint32_t timeout);
-
-uint32_t read_voice_samples(int16_t *samples, uint32_t number, uint32_t timeout);
+void init_settings_panel(void);
 
 
-#endif /* INC_TASK_AUDIO_PROCESS_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __UI_SETTINGS_PANEL_H */

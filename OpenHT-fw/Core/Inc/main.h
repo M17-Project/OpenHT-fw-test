@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
-/**
- ******************************************************************************
- * @file           : main.h
- * @brief          : Header for main.c file.
- *                   This file contains the common defines of the application.
- ******************************************************************************
- * @attention
+/*
+ * Copyright (C) 2023 M17 Project and contributors
  *
- * Copyright (c) 2023 STMicroelectronics.
- * All rights reserved.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
  *
- * This software is licensed under terms that can be found in the LICENSE file
- * in the root directory of this software component.
- * If no LICENSE file comes with this software, it is provided AS-IS.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- ******************************************************************************
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 /* USER CODE END Header */
 
@@ -54,6 +54,7 @@ extern "C" {
 	X(EEEPROM, false) \
 	X(FPGA, true) \
 	X(RADIO, true) \
+	X(GUI, true) \
 	X(GENERAL, true) \
 	X(MIC, true) \
 
@@ -76,7 +77,6 @@ void wait_spi_xfer_done(uint32_t timeout);
 #define AUDIO_RST_GPIO_Port GPIOE
 #define IO1_Pin GPIO_PIN_14
 #define IO1_GPIO_Port GPIOG
-#define IO1_EXTI_IRQn EXTI15_10_IRQn
 #define FMC_NBL1_Pin GPIO_PIN_1
 #define FMC_NBL1_GPIO_Port GPIOE
 #define FMC_NBL0_Pin GPIO_PIN_0
@@ -103,6 +103,7 @@ void wait_spi_xfer_done(uint32_t timeout);
 #define MAIN_KILL_GPIO_Port GPIOG
 #define IO3_Pin GPIO_PIN_10
 #define IO3_GPIO_Port GPIOG
+#define IO3_EXTI_IRQn EXTI15_10_IRQn
 #define LED3_Pin GPIO_PIN_5
 #define LED3_GPIO_Port GPIOD
 #define IO6_Pin GPIO_PIN_3
@@ -113,6 +114,8 @@ void wait_spi_xfer_done(uint32_t timeout);
 #define D27_GPIO_Port GPIOI
 #define D26_Pin GPIO_PIN_2
 #define D26_GPIO_Port GPIOI
+#define TP_Pin GPIO_PIN_13
+#define TP_GPIO_Port GPIOC
 #define A0_Pin GPIO_PIN_0
 #define A0_GPIO_Port GPIOF
 #define FMC_NBL3_Pin GPIO_PIN_5
