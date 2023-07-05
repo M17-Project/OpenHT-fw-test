@@ -284,14 +284,14 @@ void ui_screen_scratchpad_5_screen_init(void)
     lv_obj_set_y(ui_ctcss_rx_dropdown, 60);
     lv_obj_add_flag(ui_ctcss_rx_dropdown, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_ctcss_rx_dropdown, LV_OBJ_FLAG_CLICKABLE);      /// Flags
-    lv_obj_set_style_text_color(ui_ctcss_rx_dropdown, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_ctcss_rx_dropdown, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_ctcss_rx_dropdown, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_ctcss_rx_dropdown, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_ctcss_rx_dropdown, lv_color_hex(0x191C26), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_ctcss_rx_dropdown, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_ctcss_rx_dropdown, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_set_style_text_color(ui_ctcss_rx_dropdown, lv_color_hex(0xFFFFFF), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_ctcss_rx_dropdown, lv_color_hex(0x888888), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_ctcss_rx_dropdown, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
     lv_obj_set_style_text_color(lv_dropdown_get_list(ui_ctcss_rx_dropdown), lv_color_hex(0xFFFFFF),
