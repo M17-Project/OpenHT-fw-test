@@ -220,6 +220,72 @@ static void _reset_xcvr_defaults()
 	}
 }
 
+static void _get_xcvr_settings()
+{
+	xcvr_settings_t xcvr_settings = radio_settings_get_xcvr_settings();
+
+    lv_spinbox_set_value(ppm_spinbox, xcvr_settings.ppm);
+    lv_spinbox_set_cursor_pos(ppm_spinbox, 0);
+
+    lv_spinbox_set_value(dpd1_spinbox, xcvr_settings.dpd1);
+    lv_spinbox_set_cursor_pos(dpd1_spinbox, 0);
+
+    lv_spinbox_set_value(dpd2_spinbox, xcvr_settings.dpd2);
+    lv_spinbox_set_cursor_pos(dpd2_spinbox, 0);
+
+    lv_spinbox_set_value(dpd3_spinbox, xcvr_settings.dpd3);
+    lv_spinbox_set_cursor_pos(dpd3_spinbox, 0);
+
+    lv_spinbox_set_value(offset_i_spinbox, xcvr_settings.offset_i);
+    lv_spinbox_set_cursor_pos(offset_i_spinbox, 0);
+
+    lv_spinbox_set_value(offset_q_spinbox, xcvr_settings.offset_q);
+    lv_spinbox_set_cursor_pos(offset_q_spinbox, 0);
+
+    lv_spinbox_set_value(balance_i_spinbox, xcvr_settings.balance_i);
+    lv_spinbox_set_cursor_pos(balance_i_spinbox, 0);
+
+    lv_spinbox_set_value(balance_q_spinbox, xcvr_settings.balance_q);
+    lv_spinbox_set_cursor_pos(balance_q_spinbox, 0);
+
+    lv_spinbox_set_value(tx_pwr_spinbox, xcvr_settings.tx_pwr);
+    lv_spinbox_set_cursor_pos(tx_pwr_spinbox, 0);
+
+    if (xcvr_settings.phase_dither) {
+    	lv_obj_add_state(ui_xcvr_dither_cb, LV_STATE_CHECKED);
+    } else {
+    	lv_obj_clear_state(ui_xcvr_dither_cb, LV_STATE_CHECKED);
+    }
+
+}
+
+static void _save_xcvr_settings()
+{
+	xcvr_settings_t xcvr_settings = radio_settings_get_xcvr_settings();
+
+	xcvr_settings.ppm = (int16_t)lv_spinbox_get_value(ppm_spinbox);
+	xcvr_settings.dpd1 = (int16_t)lv_spinbox_get_value(dpd1_spinbox);
+
+	xcvr_settings.dpd2 = (int16_t)lv_spinbox_get_value(dpd2_spinbox);
+	xcvr_settings.dpd3 = (int16_t)lv_spinbox_get_value(dpd3_spinbox);
+
+	xcvr_settings.offset_i = (int16_t)lv_spinbox_get_value(offset_i_spinbox);
+	xcvr_settings.offset_q = (int16_t)lv_spinbox_get_value(offset_q_spinbox);
+
+	xcvr_settings.balance_i = (int16_t)lv_spinbox_get_value(balance_i_spinbox);
+	xcvr_settings.balance_q = (int16_t)lv_spinbox_get_value(balance_q_spinbox);
+
+	xcvr_settings.tx_pwr = (int16_t)lv_spinbox_get_value(tx_pwr_spinbox);
+
+	if (lv_obj_has_state(ui_xcvr_dither_cb, LV_STATE_CHECKED)) {
+		xcvr_settings.phase_dither = true;
+	} else {
+		xcvr_settings.phase_dither = false;
+	}
+
+	radio_settings_set_xcvr_settings(xcvr_settings);
+}
+
 void init_settings_panel(void)
 {
     // BEGIN SETTINGS TABVIEW UI INIT
@@ -539,10 +605,11 @@ void init_settings_panel(void)
 	lv_obj_add_event_cb(btn, _tx_pwr_spinbox_dec_event_cb, LV_EVENT_ALL, NULL);
 	// END TX_PWR Spinbox
 
+	_get_xcvr_settings();
 	_init_done = true;
 
 	// set defaults
-	_reset_xcvr_defaults();
+	//_reset_xcvr_defaults();
 }
 
 void on_xcvr_settings_reset_clicked(lv_event_t *e)
@@ -561,11 +628,8 @@ void on_settings_ok_clicked(lv_event_t *e)
 	lv_obj_add_flag(ui_settings_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
 
-	// test debug settings
-	int t = lv_spinbox_get_value(ppm_spinbox);
-
-	int a = 5;
-
+	_save_xcvr_settings();
+	radio_settings_save();
 }
 
 void on_settings_erase_usr_clicked(lv_event_t *e)

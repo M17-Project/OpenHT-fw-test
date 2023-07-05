@@ -33,6 +33,25 @@ extern "C" {
 
 typedef struct
 {
+	int16_t ppm;
+	int16_t dpd1;
+
+	int16_t dpd2;
+	int16_t dpd3;
+
+	int16_t offset_i;
+	int16_t offset_q;
+
+	int16_t balance_i;
+	int16_t balance_q;
+
+	int16_t tx_pwr;
+	bool     phase_dither;
+
+} __attribute__((packed)) xcvr_settings_t;
+
+typedef struct
+{
 	uint8_t maj_rev;
 	uint8_t min_rev;
 } __attribute__((packed)) maj_min_rev_t;
@@ -51,6 +70,8 @@ typedef struct
 	m17Info_t m17_info;			// M17_INFO_EEEPROM_ADDR
 
 	fmInfo_t fm_settings;		// FM_SETTINGS_EEEPROM_ADDR
+
+	xcvr_settings_t xcvr_settings; // XCVR Debug settings
 
 	// FPGA data...not stored in NOR FLASH
 	maj_min_rev_t fpga_revision;
@@ -93,6 +114,10 @@ fmInfo_t radio_settings_get_fm_settings (void);
 
 void radio_settings_set_fpga_rev(maj_min_rev_t fpga_revision);
 maj_min_rev_t radio_settings_get_fpga_rev();
+
+void radio_settings_set_xcvr_settings (xcvr_settings_t xcvr_settings);
+xcvr_settings_t radio_settings_get_xcvr_settings (void);
+
 
 #ifdef __cplusplus
 }
