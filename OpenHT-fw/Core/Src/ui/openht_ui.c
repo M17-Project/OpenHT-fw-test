@@ -160,7 +160,8 @@ void custom_ui_init(void)
 
 	str_builder_add_str(sb, "None\n", 0);
 
-    for (int index = 0; index < MAX_TONE_INDEX; index++) {
+	// start at index 1 since 0 is defined as "None"
+    for (int index = 1; index < MAX_TONE_INDEX; index++) {
 		str_builder_add_mag_val_decimal(sb, ctcss_tone[index], 10);
 		str_builder_add_char(sb, '\n');
     }

@@ -45,9 +45,12 @@
  * present in the codeplug binary data.
  */
 #define MAX_TONE_INDEX 50
-static const uint16_t ctcss_tone[MAX_TONE_INDEX] =
+static const uint16_t ctcss_tone[MAX_TONE_INDEX + 1] =
 {
-    670, 693, 719, 744, 770, 797, 825, 854, 885, 915, 948, 974, 1000, 1034,
+	// TODO: OpenHT made changes to this struct by adding a zero element in the array
+	// to define the "disabled" tone. The original OpenRTX cps.h does not have this
+	// element.
+    0 /*disable*/, 670, 693, 719, 744, 770, 797, 825, 854, 885, 915, 948, 974, 1000, 1034,
     1072, 1109, 1148, 1188, 1230, 1273, 1318, 1365, 1413, 1462, 1514, 1567,
     1598, 1622, 1655, 1679, 1713, 1738, 1773, 1799, 1835, 1862, 1899, 1928,
     1966, 1995, 2035, 2065, 2107, 2181, 2257, 2291, 2336, 2418, 2503, 2541

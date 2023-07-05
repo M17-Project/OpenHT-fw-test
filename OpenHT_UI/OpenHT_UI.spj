@@ -7218,7 +7218,7 @@
               {
                 "disabled": false,
                 "nid": 97959082,
-                "strtype": "PANEL/EventHandler",
+                "strtype": "_event/EventHandler",
                 "strval": "GESTURE_RIGHT(GESTURE)",
                 "childs": [
                   {
@@ -7241,7 +7241,7 @@
                   },
                   {
                     "nid": 1272918625,
-                    "strtype": "_custom/action",
+                    "strtype": "_event/action",
                     "strval": "CHANGE SCREEN",
                     "childs": [
                       {
@@ -7488,7 +7488,7 @@
                     "InheritedType": 7
                   },
                   {
-                    "nid": -522530579,
+                    "nid": -1697154459,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7501,7 +7501,7 @@
                 "strval": "CHECKED",
                 "childs": [
                   {
-                    "nid": 1607197107,
+                    "nid": 850526404,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7514,7 +7514,7 @@
                 "strval": "PRESSED",
                 "childs": [
                   {
-                    "nid": -94930445,
+                    "nid": 720663198,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7527,7 +7527,7 @@
                 "strval": "CHECKED|PRESSED",
                 "childs": [
                   {
-                    "nid": -55300435,
+                    "nid": 26847377,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7540,7 +7540,7 @@
                 "strval": "DISABLED",
                 "childs": [
                   {
-                    "nid": 1596547781,
+                    "nid": -1677301043,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7553,7 +7553,7 @@
                 "strval": "USER_1",
                 "childs": [
                   {
-                    "nid": 1704404558,
+                    "nid": -631347693,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7566,7 +7566,7 @@
                 "strval": "USER_2",
                 "childs": [
                   {
-                    "nid": 89989679,
+                    "nid": 1171434925,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7579,7 +7579,7 @@
                 "strval": "USER_3",
                 "childs": [
                   {
-                    "nid": 549474204,
+                    "nid": 1272268424,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -7592,7 +7592,7 @@
                 "strval": "USER_4",
                 "childs": [
                   {
-                    "nid": -1228546595,
+                    "nid": -825163473,
                     "strtype": "_style/Paddings",
                     "InheritedType": 1
                   }
@@ -8210,7 +8210,7 @@
               {
                 "disabled": false,
                 "nid": 1266910387,
-                "strtype": "PANEL/EventHandler",
+                "strtype": "_event/EventHandler",
                 "strval": "GESTURE_LEFT(GESTURE)",
                 "childs": [
                   {
@@ -8233,7 +8233,7 @@
                   },
                   {
                     "nid": 606312958,
-                    "strtype": "_custom/action",
+                    "strtype": "_event/action",
                     "strval": "CHANGE SCREEN",
                     "childs": [
                       {
@@ -16378,8 +16378,7 @@
             "InheritedType": 11
           }
         ],
-        "saved_objtypeKey": "SCREEN",
-        "tree_closed": true
+        "saved_objtypeKey": "SCREEN"
       },
       {
         "guid": "GUID68144515-481194S3452104",
@@ -28555,7 +28554,8 @@
                 "InheritedType": 11
               }
             ],
-            "saved_objtypeKey": "PANEL"
+            "saved_objtypeKey": "PANEL",
+            "tree_closed": true
           }
         ],
         "isPage": true,
@@ -28739,8 +28739,7 @@
             "InheritedType": 11
           }
         ],
-        "saved_objtypeKey": "SCREEN",
-        "tree_closed": true
+        "saved_objtypeKey": "SCREEN"
       },
       {
         "guid": "GUID6136782-85377S762154",
@@ -36805,7 +36804,7 @@
                       {
                         "nid": -638019589,
                         "strtype": "OBJECT/Clickable",
-                        "strval": "True",
+                        "strval": "False",
                         "InheritedType": 2
                       },
                       {
@@ -37421,9 +37420,9 @@
                                 "nid": -402225622,
                                 "strtype": "_style/Text_Color",
                                 "intarray": [
-                                  255,
-                                  255,
-                                  255,
+                                  136,
+                                  136,
+                                  136,
                                   255
                                 ],
                                 "InheritedType": 7
@@ -37525,7 +37524,7 @@
                   {
                     "nid": 1871778253,
                     "strtype": "OBJECT/Hidden",
-                    "strval": "True",
+                    "strval": "False",
                     "InheritedType": 2
                   },
                   {
@@ -37749,8 +37748,7 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "PANEL",
-                "tree_closed": true
+                "saved_objtypeKey": "PANEL"
               },
               {
                 "guid": "GUID35974348-987844S9352161",
@@ -41247,7 +41245,7 @@
                   {
                     "nid": -638015557,
                     "strtype": "OBJECT/Hidden",
-                    "strval": "False",
+                    "strval": "True",
                     "InheritedType": 2
                   },
                   {
@@ -41471,8 +41469,7 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "PANEL",
-                "tree_closed": true
+                "saved_objtypeKey": "PANEL"
               }
             ],
             "locked": false,
@@ -42019,8 +42016,7 @@
             "InheritedType": 11
           }
         ],
-        "saved_objtypeKey": "SCREEN",
-        "tree_closed": true
+        "saved_objtypeKey": "SCREEN"
       }
     ],
     "locked": false,
@@ -42058,7 +42054,7 @@
     "theme_color2": 0,
     "exportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/ui/sls_generated",
     "projectExportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/ui/sls_generated",
-    "backup_cnt": 261,
+    "backup_cnt": 263,
     "autosave_cnt": 0,
     "lvgl_version": "8.3.6",
     "callfuncsexport": "C_FILE",

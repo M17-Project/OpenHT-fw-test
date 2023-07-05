@@ -90,6 +90,9 @@ void init_freq_change_panel()
 	// configure m17 panel
 
 
+	// configure fm panel
+	fmInfo_t fm_info = radio_settings_get_fm_settings();
+	lv_dropdown_set_selected(ui_ctcss_tx_dropdown, fm_info.txTone);
 }
 
 void on_freq_click(lv_event_t *e)
@@ -99,6 +102,9 @@ void on_freq_click(lv_event_t *e)
 
 	// HACK WARNING: LVGL seems to render momentarily obscured widgets, so hide
 	lv_obj_add_flag(ui_vfo_panel, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_add_flag(ui_ptt_btn, LV_OBJ_FLAG_HIDDEN);
+
+	// End HACK
 
 	// unhide the panel and make the top layer clickable
 	lv_obj_clear_flag(ui_freq_change_panel, LV_OBJ_FLAG_HIDDEN);
@@ -111,6 +117,11 @@ void on_freq_ok_clicked(lv_event_t *e)
 	// HACK WARNING: now unhide
 	lv_obj_clear_flag(ui_vfo_panel, LV_OBJ_FLAG_HIDDEN);
 
+	if (user_settings.use_soft_ptt) {
+		lv_obj_clear_flag(ui_ptt_btn, LV_OBJ_FLAG_HIDDEN);
+	}
+	// End HACK
+
 	_end_input_freq_ta(true);
 	lv_obj_add_flag(ui_freq_change_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
@@ -119,6 +130,21 @@ void on_freq_ok_clicked(lv_event_t *e)
 	radio_settings_set_tx_freq(tx_freq);
 	user_settings.split_mode = split_mode;
 
+
+	// update fm settings...
+	uint16_t tx_index = lv_dropdown_get_selected(ui_ctcss_tx_dropdown);
+	fmInfo_t fm_info = radio_settings_get_fm_settings();
+
+	if (tx_index == 0) { // disabled
+		fm_info.txToneEn = false;
+	} else {
+		fm_info.txToneEn = true;
+	}
+
+	fm_info.txTone = tx_index;
+	radio_settings_set_fm_settings(fm_info);
+
+	// save to non-volatile storage...
 	radio_settings_save();//&radio_settings);
 	user_settings_save(&user_settings);
 
@@ -141,6 +167,12 @@ void on_freq_cancel_clicked(lv_event_t *e)
 {
 	// HACK WARNING: now unhide
 	lv_obj_clear_flag(ui_vfo_panel, LV_OBJ_FLAG_HIDDEN);
+
+	if (user_settings.use_soft_ptt) {
+		lv_obj_clear_flag(ui_ptt_btn, LV_OBJ_FLAG_HIDDEN);
+	}
+
+	// End HACK
 
 	_end_input_freq_ta(true);
 	lv_obj_add_flag(ui_freq_change_panel, LV_OBJ_FLAG_HIDDEN);
