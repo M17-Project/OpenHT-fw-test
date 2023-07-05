@@ -165,7 +165,7 @@ void StartTaskRadio(void *argument) {
 			FPGA_chip_select(true);
 			//GPIOC->BSRR|=(uint32_t)1<<(13+16); //TP low
 			HAL_SPI_Transmit_IT(&hspi1, samples, sizeof(samples));
-			printf("(x)\r\n");
+			//printf("(x)\r\n");
 			wait_spi_xfer_done(WAIT_TIMEOUT);
 			if(!startup_done)
 				FPGA_chip_select(false);
