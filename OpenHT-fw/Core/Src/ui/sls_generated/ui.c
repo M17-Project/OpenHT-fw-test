@@ -146,6 +146,30 @@ lv_obj_t * ui_Label2;
 void ui_event_settings_f_btn(lv_event_t * e);
 lv_obj_t * ui_settings_f_btn;
 lv_obj_t * ui_Label24;
+lv_obj_t * ui_xcvr_tab_panel;
+lv_obj_t * ui_Label42;
+lv_obj_t * ui_ppm_spinbox_panel;
+lv_obj_t * ui_Label43;
+lv_obj_t * ui_dpd1_spinbox_panel;
+lv_obj_t * ui_Label44;
+lv_obj_t * ui_dpd2_spinbox_panel;
+lv_obj_t * ui_Label45;
+lv_obj_t * ui_dpd3_spinbox_panel;
+lv_obj_t * ui_offset_i_spinbox_panel;
+lv_obj_t * ui_offset_q_spinbox_panel;
+lv_obj_t * ui_balance_i_spinbox_panel;
+lv_obj_t * ui_balance_q_spinbox_panel;
+lv_obj_t * ui_Label32;
+lv_obj_t * ui_Label33;
+lv_obj_t * ui_Label34;
+lv_obj_t * ui_Label35;
+lv_obj_t * ui_tx_pwr_spinbox_panel;
+lv_obj_t * ui_Label36;
+void ui_event_xcvr_dither_cb(lv_event_t * e);
+lv_obj_t * ui_xcvr_dither_cb;
+void ui_event_xcvr_reset_btn(lv_event_t * e);
+lv_obj_t * ui_xcvr_reset_btn;
+lv_obj_t * ui_Label37;
 void ui_event_settings_ok_btn(lv_event_t * e);
 lv_obj_t * ui_settings_ok_btn;
 lv_obj_t * ui_Label10;
@@ -474,6 +498,22 @@ void ui_event_settings_f_btn(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
         on_settings_f_clicked(e);
+    }
+}
+void ui_event_xcvr_dither_cb(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        on_split_txrx_clicked(e);
+    }
+}
+void ui_event_xcvr_reset_btn(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        on_xcvr_settings_reset_clicked(e);
     }
 }
 void ui_event_settings_ok_btn(lv_event_t * e)

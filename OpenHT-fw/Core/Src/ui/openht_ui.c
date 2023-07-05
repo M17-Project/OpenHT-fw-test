@@ -143,6 +143,24 @@ void custom_ui_init(void)
 			LV_PART_MAIN);
 	lv_obj_set_style_border_side(ui_fpga_status_panel, LV_BORDER_SIDE_NONE,
 			LV_PART_MAIN);
+	lv_obj_set_style_border_side(ui_ppm_spinbox_panel, LV_BORDER_SIDE_NONE,
+			LV_PART_MAIN);
+	lv_obj_set_style_border_side(ui_dpd1_spinbox_panel, LV_BORDER_SIDE_NONE,
+			LV_PART_MAIN);
+	lv_obj_set_style_border_side(ui_dpd2_spinbox_panel, LV_BORDER_SIDE_NONE,
+			LV_PART_MAIN);
+	lv_obj_set_style_border_side(ui_dpd3_spinbox_panel, LV_BORDER_SIDE_NONE,
+			LV_PART_MAIN);
+	lv_obj_set_style_border_side(ui_offset_i_spinbox_panel, LV_BORDER_SIDE_NONE,
+			LV_PART_MAIN);
+	lv_obj_set_style_border_side(ui_offset_q_spinbox_panel, LV_BORDER_SIDE_NONE,
+			LV_PART_MAIN);
+	lv_obj_set_style_border_side(ui_balance_i_spinbox_panel, LV_BORDER_SIDE_NONE,
+			LV_PART_MAIN);
+	lv_obj_set_style_border_side(ui_balance_q_spinbox_panel, LV_BORDER_SIDE_NONE,
+			LV_PART_MAIN);
+	lv_obj_set_style_border_side(ui_tx_pwr_spinbox_panel, LV_BORDER_SIDE_NONE,
+			LV_PART_MAIN);
 	lv_dropdown_set_selected(ui_freq_dropdown, 1);
 
 
