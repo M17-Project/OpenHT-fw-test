@@ -77,7 +77,7 @@ void StartMicrophonesTask(void *argument)
 
 	PDM_Filter_Config_t pdm_config = {
 			.decimation_factor = PDM_FILTER_DEC_FACTOR_128,
-			.mic_gain = 24,
+			.mic_gain = 18,
 			.output_samples_number = PCM_SAMPLES
 	};
 
