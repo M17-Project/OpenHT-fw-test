@@ -162,13 +162,13 @@ void StartTaskRadio(void *argument) {
 			uint8_t samples[34];
 			*(uint16_t *)samples = MOD_IN | REG_WR;
 			read_voice_samples((int16_t *)(samples+2), 16, 0);
+
 			FPGA_chip_select(true);
-			//GPIOC->BSRR|=(uint32_t)1<<(13+16); //TP low
 			HAL_SPI_Transmit_IT(&hspi1, samples, sizeof(samples));
-			//printf("(x)\r\n");
 			wait_spi_xfer_done(WAIT_TIMEOUT);
-			if(!startup_done)
+			if(!startup_done){
 				FPGA_chip_select(false);
+			}
 		}else if(flag & FPGA_READ_SAMPLES){
 			osThreadFlagsClear(FPGA_READ_SAMPLES);
 
@@ -220,9 +220,8 @@ void StartTaskRadio(void *argument) {
 			radio_configure_tx(tx_freq, ppm, mode, fm_info, tx_power);
 			tx_nRx = true;
 			uint8_t voice[66];
-			read_voice_samples((int16_t *)(voice+2), 32, 10);
-			//memset(voice+2, 0x00, 64);
 			*(uint16_t *)(voice) = MOD_IN | REG_WR;
+			read_voice_samples((int16_t *)(voice+2), 32, 10);
 
 			FPGA_chip_select(true);
 
