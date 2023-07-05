@@ -30,41 +30,23 @@
 StreamBufferHandle_t audio_in_buffer = NULL;
 
 void audio_process_init(){
-	/* 16 samples = 32 bytes. Total size = 32 samples */
-	audio_in_buffer = xStreamBufferGenericCreate(64, 32, pdFALSE);
+	/* 64 samples = 128 bytes. Total size = 128 samples */
+	/* Trigger level = 32 bytes = 16 samples */
+	audio_in_buffer = xStreamBufferGenericCreate(256, 32, pdFALSE);
 }
 
 void audio_process_set_mode(openht_mode_t mode){
 	DBG("Not implemented yet.\r\n");
 }
 
-uint32_t write_voice_samples(uint16_t *samples, uint32_t number){
-	uint32_t nb_samples_free = xStreamBufferSpacesAvailable(audio_in_buffer)/2;
-	uint32_t written;
-	if(nb_samples_free >= number){
-		xStreamBufferSend(audio_in_buffer, samples, number*2, 0);
-		written = number;
-	}else{
-		xStreamBufferSend(audio_in_buffer, samples, nb_samples_free*2, 0);
-		written = nb_samples_free;
-	}
+uint32_t write_voice_samples(int16_t *samples, uint32_t number, uint32_t timeout){
+	size_t sent = xStreamBufferSend(audio_in_buffer, samples, number*2, timeout);
 
-	return written;
+	return sent/2;
 }
 
-uint32_t read_voice_samples(uint16_t *samples, uint32_t number){
-	uint32_t nb_samples_available = xStreamBufferBytesAvailable(audio_in_buffer)/2;
-	uint32_t read;
-	if(nb_samples_available < number){
-		xStreamBufferReceive(audio_in_buffer, samples, nb_samples_available, 0);
-		for(size_t i = nb_samples_available; i < number; i++){
-			samples[i] = samples[nb_samples_available-1];
-		}
-		read = nb_samples_available;
-	}else{
-		xStreamBufferReceive(audio_in_buffer, samples, number, 0);
-		read = number;
-	}
+uint32_t read_voice_samples(int16_t *samples, uint32_t number, uint32_t timeout){
+	size_t read = xStreamBufferReceive(audio_in_buffer, samples, number*2, timeout);
 
-	return read;
+	return read/2;
 }

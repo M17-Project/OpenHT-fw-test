@@ -30,6 +30,7 @@
 #include "ui/openht_ui.h"
 #include "touch_sensor_driver.h"
 #include "screen_driver.h"
+#include "event_groups.h"
 
 #include "../shell/inc/sys_command_line.h"
 #include <lvgl.h>
@@ -139,8 +140,8 @@ const osThreadAttr_t microphones_attributes = {
 osThreadId_t radioHandle;
 const osThreadAttr_t radio_attributes = {
   .name = "radio",
-  .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityNormal1,
+  .stack_size = 768 * 4,
+  .priority = (osPriority_t) osPriorityRealtime1,
 };
 /* Definitions for SPI1Access */
 osMutexId_t SPI1AccessHandle;
@@ -162,16 +163,14 @@ osEventFlagsId_t microphoneEventsHandle;
 const osEventFlagsAttr_t microphoneEvents_attributes = {
   .name = "microphoneEvents"
 };
-/* Definitions for peripheralEvents */
-osEventFlagsId_t peripheralEventsHandle;
-const osEventFlagsAttr_t peripheralEvents_attributes = {
-  .name = "peripheralEvents"
-};
 /* USER CODE BEGIN PV */
 
 extern uint32_t gpio_port_a_state;
 extern uint32_t gpio_port_g_state;
 
+EventGroupHandle_t peripheralEventsGroup;
+
+extern volatile bool startup_done;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -342,10 +341,9 @@ int main(void)
   /* creation of microphoneEvents */
   microphoneEventsHandle = osEventFlagsNew(&microphoneEvents_attributes);
 
-  /* creation of peripheralEvents */
-  peripheralEventsHandle = osEventFlagsNew(&peripheralEvents_attributes);
-
   /* USER CODE BEGIN RTOS_EVENTS */
+  peripheralEventsGroup = xEventGroupCreate();
+
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
 
@@ -1212,16 +1210,16 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOE, SPKR_HP_Pin|AUDIO_RST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOG, MAIN_KILL_Pin|LED1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOG, IO1_Pin|MAIN_KILL_Pin|LED1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, LED3_Pin|LED2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, TP_Pin|SW_CTL1_Pin|FPGA_PROGRAMN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, SW_CTL1_Pin|FPGA_PROGRAMN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, SW_CTL2_Pin|RF_RST_Pin|OTG_FS1_PowerSwitchOn_Pin|EXT_RESET_Pin, GPIO_PIN_RESET);
@@ -1239,24 +1237,24 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : IO1_Pin */
-  GPIO_InitStruct.Pin = IO1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  /*Configure GPIO pins : IO1_Pin MAIN_KILL_Pin */
+  GPIO_InitStruct.Pin = IO1_Pin|MAIN_KILL_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(IO1_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : IO2_Pin IO3_Pin IO0_Pin uSD_Detect_Pin */
-  GPIO_InitStruct.Pin = IO2_Pin|IO3_Pin|IO0_Pin|uSD_Detect_Pin;
+  /*Configure GPIO pins : IO2_Pin IO0_Pin uSD_Detect_Pin */
+  GPIO_InitStruct.Pin = IO2_Pin|IO0_Pin|uSD_Detect_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : MAIN_KILL_Pin */
-  GPIO_InitStruct.Pin = MAIN_KILL_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  /*Configure GPIO pin : IO3_Pin */
+  GPIO_InitStruct.Pin = IO3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(MAIN_KILL_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(IO3_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED3_Pin LED2_Pin */
   GPIO_InitStruct.Pin = LED3_Pin|LED2_Pin;
@@ -1271,19 +1269,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(IO6_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : TP_Pin SW_CTL1_Pin FPGA_PROGRAMN_Pin */
+  GPIO_InitStruct.Pin = TP_Pin|SW_CTL1_Pin|FPGA_PROGRAMN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
   /*Configure GPIO pin : LED4_Pin */
   GPIO_InitStruct.Pin = LED4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED4_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : SW_CTL1_Pin FPGA_PROGRAMN_Pin */
-  GPIO_InitStruct.Pin = SW_CTL1_Pin|FPGA_PROGRAMN_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LED1_Pin */
   GPIO_InitStruct.Pin = LED1_Pin;
@@ -1360,6 +1358,7 @@ static void MX_GPIO_Init(void)
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
+  	HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
 
 	/* Configure PA.00 pin (Blue User button) as input floating */
 	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
@@ -1407,25 +1406,29 @@ void greet(void){
 
 void spi_xfer_done_event(SPI_HandleTypeDef *hspi){
 	if(hspi->Instance == SPI1){
-		uint32_t result = osEventFlagsSet(peripheralEventsHandle, PERIPH_SPI1_DONE);
-		if(result >= (1<<31)){
-			DBG("SPI1 Transfer done: could not set the event flag, osEventFlagSet returned %ld.\r\n", (int32_t)result);
+		//GPIOC->BSRR|=(uint32_t)1<<13; //TP high
+		BaseType_t yield = pdFALSE;
+		BaseType_t res = xEventGroupSetBitsFromISR(peripheralEventsGroup, PERIPH_SPI1_DONE, &yield);
+		if(res == pdFAIL){
+			DBG("SPI1 Transfer done: could not set the event bit.\n");
+		}else{
+			portYIELD_FROM_ISR(yield);
+		}
+		if(startup_done)
+		{
+			FPGA_chip_select(false);
+			XCVR_chip_select(false);
 		}
 	}
 }
 
-void wait_spi_xfer_done(uint32_t timeout){
-	int32_t result = (int32_t)osEventFlagsWait(peripheralEventsHandle, PERIPH_SPI1_DONE, 0, timeout);
-	if(result == -2){
+void wait_spi_xfer_done(TickType_t timeout){
+	BaseType_t res = xEventGroupWaitBits(peripheralEventsGroup, PERIPH_SPI1_DONE, pdTRUE, pdFALSE, timeout);
+	if(!(res & PERIPH_SPI1_DONE)){
 		DBG("SPI1 transfer timed out.\r\n");
-	}else if(result & (1<<31)){
-		DBG("SPI1 Error while waiting for transfer to finish: osEventFlagsWait returned %ld.\r\n", result);
 	}
 }
 
-/*void reset_spi1_flag(){
-	osEventFlagsClear(peripheralEventsHandle, PERIPH_SPI1_DONE);
-}*/
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartGeneralTask */

@@ -35,6 +35,7 @@
 #define SPI_PORT_ACTIVATION_KEY	0x8AF4C6A4 // Swapped for endianness
 
 extern SPI_HandleTypeDef 	hspi1;
+extern volatile bool		startup_done;
 
 void radio_on(){
 	HAL_GPIO_WritePin(MAIN_KILL_GPIO_Port, MAIN_KILL_Pin, GPIO_PIN_SET);
@@ -115,8 +116,9 @@ void radio_configure_rx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		XCVR_write_reg(RF24_RXDFE, RFn_RXDFE_RCUT_1 | RFn_RXDFE_SR_400K);
 
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_RESET);
-		osDelay(5);
+		osDelay(2);
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
+		osDelay(2);
 
 		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_24);
 		FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_N | ctcss | STATE_RX);
@@ -152,8 +154,9 @@ void radio_configure_rx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		XCVR_write_reg(RF09_RXDFE, RFn_RXDFE_RCUT_1 | RFn_RXDFE_SR_400K);
 
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_RESET);
-		osDelay(5);
+		osDelay(2);
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
+		osDelay(2);
 
 		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_09);
 		FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_N | ctcss | STATE_RX);
@@ -184,7 +187,7 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		radio_sw_24();
 
 		// Configure 2.4G transceiver
-		XCVR_write_reg(RF24_CMD, RFn_CMD_TRXOFF);
+		//XCVR_write_reg(RF24_CMD, RFn_CMD_TRXOFF);
 		XCVR_write_reg(RF24_PAC, RFn_PAC_PACUR_MAX | power);
 
 		/* Set frequency */ // TODO PPM
@@ -201,17 +204,12 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		XCVR_write_reg(RF24_CMD, RFn_CMD_TXPREP);
 
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_RESET);
-		osDelay(5);
+		osDelay(2);
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
+		osDelay(2);
 
 		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_24);
 		FPGA_write_reg(CR_2, (1 << 11) | CH_RX_12_5 | FM_TX_N | ctcss | STATE_TX);
-
-		uint16_t readback;
-		FPGA_read_reg(CR_1, &readback);
-		LOG(CLI_LOG_RADIO, "CR_1 readback is 0x%02x.\r\n", readback);
-		FPGA_read_reg(CR_2, &readback);
-		LOG(CLI_LOG_RADIO, "CR_2 readback is 0x%02x.\r\n", readback);
 
 		XCVR_write_reg(RF24_CMD, RFn_CMD_TX);
 	}else{
@@ -245,12 +243,6 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_09);
 		FPGA_write_reg(CR_2, (1 << 11) | CH_RX_12_5 | FM_TX_N | ctcss | STATE_TX);
 
-		uint16_t readback;
-		FPGA_read_reg(CR_1, &readback);
-		LOG(CLI_LOG_RADIO, "CR_1 readback is 0x%04x.\r\n", readback);
-		FPGA_read_reg(CR_2, &readback);
-		LOG(CLI_LOG_RADIO, "CR_2 readback is 0x%04x.\r\n", readback);
-
 		XCVR_write_reg(RF09_CMD, RFn_CMD_TX);
 	}
 }
@@ -265,19 +257,23 @@ void radio_sw_24(){
 	HAL_GPIO_WritePin(SW_CTL2_GPIO_Port, SW_CTL2_Pin, GPIO_PIN_RESET);
 }
 
-void FPGA_chip_select(bool selected){
+inline void FPGA_chip_select(bool selected){
 	if(selected){
-		HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
+		//HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
+		FPGA_NSS_GPIO_Port->BSRR|=(uint32_t)FPGA_NSS_Pin<<16;
 	}else{
-		HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+		//HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+		FPGA_NSS_GPIO_Port->BSRR|=FPGA_NSS_Pin;
 	}
 }
 
-void XCVR_chip_select(bool selected){
+inline void XCVR_chip_select(bool selected){
 	if(selected){
-		HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_RESET);
+		//HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_RESET);
+		XCVR_NSS_GPIO_Port->BSRR|=(uint32_t)XCVR_NSS_Pin<<16;
 	}else{
-		HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_SET);
+		//HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_SET);
+		XCVR_NSS_GPIO_Port->BSRR|=XCVR_NSS_Pin;
 	}
 }
 
@@ -304,13 +300,13 @@ void FPGA_send_bitstream(uint32_t address, size_t length){
 	LOG(CLI_LOG_FPGA, "Sent %lu bitstream bytes.\r\n", sent);
 	ui_log_add("[FPGA]: Sent %lu bitstream bytes.\n", sent);
 	FPGA_chip_select(false);
+	LOG(CLI_LOG_FPGA, "FPGA Upload done!\r\n");
 }
 
 uint32_t FPGA_write_reg(uint16_t addr, uint16_t data){
 	uint8_t buffer[4];
 
 	FPGA_chip_select(true);
-	osDelay(1);
 	*(uint16_t *)buffer = addr | REG_WR;
 	buffer[2] = (data>>8) & 0xFF;
 	buffer[3] = (uint8_t)data;
@@ -326,7 +322,6 @@ uint32_t FPGA_read_reg(uint16_t addr, uint16_t *data){
 	uint8_t bufferRX[4] = {0};
 
 	FPGA_chip_select(true);
-	osDelay(1);
 	*(uint16_t *)bufferTX = addr;
 	*(uint16_t *)(bufferTX + 2) = 0;
 	HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 4);
@@ -341,13 +336,12 @@ uint32_t XCVR_write_reg(uint16_t addr, uint8_t data){
 	uint8_t buffer[3];
 
 	XCVR_chip_select(true);
-	osDelay(1);
 	*(uint16_t *)buffer = addr | (1<<7);
 	buffer[2] = data;
 	HAL_SPI_Transmit_IT(&hspi1, buffer, 3);
 	wait_spi_xfer_done(WAIT_TIMEOUT);
-	osDelay(1);
-	XCVR_chip_select(false);
+	if(!startup_done)
+		XCVR_chip_select(false);
 
 	return EXIT_SUCCESS;
 }
@@ -357,14 +351,13 @@ uint32_t XCVR_read_reg(uint16_t addr, uint8_t *data){
 	uint8_t bufferRX[3] = {0};
 
 	XCVR_chip_select(true);
-	osDelay(1);
 	*(uint16_t *)bufferTX = addr;
 	bufferTX[2] = 0;
 	HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 3);
 	wait_spi_xfer_done(WAIT_TIMEOUT);
 	*data = bufferRX[2];
-	osDelay(1);
-	XCVR_chip_select(false);
+	if(!startup_done)
+		XCVR_chip_select(false);
 
 	return EXIT_SUCCESS;
 }

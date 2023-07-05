@@ -1,3 +1,4 @@
+/* USER CODE BEGIN Header */
 /*
  * Copyright (C) 2023 M17 Project and contributors
  *
@@ -15,7 +16,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+/* USER CODE END Header */
 
+/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __MAIN_H
 #define __MAIN_H
 
@@ -74,7 +77,6 @@ void wait_spi_xfer_done(uint32_t timeout);
 #define AUDIO_RST_GPIO_Port GPIOE
 #define IO1_Pin GPIO_PIN_14
 #define IO1_GPIO_Port GPIOG
-#define IO1_EXTI_IRQn EXTI15_10_IRQn
 #define FMC_NBL1_Pin GPIO_PIN_1
 #define FMC_NBL1_GPIO_Port GPIOE
 #define FMC_NBL0_Pin GPIO_PIN_0
@@ -101,6 +103,7 @@ void wait_spi_xfer_done(uint32_t timeout);
 #define MAIN_KILL_GPIO_Port GPIOG
 #define IO3_Pin GPIO_PIN_10
 #define IO3_GPIO_Port GPIOG
+#define IO3_EXTI_IRQn EXTI15_10_IRQn
 #define LED3_Pin GPIO_PIN_5
 #define LED3_GPIO_Port GPIOD
 #define IO6_Pin GPIO_PIN_3
@@ -111,6 +114,8 @@ void wait_spi_xfer_done(uint32_t timeout);
 #define D27_GPIO_Port GPIOI
 #define D26_Pin GPIO_PIN_2
 #define D26_GPIO_Port GPIOI
+#define TP_Pin GPIO_PIN_13
+#define TP_GPIO_Port GPIOC
 #define A0_Pin GPIO_PIN_0
 #define A0_GPIO_Port GPIOF
 #define FMC_NBL3_Pin GPIO_PIN_5
