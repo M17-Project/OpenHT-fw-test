@@ -201,7 +201,6 @@ void StartTaskRadio(void *argument) {
 			osThreadFlagsClear(RADIO_START_RX);
 
 			// Disable IO3 IRQ
-			HAL_NVIC_ClearPendingIRQ(EXTI15_10_IRQn);
 			HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
 
 			stop_microphone_acquisition();
@@ -212,7 +211,6 @@ void StartTaskRadio(void *argument) {
 			osThreadFlagsClear(RADIO_START_TX);
 
 			// Disable IO3 IRQ
-			HAL_NVIC_ClearPendingIRQ(EXTI15_10_IRQn);
 			HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
 
 			start_microphone_acquisition();
@@ -225,15 +223,16 @@ void StartTaskRadio(void *argument) {
 			*(uint16_t *)(voice) = MOD_IN | REG_WR;
 
 			FPGA_chip_select(true);
-			// Enable IO3 IRQ
-			HAL_NVIC_ClearPendingIRQ(EXTI15_10_IRQn);
-			HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 			HAL_SPI_Transmit_IT(&hspi1, voice, sizeof(voice));
 			wait_spi_xfer_done(WAIT_TIMEOUT);
 			if(!startup_done)
 				FPGA_chip_select(false);
 
+			// Enable IO3 IRQ
+			__HAL_GPIO_EXTI_CLEAR_FLAG(IO3_Pin);
+			HAL_NVIC_ClearPendingIRQ(EXTI15_10_IRQn);
+			HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 		}else if(flag & RADIO_INITN_CHANGED){
 			osThreadFlagsClear(RADIO_INITN_CHANGED);
@@ -248,7 +247,6 @@ void StartTaskRadio(void *argument) {
 				LOG(CLI_LOG_RADIO, "PoC powered off.\r\n");
 				startup_done = false;
 
-				HAL_NVIC_ClearPendingIRQ(EXTI15_10_IRQn);
 				HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
 
 				radio_enabled = false;
