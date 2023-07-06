@@ -271,6 +271,7 @@ void StartTaskRadio(void *argument) {
 			}
 			HAL_GPIO_WritePin(RF_RST_GPIO_Port, RF_RST_Pin, GPIO_PIN_SET);
 			osDelay(5);
+			XCVR_write_reg(RF_CLKO, RF_DRVCLKO4 | RF_CLKO_OS_32MHZ);
 			task_radio_event(UPLOAD_BITSTREAM);
 		}else if(flag & FPGA_UPLOAD_BIN){
 			osThreadFlagsClear(FPGA_UPLOAD_BIN);				// Clear the flag
@@ -380,9 +381,12 @@ void StartTaskRadio(void *argument) {
 			fpga_revision.maj_rev = bufferRX[1];
 			fpga_revision.min_rev = bufferRX[0];
 			radio_settings_set_fpga_rev(fpga_revision);
-			if(fpga_revision.maj_rev == 0 && fpga_revision.min_rev == 1){
+			if(fpga_revision.maj_rev == 0 && fpga_revision.min_rev == 2){
 				DBG("FPGA revision is %u.%u.\r\n", fpga_revision.maj_rev, fpga_revision.min_rev);
-			}else{
+			}else if(fpga_revision.maj_rev == 0 && fpga_revision.min_rev == 1){
+				ERR("You are running FPGA image version %u.%u which is not supported anymore. Please update your FPGA image.\r\n", fpga_revision.maj_rev, fpga_revision.min_rev);
+				set_fpga_status(FPGA_Error);
+			}else {
 				ERR("FPGA version %u.%u is not supported!!\r\n", fpga_revision.maj_rev, fpga_revision.min_rev);
 				set_fpga_status(FPGA_Error);
 			}
