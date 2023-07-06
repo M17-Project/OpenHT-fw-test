@@ -376,11 +376,18 @@ void StartTaskRadio(void *argument) {
 			LOG(CLI_LOG_FPGA, "FPGA PLL is locked. Querying revision number.\r\n");
 
 			FPGA_read_reg(SR_1, (uint16_t *)bufferRX);
-			DBG("FPGA revision is %u.%u.\r\n", bufferRX[1], bufferRX[0]);
 			maj_min_rev_t fpga_revision;
 			fpga_revision.maj_rev = bufferRX[1];
 			fpga_revision.min_rev = bufferRX[0];
 			radio_settings_set_fpga_rev(fpga_revision);
+			if(fpga_revision.maj_rev == 0 && fpga_revision.min_rev == 1){
+				DBG("FPGA revision is %u.%u.\r\n", fpga_revision.maj_rev, fpga_revision.min_rev);
+			}else{
+				ERR("FPGA version %u.%u is not supported!!\r\n", fpga_revision.maj_rev, fpga_revision.min_rev);
+				set_fpga_status(FPGA_Error);
+			}
+
+
 
 			uint8_t read = 0;
 			XCVR_read_reg(RF_PN, &read);
