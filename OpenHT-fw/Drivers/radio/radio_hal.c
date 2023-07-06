@@ -255,20 +255,20 @@ void radio_sw_24(){
 inline void FPGA_chip_select(bool selected){
 	if(selected){
 		//HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
-		FPGA_NSS_GPIO_Port->BSRR|=(uint32_t)FPGA_NSS_Pin<<16;
+		FPGA_NSS_GPIO_Port->BSRR=(uint32_t)FPGA_NSS_Pin<<16;
 	}else{
 		//HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
-		FPGA_NSS_GPIO_Port->BSRR|=FPGA_NSS_Pin;
+		FPGA_NSS_GPIO_Port->BSRR=FPGA_NSS_Pin;
 	}
 }
 
 inline void XCVR_chip_select(bool selected){
 	if(selected){
 		//HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_RESET);
-		XCVR_NSS_GPIO_Port->BSRR|=(uint32_t)XCVR_NSS_Pin<<16;
+		XCVR_NSS_GPIO_Port->BSRR=(uint32_t)XCVR_NSS_Pin<<16;
 	}else{
 		//HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_SET);
-		XCVR_NSS_GPIO_Port->BSRR|=XCVR_NSS_Pin;
+		XCVR_NSS_GPIO_Port->BSRR=XCVR_NSS_Pin;
 	}
 }
 
