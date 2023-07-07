@@ -159,50 +159,37 @@ void radio_settings_init()
 	// FPGA data. Not stored in NOR Flash
 	*(uint16_t *)(&saved_settings.fpga_revision) = 0;
 
+	// start with the default settings and overwrite from EEEPROM
+	saved_settings.xcvr_settings = radio_settings_get_default_xcvr_settings();
 
 	// XCVR Settings1
 	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS1_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		saved_settings.xcvr_settings.ppm = (uint16_t)buffer;
 		saved_settings.xcvr_settings.dpd1 = (buffer>>16) & 0xFF;
-	}else{
-		saved_settings.xcvr_settings.ppm = 0;
-		saved_settings.xcvr_settings.dpd1 = 0;
 	}
 
 	// XCVR Settings2
 	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS2_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		saved_settings.xcvr_settings.dpd2 = (uint16_t)buffer;
 		saved_settings.xcvr_settings.dpd3 = (buffer>>16) & 0xFF;
-	}else{
-		saved_settings.xcvr_settings.dpd2 = 0;
-		saved_settings.xcvr_settings.dpd3 = 0;
 	}
 
 	// XCVR Settings3
 	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS3_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		saved_settings.xcvr_settings.offset_i = (uint16_t)buffer;
 		saved_settings.xcvr_settings.offset_q = (buffer>>16) & 0xFF;
-	}else{
-		saved_settings.xcvr_settings.offset_i = 0;
-		saved_settings.xcvr_settings.offset_q = 0;
 	}
 
 	// XCVR Settings4
 	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS4_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		saved_settings.xcvr_settings.balance_i = (uint16_t)buffer;
 		saved_settings.xcvr_settings.balance_q = (buffer>>16) & 0xFF;
-	}else{
-		saved_settings.xcvr_settings.balance_i = 0;
-		saved_settings.xcvr_settings.balance_q = 0;
 	}
 
 	// XCVR Settings5
 	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS5_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		saved_settings.xcvr_settings.tx_pwr = (uint16_t)buffer;
 		saved_settings.xcvr_settings.phase_dither = (buffer>>16) & 0xFF;
-	}else{
-		saved_settings.xcvr_settings.tx_pwr = 0;
-		saved_settings.xcvr_settings.phase_dither = 0;
 	}
 
 	// set the saved_settings (which represents the contents of the EEEPROM) and the
@@ -421,9 +408,40 @@ void radio_settings_set_fpga_rev(maj_min_rev_t fpga_revision)
 	cached_settings.fpga_revision = fpga_revision;
 }
 
-maj_min_rev_t radio_settings_get_fpga_rev()
+maj_min_rev_t radio_settings_get_fpga_rev(void)
 {
 	return cached_settings.fpga_revision;
+}
+
+xcvr_settings_t radio_settings_get_default_xcvr_settings(void)
+{
+	xcvr_settings_t xcvr_settings;
+
+	// range -100 to 100
+	xcvr_settings.ppm = 0;
+
+	// range 0.5 to 1.5
+	xcvr_settings.dpd1 = 10; // 1.0
+	// range -0.5 to 0.5
+	xcvr_settings.dpd2 = 0; // 0.0
+	// range -0.5 to 0.5
+	xcvr_settings.dpd3 = 0; // 0.0
+
+	// range -100 to 100
+	xcvr_settings.offset_i = 0;
+	// range -100 to 100
+	xcvr_settings.offset_q = 0;
+
+	// range 0 to 1.0
+	xcvr_settings.balance_i = 10; // 1.0
+	// range 0 to 1.0
+	xcvr_settings.balance_q = 10; // 1.0
+
+	// range 0 to 31
+	xcvr_settings.tx_pwr = 31;
+	xcvr_settings.phase_dither = false;
+
+	return xcvr_settings;
 }
 
 void radio_settings_set_xcvr_settings (xcvr_settings_t xcvr_settings)

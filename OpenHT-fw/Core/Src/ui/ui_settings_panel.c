@@ -185,44 +185,18 @@ static void _tx_pwr_spinbox_dec_event_cb(lv_event_t * e)
     }
 }
 
-static void _reset_xcvr_defaults()
+static void _get_xcvr_settings(bool default_xcvr_settings)
 {
-	if (_init_done) {
+	xcvr_settings_t xcvr_settings;
 
-	    lv_spinbox_set_value(ppm_spinbox, 0);
-	    lv_spinbox_set_cursor_pos(ppm_spinbox, 0);
-
-	    lv_spinbox_set_value(dpd1_spinbox, 10);
-	    lv_spinbox_set_cursor_pos(dpd1_spinbox, 0);
-
-	    lv_spinbox_set_value(dpd2_spinbox, 0);
-	    lv_spinbox_set_cursor_pos(dpd2_spinbox, 0);
-
-	    lv_spinbox_set_value(dpd3_spinbox, 0);
-	    lv_spinbox_set_cursor_pos(dpd3_spinbox, 0);
-
-	    lv_spinbox_set_value(offset_i_spinbox, 0);
-	    lv_spinbox_set_cursor_pos(offset_i_spinbox, 0);
-
-	    lv_spinbox_set_value(offset_q_spinbox, 0);
-	    lv_spinbox_set_cursor_pos(offset_q_spinbox, 0);
-
-	    lv_spinbox_set_value(balance_i_spinbox, 10);
-	    lv_spinbox_set_cursor_pos(balance_i_spinbox, 0);
-
-	    lv_spinbox_set_value(balance_q_spinbox, 10);
-	    lv_spinbox_set_cursor_pos(balance_q_spinbox, 0);
-
-	    lv_spinbox_set_value(tx_pwr_spinbox, 15);
-	    lv_spinbox_set_cursor_pos(tx_pwr_spinbox, 0);
-
-		lv_obj_clear_state(ui_xcvr_dither_cb, LV_STATE_CHECKED);
+	// if resetting to default xcvr settings
+	if (default_xcvr_settings) {
+		// get the default settings
+		xcvr_settings = radio_settings_get_default_xcvr_settings();
+	} else {
+		// get the stored settings
+		xcvr_settings = radio_settings_get_xcvr_settings();
 	}
-}
-
-static void _get_xcvr_settings()
-{
-	xcvr_settings_t xcvr_settings = radio_settings_get_xcvr_settings();
 
     lv_spinbox_set_value(ppm_spinbox, xcvr_settings.ppm);
     lv_spinbox_set_cursor_pos(ppm_spinbox, 0);
@@ -283,6 +257,7 @@ static void _save_xcvr_settings()
 		xcvr_settings.phase_dither = false;
 	}
 
+	// save the xcvr settings into radio_settings
 	radio_settings_set_xcvr_settings(xcvr_settings);
 }
 
@@ -605,16 +580,13 @@ void init_settings_panel(void)
 	lv_obj_add_event_cb(btn, _tx_pwr_spinbox_dec_event_cb, LV_EVENT_ALL, NULL);
 	// END TX_PWR Spinbox
 
-	_get_xcvr_settings();
+	_get_xcvr_settings(false);
 	_init_done = true;
-
-	// set defaults
-	//_reset_xcvr_defaults();
 }
 
 void on_xcvr_settings_reset_clicked(lv_event_t *e)
 {
-	_reset_xcvr_defaults();
+	_get_xcvr_settings(true);
 }
 
 void on_settings_clicked(lv_event_t *e)
@@ -629,6 +601,8 @@ void on_settings_ok_clicked(lv_event_t *e)
 	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
 
 	_save_xcvr_settings();
+
+	// write to EEEPROM
 	radio_settings_save();
 }
 

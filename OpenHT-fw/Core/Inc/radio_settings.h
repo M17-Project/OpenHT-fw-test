@@ -113,8 +113,9 @@ void radio_settings_set_fm_settings (fmInfo_t fm_settings);
 fmInfo_t radio_settings_get_fm_settings (void);
 
 void radio_settings_set_fpga_rev(maj_min_rev_t fpga_revision);
-maj_min_rev_t radio_settings_get_fpga_rev();
+maj_min_rev_t radio_settings_get_fpga_rev(void);
 
+xcvr_settings_t radio_settings_get_default_xcvr_settings(void);
 void radio_settings_set_xcvr_settings (xcvr_settings_t xcvr_settings);
 xcvr_settings_t radio_settings_get_xcvr_settings (void);
 
