@@ -44,7 +44,6 @@ typedef enum
     OpMode_M17,
 	OpMode_FreeDV,
 	OpMode_NFM,
-	OpMode_FM,
 	OpMode_WFM,
 	OpMode_AM,
 	OpMode_LSB,

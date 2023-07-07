@@ -80,7 +80,6 @@ void init_freq_change_panel()
 
 	openht_mode_t mode = radio_settings_get_mode();
 	if (mode == OpMode_NFM ||
-			mode == OpMode_FM ||
 			mode == OpMode_WFM) {
 		lv_obj_clear_flag(ui_fm_settings_panel, LV_OBJ_FLAG_HIDDEN);
 	} else if (mode == OpMode_M17) {

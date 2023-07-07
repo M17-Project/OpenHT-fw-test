@@ -318,10 +318,6 @@ freq_t radio_settings_get_rx_freq (void)
 void radio_settings_set_tx_freq (freq_t freq)
 {
 	cached_settings.tx_freq = freq;
-
-	if (radio_settings_mode_changed_cb != NULL) {
-		radio_settings_mode_changed_cb();
-	}
 }
 
 freq_t radio_settings_get_tx_freq (void)
@@ -357,6 +353,10 @@ void radio_settings_sub_mode_cb(radio_setting_changed_func_t cb)
 void radio_settings_set_mode (openht_mode_t mode)
 {
 	cached_settings.mode = mode;
+
+	if (radio_settings_mode_changed_cb != NULL) {
+		radio_settings_mode_changed_cb();
+	}
 }
 
 openht_mode_t radio_settings_get_mode (void)

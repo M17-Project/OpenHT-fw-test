@@ -66,6 +66,12 @@ void radio_configure_rx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		ctcss = fm.rxTone << 2;
 	}
 
+	// TODO: Since we only support FM at the moment, this is fine
+	uint16_t fm_mode = FM_TX_N;
+	if (mode == OpMode_WFM) {
+		fm_mode = FM_TX_W;
+	}
+
 	if(freq > 1e9){
 		LOG(CLI_LOG_RADIO, "Radio set in RX 2.4G.\r\n");
 
@@ -120,7 +126,7 @@ void radio_configure_rx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		osDelay(2);
 
 		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_24);
-		FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_N | ctcss | STATE_RX);
+		FPGA_write_reg(CR_2, CH_RX_12_5 | fm_mode | ctcss | STATE_RX);
 
 		XCVR_write_reg(RF24_CMD, RFn_CMD_RX);
 
@@ -157,7 +163,7 @@ void radio_configure_rx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		osDelay(2);
 
 		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_09);
-		FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_N | ctcss | STATE_RX);
+		FPGA_write_reg(CR_2, CH_RX_12_5 | fm_mode | ctcss | STATE_RX);
 
 		XCVR_write_reg(RF09_CMD, RFn_CMD_RX);
 
@@ -171,6 +177,12 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 	uint8_t ctcss = 0;
 	if(fm.txToneEn){
 		ctcss = fm.txTone << 2;
+	}
+
+	// TODO: Since we only support FM at the moment, this is fine
+	uint16_t fm_mode = FM_TX_N;
+	if (mode == OpMode_WFM) {
+		fm_mode = FM_TX_W;
 	}
 
 	if(power > RFn_PAC_TXPWR_MAX){
@@ -205,7 +217,7 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		osDelay(2);
 
 		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_24);
-		FPGA_write_reg(CR_2, (1 << 11) | CH_RX_12_5 | FM_TX_N | ctcss | STATE_TX);
+		FPGA_write_reg(CR_2, (1 << 11) | CH_RX_12_5 | fm_mode | ctcss | STATE_TX);
 
 		XCVR_write_reg(RF24_CMD, RFn_CMD_TX);
 	}else{
@@ -236,7 +248,7 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		osDelay(2);
 
 		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_09);
-		FPGA_write_reg(CR_2, (1 << 11) | CH_RX_12_5 | FM_TX_N | ctcss | STATE_TX);
+		FPGA_write_reg(CR_2, (1 << 11) | CH_RX_12_5 | fm_mode | ctcss | STATE_TX);
 
 		XCVR_write_reg(RF09_CMD, RFn_CMD_TX);
 	}

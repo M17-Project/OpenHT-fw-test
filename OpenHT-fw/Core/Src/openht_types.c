@@ -26,8 +26,7 @@ struct mode_datum openht_mode_data[] =
 {
     {OpMode_M17, "M17"}, // digital
     {OpMode_FreeDV, "FreeDV"}, // digital
-    {OpMode_NFM,  "NFM"},  // 6.25k
-    {OpMode_FM,  "FM"},  // 12.5k
+    {OpMode_NFM,  "NFM"},  // 12.5k
     {OpMode_WFM,  "WFM"},  // 25k
     {OpMode_AM,  "AM"},
     {OpMode_LSB,  "LSB"}, // Lower
