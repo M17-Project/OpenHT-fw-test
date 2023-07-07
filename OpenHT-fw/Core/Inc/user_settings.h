@@ -29,6 +29,7 @@ extern "C" {
 #include "stm32469i_discovery.h" /* DISCOVERY includes component */
 #include "stm32469i_discovery_qspi.h"
 
+#define N0CALL "N0CALL"
 
 typedef struct
 {

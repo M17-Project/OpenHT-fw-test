@@ -31,7 +31,7 @@ extern "C" {
 
 // Version defines for the FW version as displayed in UI About
 static const uint8_t OPENHT_MAJOR_VER = 0;
-static const uint8_t OPENHT_MINOR_VER = 1;
+static const uint8_t OPENHT_MINOR_VER = 2;
 
 typedef enum
 {

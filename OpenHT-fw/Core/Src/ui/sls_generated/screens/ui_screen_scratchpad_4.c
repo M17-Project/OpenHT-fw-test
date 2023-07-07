@@ -68,7 +68,7 @@ void ui_screen_scratchpad_4_screen_init(void)
     lv_obj_set_x(ui_text_area_callsign, 10);
     lv_obj_set_y(ui_text_area_callsign, 44);
     lv_textarea_set_max_length(ui_text_area_callsign, 9);
-    lv_textarea_set_placeholder_text(ui_text_area_callsign, "CALLSIGN...");
+    lv_textarea_set_placeholder_text(ui_text_area_callsign, "N0CALL");
     lv_textarea_set_one_line(ui_text_area_callsign, true);
     lv_obj_clear_flag(ui_text_area_callsign, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_text_color(ui_text_area_callsign, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);

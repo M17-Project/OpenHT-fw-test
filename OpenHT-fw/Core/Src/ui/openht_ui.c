@@ -203,8 +203,8 @@ void custom_ui_init(void)
 	get_display_str_from_freq(radio_settings_get_tx_freq(), tx_buffer);
 	lv_label_set_text_fmt(ui_tx_display_label, "%s", tx_buffer);
 
+	// copy user_settings callsign to local GUI copy
 	strcpy(callsign_str, user_settings.callsign);
-	lv_textarea_set_text(ui_text_area_callsign, callsign_str);
 
 	if (user_settings.use_freq_offset) {
 		lv_obj_add_state(ui_use_freq_offset_cb, LV_STATE_CHECKED);

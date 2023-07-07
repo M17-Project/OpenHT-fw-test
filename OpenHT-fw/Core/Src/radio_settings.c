@@ -417,11 +417,14 @@ xcvr_settings_t radio_settings_get_default_xcvr_settings(void)
 {
 	xcvr_settings_t xcvr_settings;
 
+	// some of the values are magnitude values that need to be
+	// divided by the magnitude to get the resulting float
+
 	// range -100 to 100
 	xcvr_settings.ppm = 0;
 
 	// range 0.5 to 1.5
-	xcvr_settings.dpd1 = 1000; // 1.0
+	xcvr_settings.dpd1 = 1000; // 1000/1000 = 1.0
 	// range -0.5 to 0.5
 	xcvr_settings.dpd2 = 0; // 0.0
 	// range -0.5 to 0.5
@@ -433,9 +436,9 @@ xcvr_settings_t radio_settings_get_default_xcvr_settings(void)
 	xcvr_settings.offset_q = 0;
 
 	// range 0 to 1.0
-	xcvr_settings.balance_i = 1000; // 1.0
+	xcvr_settings.balance_i = 1000; // 1000/1000 = 1.0
 	// range 0 to 1.0
-	xcvr_settings.balance_q = 1000; // 1.0
+	xcvr_settings.balance_q = 1000; // 1000/1000 = 1.0
 
 	// range 0 to 31
 	xcvr_settings.tx_pwr = 31; // max power

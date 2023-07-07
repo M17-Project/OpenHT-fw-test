@@ -37935,7 +37935,7 @@
                   {
                     "nid": 808381739,
                     "strtype": "TEXTAREA/Placeholder",
-                    "strval": "CALLSIGN...",
+                    "strval": "N0CALL",
                     "InheritedType": 10
                   },
                   {
@@ -38807,8 +38807,7 @@
             "InheritedType": 11
           }
         ],
-        "saved_objtypeKey": "SCREEN",
-        "tree_closed": true
+        "saved_objtypeKey": "SCREEN"
       },
       {
         "guid": "GUID91992622-81721S9442157",
@@ -49582,7 +49581,7 @@
     "theme_color2": 0,
     "exportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/ui/sls_generated",
     "projectExportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/ui/sls_generated",
-    "backup_cnt": 288,
+    "backup_cnt": 289,
     "autosave_cnt": 0,
     "lvgl_version": "8.3.6",
     "callfuncsexport": "C_FILE",

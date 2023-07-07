@@ -75,27 +75,22 @@ void user_settings_init()
 	}
 	uint32_t buffer;
 
+	// set the default callsign...
+	strcpy(cached_settings.callsign, N0CALL);
+
 	// CS letters 1 to 4
 	if(EEEPROM_read_data(&user_settings_eeeprom, CALLSIGN1_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		*(uint32_t *)(cached_settings.callsign) = buffer;
-	}else{
-		cached_settings.callsign[0] = '\0';
 	}
-
 
 	// CS letters 5 to 8
 	if(EEEPROM_read_data(&user_settings_eeeprom, CALLSIGN2_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		*(uint32_t *)(cached_settings.callsign+4) = buffer;
-	}else{
-		cached_settings.callsign[4] = '\0';
 	}
-
 
 	// CS letters 9-10
 	if(EEEPROM_read_data(&user_settings_eeeprom, CALLSIGN3_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		*(uint16_t *)(cached_settings.callsign+8) = (uint16_t)buffer;
-	}else{
-		cached_settings.callsign[8] = '\0';
 	}
 
 	// Audio volume

@@ -37,9 +37,16 @@ void init_callsign_change_panel(lv_obj_t * obj)
 
 void on_callsign_clicked(lv_event_t *e)
 {
-	// update text area with current callsign...
 	strcpy(work_str, callsign_str);
-	lv_textarea_set_text(ui_text_area_callsign, callsign_str);
+
+	// update text area with current callsign...
+	// if callsign is "N0CALL"
+	if (strcmp(callsign_str, N0CALL) == 0) {
+		lv_textarea_set_text(ui_text_area_callsign, "");
+		strcpy(work_str, "");
+	} else {
+		lv_textarea_set_text(ui_text_area_callsign, callsign_str);
+	}
 
 	lv_obj_clear_flag(ui_callsign_change_panel, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_clear_flag(ui_qwerty_key_panel, LV_OBJ_FLAG_HIDDEN);
@@ -69,7 +76,14 @@ void on_callsign_ok_clicked(lv_event_t *e)
 	lv_obj_clear_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
 
 	// save callsign
-	strcpy(callsign_str, work_str);
+
+	// if work_str is empty... is "N0CALL"
+	if (strcmp(work_str, "") == 0) {
+		strcpy(callsign_str, N0CALL);
+	} else {
+		strcpy(callsign_str, work_str);
+	}
+
 	update_callsign();
 }
 
