@@ -61,15 +61,17 @@ void radio_off(){
 
 void radio_configure_rx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t fm, openht_radio_agc agc){
 	XCVR_stop_operation();
-	uint8_t ctcss = 0;
+
+	// TODO: CTCSS doesn't work on RX yet
+	uint16_t ctcss = 0;
 	if(fm.rxToneEn){
 		ctcss = fm.rxTone << 2;
 	}
 
 	// TODO: Since we only support FM at the moment, this is fine
-	uint16_t fm_mode = FM_TX_N;
+	uint16_t fm_mode = CH_RX_12_5;
 	if (mode == OpMode_WFM) {
-		fm_mode = FM_TX_W;
+		fm_mode = CH_RX_25;
 	}
 
 	if(freq > 1e9){
@@ -174,7 +176,7 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 	// Switch FPGA to TX
 	XCVR_stop_operation();
 
-	uint8_t ctcss = 0;
+	uint16_t ctcss = 0;
 	if(fm.txToneEn){
 		ctcss = fm.txTone << 2;
 	}
