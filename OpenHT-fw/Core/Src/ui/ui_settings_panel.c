@@ -351,8 +351,8 @@ void init_settings_panel(void)
     lv_obj_set_style_bg_opa(dpd1_spinbox, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(dpd1_spinbox, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_spinbox_set_range(dpd1_spinbox, 5, 15);
-    lv_spinbox_set_digit_format(dpd1_spinbox, 2, 1);
+    lv_spinbox_set_range(dpd1_spinbox, 500, 1500);
+    lv_spinbox_set_digit_format(dpd1_spinbox, 4, 1);
     lv_spinbox_step_prev(dpd1_spinbox);
     lv_obj_set_width(dpd1_spinbox, 100);
     lv_obj_center(dpd1_spinbox);
@@ -381,8 +381,8 @@ void init_settings_panel(void)
     lv_obj_set_style_bg_opa(dpd2_spinbox, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(dpd2_spinbox, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_spinbox_set_range(dpd2_spinbox, -5, 5);
-    lv_spinbox_set_digit_format(dpd2_spinbox, 2, 1);
+    lv_spinbox_set_range(dpd2_spinbox, -500, 500);
+    lv_spinbox_set_digit_format(dpd2_spinbox, 4, 1);
     lv_spinbox_step_prev(dpd2_spinbox);
     lv_obj_set_width(dpd2_spinbox, 100);
     lv_obj_center(dpd2_spinbox);
@@ -411,8 +411,8 @@ void init_settings_panel(void)
     lv_obj_set_style_bg_opa(dpd3_spinbox, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(dpd3_spinbox, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_spinbox_set_range(dpd3_spinbox, -5, 5);
-    lv_spinbox_set_digit_format(dpd3_spinbox, 2, 1);
+    lv_spinbox_set_range(dpd3_spinbox, -500, 500);
+    lv_spinbox_set_digit_format(dpd3_spinbox, 4, 1);
     lv_spinbox_step_prev(dpd3_spinbox);
     lv_obj_set_width(dpd3_spinbox, 100);
     lv_obj_center(dpd3_spinbox);
@@ -501,8 +501,8 @@ void init_settings_panel(void)
     lv_obj_set_style_bg_opa(balance_i_spinbox, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(balance_i_spinbox, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_spinbox_set_range(balance_i_spinbox, 0, 10);
-    lv_spinbox_set_digit_format(balance_i_spinbox, 2, 1);
+    lv_spinbox_set_range(balance_i_spinbox, 0, 1000);
+    lv_spinbox_set_digit_format(balance_i_spinbox, 4, 1);
     lv_spinbox_step_prev(balance_i_spinbox);
     lv_obj_set_width(balance_i_spinbox, 100);
     lv_obj_center(balance_i_spinbox);
@@ -531,8 +531,8 @@ void init_settings_panel(void)
     lv_obj_set_style_bg_opa(balance_q_spinbox, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(balance_q_spinbox, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_spinbox_set_range(balance_q_spinbox, 0, 10);
-    lv_spinbox_set_digit_format(balance_q_spinbox, 2, 1);
+    lv_spinbox_set_range(balance_q_spinbox, 0, 1000);
+    lv_spinbox_set_digit_format(balance_q_spinbox, 4, 1);
     lv_spinbox_step_prev(balance_q_spinbox);
     lv_obj_set_width(balance_q_spinbox, 100);
     lv_obj_center(balance_q_spinbox);

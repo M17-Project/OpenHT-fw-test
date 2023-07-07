@@ -98,14 +98,14 @@ void radio_settings_init()
 	if(EEEPROM_read_data(&radio_settings_eeeprom, RX_FREQ_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		saved_settings.rx_freq = buffer;
 	}else{
-		saved_settings.rx_freq = 0;
+		saved_settings.rx_freq = 435000000; //default value
 	}
 
 	// TX freq
 	if(EEEPROM_read_data(&radio_settings_eeeprom, TX_FREQ_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		saved_settings.tx_freq = buffer;
 	}else{
-		saved_settings.tx_freq = 0;
+		saved_settings.tx_freq = 435000000; //default value
 	}
 
 	// AGC and Power output
@@ -115,7 +115,7 @@ void radio_settings_init()
 		saved_settings.mode = (buffer>>16) & 0xFF;
 	}else{
 		saved_settings.radio_agc = 0;
-		saved_settings.output_pwr = 0;
+		saved_settings.output_pwr = 31; //max power by default
 		saved_settings.mode = 0;
 	}
 
@@ -421,7 +421,7 @@ xcvr_settings_t radio_settings_get_default_xcvr_settings(void)
 	xcvr_settings.ppm = 0;
 
 	// range 0.5 to 1.5
-	xcvr_settings.dpd1 = 10; // 1.0
+	xcvr_settings.dpd1 = 1000; // 1.0
 	// range -0.5 to 0.5
 	xcvr_settings.dpd2 = 0; // 0.0
 	// range -0.5 to 0.5
@@ -433,13 +433,13 @@ xcvr_settings_t radio_settings_get_default_xcvr_settings(void)
 	xcvr_settings.offset_q = 0;
 
 	// range 0 to 1.0
-	xcvr_settings.balance_i = 10; // 1.0
+	xcvr_settings.balance_i = 1000; // 1.0
 	// range 0 to 1.0
-	xcvr_settings.balance_q = 10; // 1.0
+	xcvr_settings.balance_q = 1000; // 1.0
 
 	// range 0 to 31
-	xcvr_settings.tx_pwr = 31;
-	xcvr_settings.phase_dither = false;
+	xcvr_settings.tx_pwr = 31; // max power
+	xcvr_settings.phase_dither = true; // dither on by default
 
 	return xcvr_settings;
 }
