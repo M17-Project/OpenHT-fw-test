@@ -426,9 +426,9 @@ xcvr_settings_t radio_settings_get_default_xcvr_settings(void)
 	// range 0.5 to 1.5
 	xcvr_settings.dpd1 = 1000; // 1000/1000 = 1.0
 	// range -0.5 to 0.5
-	xcvr_settings.dpd2 = 0; // 0.0
+	xcvr_settings.dpd2 = 0; // 0/1000 = 0.0
 	// range -0.5 to 0.5
-	xcvr_settings.dpd3 = 0; // 0.0
+	xcvr_settings.dpd3 = 0; // 0/1000 = 0.0
 
 	// range -100 to 100
 	xcvr_settings.offset_i = 0;

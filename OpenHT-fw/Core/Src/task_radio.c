@@ -120,15 +120,14 @@ void StartTaskRadio(void *argument) {
 	radio_settings_sub_rx_freq_cb(rx_changed_cb);
 	radio_settings_sub_mode_cb(mode_changed_cb);
 
-	openht_mode_t 		mode 		= radio_settings_get_mode();
-	freq_t 				rx_freq 	= radio_settings_get_rx_freq();
-	freq_t 				tx_freq 	= radio_settings_get_tx_freq();
-	fmInfo_t 			fm_info 	= radio_settings_get_fm_settings();
-	openht_radio_agc	agc 		= radio_settings_get_radio_agc();
-	uint8_t				tx_power	= radio_settings_get_output_pwr();
-	tx_power = 0x1F;
-
-	float			ppm 		= 0;
+	xcvr_settings_t		xcvr_settings	= radio_settings_get_xcvr_settings();
+	openht_mode_t 		mode 			= radio_settings_get_mode();
+	freq_t 				rx_freq 		= radio_settings_get_rx_freq();
+	freq_t 				tx_freq 		= radio_settings_get_tx_freq();
+	fmInfo_t 			fm_info 		= radio_settings_get_fm_settings();
+	openht_radio_agc	agc 			= radio_settings_get_radio_agc();
+	uint8_t				tx_power		= xcvr_settings.tx_pwr; //radio_settings_get_output_pwr(); //somehow this doesn't work
+	float				ppm 			= xcvr_settings.ppm/10.0f;
 
 	if(EEEPROM_init(&eeeprom) == EXIT_FAILURE){
 		ERR("Error initializing fpga binaries EEEPROM.\r\n");
@@ -182,14 +181,14 @@ void StartTaskRadio(void *argument) {
 			// TODO: M17 mode support. This will get user callsign:
 			//const char * test = radio_settings_get_m17_callsign();
 
-			mode 		= radio_settings_get_mode();
-			rx_freq 	= radio_settings_get_rx_freq();
-			tx_freq 	= radio_settings_get_tx_freq();
-			fm_info 	= radio_settings_get_fm_settings();
-			agc			= radio_settings_get_radio_agc();
-			tx_power	= radio_settings_get_output_pwr();
-
-			tx_power = 0x1F;
+			xcvr_settings	= radio_settings_get_xcvr_settings();
+			mode 			= radio_settings_get_mode();
+			rx_freq 		= radio_settings_get_rx_freq();
+			tx_freq 		= radio_settings_get_tx_freq();
+			fm_info 		= radio_settings_get_fm_settings();
+			agc				= radio_settings_get_radio_agc();
+			tx_power		= xcvr_settings.tx_pwr; //radio_settings_get_output_pwr(); //somehow this doesn't work
+			ppm 			= xcvr_settings.ppm/10.0f;
 
 			// Simulate a PTT press to re-send all settings
 			_ptt_timer_expired(NULL);
@@ -206,6 +205,8 @@ void StartTaskRadio(void *argument) {
 			stop_microphone_acquisition();
 			BSP_LED_Off(LED_RED);
 			tx_nRx = false;
+			xcvr_settings = radio_settings_get_xcvr_settings();
+			ppm = xcvr_settings.ppm/10.0f;
 			radio_configure_rx(rx_freq, ppm, mode, fm_info, agc);
 		}else if(flag & RADIO_START_TX){
 			osThreadFlagsClear(RADIO_START_TX);
@@ -215,6 +216,9 @@ void StartTaskRadio(void *argument) {
 
 			start_microphone_acquisition();
 			BSP_LED_On(LED_RED);
+			xcvr_settings = radio_settings_get_xcvr_settings();
+			ppm = xcvr_settings.ppm/10.0f;
+			tx_power = xcvr_settings.tx_pwr; //radio_settings_get_output_pwr(); //somehow this doesn't work
 			radio_configure_tx(tx_freq, ppm, mode, fm_info, tx_power);
 			tx_nRx = true;
 			uint8_t voice[66];

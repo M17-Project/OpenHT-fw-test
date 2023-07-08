@@ -59,7 +59,7 @@ void radio_off(){
 	HAL_GPIO_WritePin(RF_RST_GPIO_Port, RF_RST_Pin, GPIO_PIN_RESET);
 }
 
-void radio_configure_rx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t fm, openht_radio_agc agc){
+void radio_configure_rx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, openht_radio_agc agc){
 	XCVR_stop_operation();
 
 	// TODO: CTCSS doesn't work on RX yet
@@ -73,6 +73,9 @@ void radio_configure_rx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 	if (mode == OpMode_WFM) {
 		fm_mode = CH_RX_25;
 	}
+
+	// Set frequency
+	uint32_t val = round(freq*(1.0f+ppm/1e6));
 
 	if(freq > 1e9){
 		LOG(CLI_LOG_RADIO, "Radio set in RX 2.4G.\r\n");
@@ -111,8 +114,7 @@ void radio_configure_rx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 			}
 		}
 
-		/* Set frequency */
-		uint32_t val = freq * (1+ppm/1e6);
+		// Set frequency
 		val = round((val-2366000000)/(406250.0/1024.0));
 		XCVR_write_reg(RF24_CCF0L, (uint8_t)(val>>8));
 		XCVR_write_reg(RF24_CCF0H, (uint8_t)(val>>16));
@@ -148,8 +150,7 @@ void radio_configure_rx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		XCVR_write_reg(RF09_AGCC, RFn_AGCC_EN); // TODO manage AGC enabled/disabled
 		XCVR_write_reg(RF09_AGCS, RFn_AGCS_TGT_n30);
 
-		/* Set frequency */ // TODO PPM
-		uint32_t val = freq * (1+ppm/1e6);
+		// Set frequency
 		val = round((val-377000000)/(203125.0/2048.0));
 		XCVR_write_reg(RF09_CCF0L, (uint8_t)(val>>8));
 		XCVR_write_reg(RF09_CCF0H, (uint8_t)(val>>16));
@@ -172,7 +173,7 @@ void radio_configure_rx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 	}
 }
 
-void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t fm, uint8_t power){
+void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, uint8_t power){
 	// Switch FPGA to TX
 	XCVR_stop_operation();
 
@@ -191,6 +192,9 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		power = RFn_PAC_TXPWR_MAX;
 	}
 
+	// Set frequency
+	uint32_t val = round(freq*(1.0f+ppm/1e6));
+
 	if(freq>1e9){
 		LOG(CLI_LOG_RADIO, "Radio set in TX 2.4G.\r\n");
 
@@ -200,8 +204,7 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		// Configure 2.4G transceiver
 		XCVR_write_reg(RF24_PAC, RFn_PAC_PACUR_MAX | power);
 
-		/* Set frequency */ // TODO PPM
-		uint32_t val = freq * (1+ppm/1e6);
+		// Set frequency
 		val = round((val-2366000000)/(406250.0/1024.0));
 		XCVR_write_reg(RF24_CCF0L, (uint8_t)(val>>8));
 		XCVR_write_reg(RF24_CCF0H, (uint8_t)(val>>16));
@@ -231,8 +234,7 @@ void radio_configure_tx(uint32_t freq, int16_t ppm, openht_mode_t mode, fmInfo_t
 		// Configure SubGHZ Transceiver
 		XCVR_write_reg(RF09_PAC, RFn_PAC_PACUR_MAX | power);
 
-		/* Set frequency */
-		uint32_t val = freq * (1.0f+ppm/1e6);
+		// Set frequency
 		val = round((val-377000000)/(203125.0/2048.0));
 		XCVR_write_reg(RF09_CCF0L, (uint8_t)(val>>8));
 		XCVR_write_reg(RF09_CCF0H, (uint8_t)(val>>16));
