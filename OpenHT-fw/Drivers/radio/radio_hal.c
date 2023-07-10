@@ -247,10 +247,7 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 
 		case OpMode_NFM:
 		case OpMode_WFM: {
-			uint16_t fm_mode = FM_TX_N;
-			if (mode == OpMode_WFM) {
-				fm_mode = FM_TX_W;
-			}
+			uint16_t fm_mode = (mode == OpMode_WFM) ? FM_TX_W : FM_TX_N;
 
 			uint16_t ctcss = 0;
 			if(fm.txToneEn){
@@ -270,10 +267,8 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 
 		case OpMode_LSB:
 		case OpMode_USB: {
-			uint16_t ssb_mode = SSB_USB;
-			if (mode == OpMode_LSB) {
-				ssb_mode = SSB_LSB;
-			}
+			uint16_t ssb_mode = (mode == OpMode_LSB) ? SSB_LSB : SSB_USB;
+
 	        FPGA_write_reg(CR_1, ssb_mode | MOD_SSB | IO3_FIFO_AE | PD_ON | band);
 	        FPGA_write_reg(CR_2, FIFO_TX | STATE_TX);
 	        FPGA_write_reg(I_GAIN, 0x3000); //needed to compensate for the Hilbert block's gain
