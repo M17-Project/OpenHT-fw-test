@@ -95,6 +95,7 @@
 #define STATE_IDLE					((uint16_t)0<<0)
 #define STATE_TX					((uint16_t)1<<0)
 #define STATE_RX					((uint16_t)2<<0)
+#define FIFO_TX						((uint16_t)1<<11)
 
 //Register 2 - I branch offset null
 #define I_OFFS_NULL					((uint16_t)0x0200) // Addr 02

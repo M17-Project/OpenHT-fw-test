@@ -221,7 +221,7 @@ void StartTaskRadio(void *argument) {
 			ppm = xcvr_settings.ppm/10.0f;
 			tx_power = xcvr_settings.tx_pwr; //radio_settings_get_output_pwr(); //somehow this doesn't work
 			fm_info = radio_settings_get_fm_settings();
-			radio_configure_tx(tx_freq, ppm, mode, fm_info, tx_power);
+			radio_configure_tx(tx_freq, ppm, mode, fm_info, xcvr_settings);
 			tx_nRx = true;
 			uint8_t voice[66];
 			*(uint16_t *)(voice) = MOD_IN | REG_WR;

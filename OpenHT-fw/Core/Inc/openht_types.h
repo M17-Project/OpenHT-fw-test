@@ -33,6 +33,18 @@ extern "C" {
 static const uint8_t OPENHT_MAJOR_VER = 0;
 static const uint8_t OPENHT_MINOR_VER = 2;
 
+typedef enum {
+	AGC_OFF,
+	AGC_neg21,
+	AGC_neg24,
+	AGC_neg27,
+	AGC_neg30,
+	AGC_neg33,
+	AGC_neg36,
+	AGC_neg39,
+	AGC_neg42,
+} openht_radio_agc;
+
 typedef enum
 {
 	OPENHT_OK = 0, /* (0) Succeeded */

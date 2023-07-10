@@ -173,27 +173,17 @@ void radio_configure_rx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 	}
 }
 
-void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, uint8_t power){
+void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, xcvr_settings_t xcvr_settings){
 	// Switch FPGA to TX
 	XCVR_stop_operation();
 
-	uint16_t ctcss = 0;
-	if(fm.txToneEn){
-		ctcss = fm.txTone << 2;
-	}
-
-	// TODO: Since we only support FM at the moment, this is fine
-	uint16_t fm_mode = FM_TX_N;
-	if (mode == OpMode_WFM) {
-		fm_mode = FM_TX_W;
-	}
-
-	if(power > RFn_PAC_TXPWR_MAX){
-		power = RFn_PAC_TXPWR_MAX;
+	if(xcvr_settings.tx_pwr > RFn_PAC_TXPWR_MAX){
+		xcvr_settings.tx_pwr = RFn_PAC_TXPWR_MAX;
 	}
 
 	// Set frequency
 	uint32_t val = round(freq*(1.0f+ppm/1e6));
+	uint16_t band = BAND_09;
 
 	if(freq>1e9){
 		LOG(CLI_LOG_RADIO, "Radio set in TX 2.4G.\r\n");
@@ -202,7 +192,7 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 		radio_sw_24();
 
 		// Configure 2.4G transceiver
-		XCVR_write_reg(RF24_PAC, RFn_PAC_PACUR_MAX | power);
+		XCVR_write_reg(RF24_PAC, RFn_PAC_PACUR_MAX | xcvr_settings.tx_pwr);
 
 		// Set frequency
 		val = round((val-2366000000)/(406250.0/1024.0));
@@ -216,15 +206,7 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 		XCVR_write_reg(RF24_TXDFE, RFn_TXDFE_RCUT_0_25 | RFn_TXDFE_SR_400K);
 		XCVR_write_reg(RF24_CMD, RFn_CMD_TXPREP);
 
-		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_RESET);
-		osDelay(2);
-		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
-		osDelay(2);
-
-		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_24);
-		FPGA_write_reg(CR_2, (1 << 11) | CH_RX_12_5 | fm_mode | ctcss | STATE_TX);
-
-		XCVR_write_reg(RF24_CMD, RFn_CMD_TX);
+		band = BAND_24;
 	}else{
 		LOG(CLI_LOG_RADIO, "Radio set in TX Sub-GHz.\r\n");
 
@@ -232,7 +214,7 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 		radio_sw_09();
 
 		// Configure SubGHZ Transceiver
-		XCVR_write_reg(RF09_PAC, RFn_PAC_PACUR_MAX | power);
+		XCVR_write_reg(RF09_PAC, RFn_PAC_PACUR_MAX | xcvr_settings.tx_pwr);
 
 		// Set frequency
 		val = round((val-377000000)/(203125.0/2048.0));
@@ -246,16 +228,91 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 		XCVR_write_reg(RF09_TXDFE, RFn_TXDFE_RCUT_0_25 | RFn_TXDFE_SR_400K);
 		XCVR_write_reg(RF09_CMD, RFn_CMD_TXPREP);
 
-		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_RESET);
-		osDelay(2);
-		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
-		osDelay(2);
-
-		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_09);
-		FPGA_write_reg(CR_2, (1 << 11) | CH_RX_12_5 | fm_mode | ctcss | STATE_TX);
-
-		XCVR_write_reg(RF09_CMD, RFn_CMD_TX);
+		band = BAND_09;
 	}
+
+	// reset FPGA...
+	HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_RESET);
+	osDelay(2);
+	HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
+	osDelay(2);
+
+	bool supported_mode = false;
+	LOG(CLI_LOG_RADIO, "Radio mode: %s\r\n", openht_get_mode_str(mode));
+	switch (mode) {
+		case OpMode_AM: {
+			LOG(CLI_LOG_RADIO, "TODO Supported Mode\r\n");
+		}
+		break;
+
+		case OpMode_NFM:
+		case OpMode_WFM: {
+			uint16_t fm_mode = FM_TX_N;
+			if (mode == OpMode_WFM) {
+				fm_mode = FM_TX_W;
+			}
+
+			uint16_t ctcss = 0;
+			if(fm.txToneEn){
+				ctcss = fm.txTone << 2;
+			}
+
+			FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | band);
+			FPGA_write_reg(CR_2, FIFO_TX | CH_RX_12_5 | fm_mode | ctcss | STATE_TX);
+
+			FPGA_write_reg(DPD_1, (int16_t)0x4000);
+			FPGA_write_reg(DPD_2, (int16_t)0);
+			FPGA_write_reg(DPD_3, (int16_t)0);
+
+			supported_mode = true;
+		}
+		break;
+
+		case OpMode_LSB:
+		case OpMode_USB: {
+			uint16_t ssb_mode = SSB_USB;
+			if (mode == OpMode_LSB) {
+				ssb_mode = SSB_LSB;
+			}
+	        FPGA_write_reg(CR_1, ssb_mode | MOD_SSB | IO3_FIFO_AE | PD_ON | band);
+	        FPGA_write_reg(CR_2, FIFO_TX | STATE_TX);
+	        FPGA_write_reg(I_GAIN, 0x3000); //needed to compensate for the Hilbert block's gain
+
+			// set DPD_1, DPD_2, DPD_3
+	        FPGA_write_reg(DPD_1, (int16_t)round((float)xcvr_settings.dpd1*16.384f) & 0xFFFF);
+	        FPGA_write_reg(DPD_2, (int16_t)round((float)xcvr_settings.dpd2*16.384f) & 0xFFFF);
+	        FPGA_write_reg(DPD_3, (int16_t)round((float)xcvr_settings.dpd3*16.384f) & 0xFFFF);
+
+			supported_mode = true;
+		}
+		break;
+
+		case OpMode_M17: {
+			LOG(CLI_LOG_RADIO, "TODO Supported Mode\r\n");
+		}
+		break;
+
+		case OpMode_FreeDV: {
+			LOG(CLI_LOG_RADIO, "TODO Supported Mode\r\n");
+		}
+		break;
+
+		default: {
+			LOG(CLI_LOG_RADIO, "Unsupported Mode\r\n");
+			supported_mode = false;
+		}
+		break;
+	}
+
+	// if mode is supported, start tx'ing in the correct band
+	if (supported_mode) {
+		if (band == BAND_09) {
+			XCVR_write_reg(RF09_CMD, RFn_CMD_TX);
+		} else if (band == BAND_24) {
+			XCVR_write_reg(RF24_CMD, RFn_CMD_TX);
+		}
+	}
+
 }
 
 void radio_sw_09(){

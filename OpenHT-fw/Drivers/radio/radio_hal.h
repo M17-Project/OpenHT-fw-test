@@ -20,6 +20,7 @@
 #define RADIO_RADIO_HAL_H_
 
 #include "openht_types.h"
+#include "radio_settings.h"
 #include "cps.h"
 
 #include <stdbool.h>
@@ -30,18 +31,6 @@
 #define WAIT_TIMEOUT 1500
 #endif
 
-typedef enum {
-	AGC_OFF,
-	AGC_neg21,
-	AGC_neg24,
-	AGC_neg27,
-	AGC_neg30,
-	AGC_neg33,
-	AGC_neg36,
-	AGC_neg39,
-	AGC_neg42,
-} openht_radio_agc;
-
 void radio_on();
 
 void radio_off();
@@ -49,7 +38,7 @@ void radio_off();
 // AGC target. negative to disable
 void radio_configure_rx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, openht_radio_agc agc);
 
-void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, uint8_t power);
+void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, xcvr_settings_t xcvr_settings);
 
 void radio_sw_09();
 
