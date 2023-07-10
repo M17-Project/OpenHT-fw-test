@@ -165,31 +165,31 @@ void radio_settings_init()
 	// XCVR Settings1
 	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS1_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		saved_settings.xcvr_settings.ppm = (uint16_t)buffer;
-		saved_settings.xcvr_settings.dpd1 = (buffer>>16) & 0xFF;
+		saved_settings.xcvr_settings.dpd1 = (uint16_t)(buffer>>16);
 	}
 
 	// XCVR Settings2
 	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS2_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		saved_settings.xcvr_settings.dpd2 = (uint16_t)buffer;
-		saved_settings.xcvr_settings.dpd3 = (buffer>>16) & 0xFF;
+		saved_settings.xcvr_settings.dpd3 = (uint16_t)(buffer>>16);
 	}
 
 	// XCVR Settings3
 	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS3_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		saved_settings.xcvr_settings.offset_i = (uint16_t)buffer;
-		saved_settings.xcvr_settings.offset_q = (buffer>>16) & 0xFF;
+		saved_settings.xcvr_settings.offset_q = (uint16_t)(buffer>>16);
 	}
 
 	// XCVR Settings4
 	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS4_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		saved_settings.xcvr_settings.balance_i = (uint16_t)buffer;
-		saved_settings.xcvr_settings.balance_q = (buffer>>16) & 0xFF;
+		saved_settings.xcvr_settings.balance_q = (uint16_t)(buffer>>16);
 	}
 
 	// XCVR Settings5
 	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS5_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		saved_settings.xcvr_settings.tx_pwr = (uint16_t)buffer;
-		saved_settings.xcvr_settings.phase_dither = (buffer>>16) & 0xFF;
+		saved_settings.xcvr_settings.phase_dither = (uint16_t)(buffer>>16);
 	}
 
 	// set the saved_settings (which represents the contents of the EEEPROM) and the
