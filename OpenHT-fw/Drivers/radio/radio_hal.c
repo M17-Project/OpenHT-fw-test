@@ -241,7 +241,16 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 	LOG(CLI_LOG_RADIO, "Radio mode: %s\r\n", openht_get_mode_str(mode));
 	switch (mode) {
 		case OpMode_AM: {
-			LOG(CLI_LOG_RADIO, "TODO Supported Mode\r\n");
+	        FPGA_write_reg(CR_1, MOD_AM | IO3_FIFO_AE | PD_ON | band);
+	        FPGA_write_reg(CR_2, FIFO_TX | STATE_TX);
+	        //FPGA_write_reg(I_GAIN, 0x3000); //needed to compensate for the Hilbert block's gain
+
+			// set DPD_1, DPD_2, DPD_3
+	        FPGA_write_reg(DPD_1, (int16_t)round((float)xcvr_settings.dpd1*16.384f) & 0xFFFF);
+	        FPGA_write_reg(DPD_2, (int16_t)round((float)xcvr_settings.dpd2*16.384f) & 0xFFFF);
+	        FPGA_write_reg(DPD_3, (int16_t)round((float)xcvr_settings.dpd3*16.384f) & 0xFFFF);
+
+			supported_mode = true;
 		}
 		break;
 
