@@ -668,25 +668,25 @@ void on_settings_f_clicked(lv_event_t *e)
 void on_use_soft_ptt_clicked(lv_event_t *e)
 {
 	if (lv_obj_has_state(ui_use_soft_ptt_cb, LV_STATE_CHECKED)) {
-		user_settings.use_soft_ptt = true;
+		user_settings_set_use_soft_ptt(true);
 		lv_obj_clear_flag(ui_ptt_btn, LV_OBJ_FLAG_HIDDEN);
 	} else {
-		user_settings.use_soft_ptt = false;
+		user_settings_set_use_soft_ptt(false);
 		lv_obj_add_flag(ui_ptt_btn, LV_OBJ_FLAG_HIDDEN);
 	}
 
-	user_settings_save(&user_settings);
+	user_settings_save();
 }
 
 void on_use_tx_offset_clicked(lv_event_t *e)
 {
 	if (lv_obj_has_state(ui_use_freq_offset_cb, LV_STATE_CHECKED)) {
-		user_settings.use_freq_offset = true;
+		user_settings_set_use_freq_offset(true);
 	} else {
-		user_settings.use_freq_offset = false;
+		user_settings_set_use_freq_offset(false);
 	}
 
-	user_settings_save(&user_settings);
+	user_settings_save();
 }
 
 void on_disp_brightness_changed(lv_event_t *e)

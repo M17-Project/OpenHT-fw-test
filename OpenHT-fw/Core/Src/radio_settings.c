@@ -121,7 +121,7 @@ void radio_settings_init()
 
 	// M17 Callsign
 	// set func ptr to get user callsign
-	callsign_cb = user_settings_callsign;
+	callsign_cb = user_settings_get_callsign;
 
 	// DST letters 1 to 4
 	if(EEEPROM_read_data(&radio_settings_eeeprom, M17_DST1_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){

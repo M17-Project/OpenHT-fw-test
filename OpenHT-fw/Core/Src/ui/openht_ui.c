@@ -45,8 +45,6 @@
 #include <limits.h>
 
 char callsign_str[10] = ""; // 9 digits for callsign
-user_settings_t user_settings;
-
 char * callsign_prefix = NULL;
 char * mode_prefix = NULL;
 char * ctcss_options_str;
@@ -95,7 +93,7 @@ void custom_ui_init(void)
 {
 	// GET STORED SETTINGS
 	radio_settings_init();
-	user_settings_get(&user_settings);
+	user_settings_init();
 
 	// SquareLine designer add widgets to screens, however, we want to use
 	// these as top layer widgets. So we can still use the designer
@@ -163,7 +161,6 @@ void custom_ui_init(void)
 			LV_PART_MAIN);
 	lv_dropdown_set_selected(ui_freq_dropdown, 1);
 
-
 	lv_obj_t * qwerty_key = create_qwerty_pad(ui_qwerty_key_panel);
 	init_callsign_change_panel(qwerty_key);
 
@@ -193,26 +190,27 @@ void custom_ui_init(void)
 
     // UPDATE UI from stored settings
 
+    lv_slider_set_value(ui_vol_slider, user_settings_get_audio_vol(), LV_ANIM_OFF);
+    lv_slider_set_value(ui_mic_slider, user_settings_get_mic_gain(), LV_ANIM_OFF);
+
 	char rx_buffer[10];
-	//get_str_from_freq(user_settings.rx_freq, rx_buffer, -1);
 	get_display_str_from_freq(radio_settings_get_rx_freq(), rx_buffer);
 	lv_label_set_text_fmt(ui_rx_display_label, "%s", rx_buffer);
 
 	char tx_buffer[10];
-	//get_str_from_freq(user_settings.tx_freq, tx_buffer, -1);
 	get_display_str_from_freq(radio_settings_get_tx_freq(), tx_buffer);
 	lv_label_set_text_fmt(ui_tx_display_label, "%s", tx_buffer);
 
 	// copy user_settings callsign to local GUI copy
-	strcpy(callsign_str, user_settings.callsign);
+	strcpy(callsign_str, user_settings_get_callsign());
 
-	if (user_settings.use_freq_offset) {
+	if (user_settings_get_use_freq_offset()) {
 		lv_obj_add_state(ui_use_freq_offset_cb, LV_STATE_CHECKED);
 	} else {
 		lv_obj_clear_state(ui_use_freq_offset_cb, LV_STATE_CHECKED);
 	}
 
-	if (user_settings.use_soft_ptt) {
+	if (user_settings_get_use_soft_ptt()) {
 		lv_obj_clear_flag(ui_ptt_btn, LV_OBJ_FLAG_HIDDEN);
 		lv_obj_add_state(ui_use_soft_ptt_cb, LV_STATE_CHECKED);
 	} else {
@@ -255,6 +253,14 @@ void on_xmit_button_release(lv_event_t *e)
 
 void on_vol_changed(lv_event_t *e)
 {
+	user_settings_set_audio_vol(lv_slider_get_value(ui_vol_slider));
+	// TODO: need to save to EEEPROM, but not on every slider change!
+}
+
+void on_mic_changed(lv_event_t *e)
+{
+	user_settings_set_mic_gain(lv_slider_get_value(ui_mic_slider));
+	// TODO: need to save to EEEPROM, but not on every slider change!
 }
 
 
@@ -337,8 +343,8 @@ void update_callsign()
 {
 	lv_label_set_text_fmt(ui_header_callsign_label, "%s%s", callsign_prefix, callsign_str);
 
-    strcpy(user_settings.callsign, callsign_str);
-	user_settings_save(&user_settings);
+    user_settings_set_callsign(callsign_str);
+	user_settings_save();
 }
 
 void ui_log_add(const char *fmt,...)

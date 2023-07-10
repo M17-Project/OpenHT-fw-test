@@ -57,6 +57,7 @@ EEEPROMHandle_t user_settings_eeeprom = {
 
 static bool init_done = false;
 static user_settings_t cached_settings;
+static user_settings_t saved_settings;
 
 void user_settings_reset(){
 	bool res = EEEPROM_erase(&user_settings_eeeprom);
@@ -70,113 +71,160 @@ void user_settings_reset(){
 
 void user_settings_init()
 {
+	if (init_done) {
+		return;
+	}
+
 	if(EEEPROM_init(&user_settings_eeeprom) != EXIT_SUCCESS){
 		printf("Error initializing EEEPROM for user settings.\r\n");
 	}
+
 	uint32_t buffer;
 
 	// set the default callsign...
-	strcpy(cached_settings.callsign, N0CALL);
+	strcpy(saved_settings.callsign, N0CALL);
 
 	// CS letters 1 to 4
 	if(EEEPROM_read_data(&user_settings_eeeprom, CALLSIGN1_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		*(uint32_t *)(cached_settings.callsign) = buffer;
+		*(uint32_t *)(saved_settings.callsign) = buffer;
 	}
 
 	// CS letters 5 to 8
 	if(EEEPROM_read_data(&user_settings_eeeprom, CALLSIGN2_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		*(uint32_t *)(cached_settings.callsign+4) = buffer;
+		*(uint32_t *)(saved_settings.callsign+4) = buffer;
 	}
 
 	// CS letters 9-10
 	if(EEEPROM_read_data(&user_settings_eeeprom, CALLSIGN3_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		*(uint16_t *)(cached_settings.callsign+8) = (uint16_t)buffer;
+		*(uint16_t *)(saved_settings.callsign+8) = (uint16_t)buffer;
 	}
 
 	// Audio volume
 	if(EEEPROM_read_data(&user_settings_eeeprom, AV_MODE_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		cached_settings.audio_vol = buffer & 0xFF;
-		// cached_settings.reserved = (buffer>>8) & 0xFF;
+		saved_settings.audio_vol = buffer & 0xFF;
+		saved_settings.mic_gain = (buffer>>8) & 0xFF;
 	}else{
-		cached_settings.audio_vol = 0;
-		// cached_settings.reserved = 0;
+		saved_settings.audio_vol = 0;
+		saved_settings.mic_gain = 22;  // 17-26 range
 	}
 
 	// config bits
 	if(EEEPROM_read_data(&user_settings_eeeprom, CONFIG_BITS_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
-		cached_settings.use_freq_offset = buffer >> 0 & 0x01;
-		cached_settings.split_mode = buffer >> 1 & 0x01;
-		cached_settings.use_soft_ptt = buffer >> 2 & 0x01;
+		saved_settings.use_freq_offset = buffer >> 0 & 0x01;
+		saved_settings.split_mode = buffer >> 1 & 0x01;
+		saved_settings.use_soft_ptt = buffer >> 2 & 0x01;
 	}else{
-		cached_settings.use_freq_offset = false;
-		cached_settings.split_mode = false;
-		cached_settings.use_soft_ptt = false;
+		saved_settings.use_freq_offset = false;
+		saved_settings.split_mode = false;
+		saved_settings.use_soft_ptt = false;
 	}
+
+	// set the saved_settings (which represents the contents of the EEEPROM) and the
+	// cached_settings (which is the volatile settings) to be equal
+	memcpy(&cached_settings, &saved_settings, sizeof(user_settings_t));
 
 	init_done = true;
 }
 
-void user_settings_save(const user_settings_t *settings)
+void user_settings_save()
 {
 	uint32_t buffer;
-	if(strcmp(settings->callsign, cached_settings.callsign) != 0){
+	if(strcmp(cached_settings.callsign, saved_settings.callsign) != 0){
 		// Compare first four letters
-		if(*(uint32_t *)(settings->callsign) != *(uint32_t *)(cached_settings.callsign)){
-			EEEPROM_write_data(&user_settings_eeeprom, CALLSIGN1_EEEPROM_ADDR, (void *)settings->callsign);
+		if(*(uint32_t *)(cached_settings.callsign) != *(uint32_t *)(saved_settings.callsign)){
+			EEEPROM_write_data(&user_settings_eeeprom, CALLSIGN1_EEEPROM_ADDR, (void *)cached_settings.callsign);
 		}
 		// Compare letters 5 to 8
-		if(*(uint32_t *)(settings->callsign+4) != *(uint32_t *)(cached_settings.callsign+4)){
-			EEEPROM_write_data(&user_settings_eeeprom, CALLSIGN2_EEEPROM_ADDR, (void *)(settings->callsign+4));
+		if(*(uint32_t *)(cached_settings.callsign+4) != *(uint32_t *)(saved_settings.callsign+4)){
+			EEEPROM_write_data(&user_settings_eeeprom, CALLSIGN2_EEEPROM_ADDR, (void *)(cached_settings.callsign+4));
 		}
 		// Compare letters 9-10
-		if(*(uint16_t *)(settings->callsign+8) != *(uint16_t *)(cached_settings.callsign+8)){
-			EEEPROM_write_data(&user_settings_eeeprom, CALLSIGN3_EEEPROM_ADDR, (void *)(settings->callsign+8));
+		if(*(uint16_t *)(cached_settings.callsign+8) != *(uint16_t *)(saved_settings.callsign+8)){
+			EEEPROM_write_data(&user_settings_eeeprom, CALLSIGN3_EEEPROM_ADDR, (void *)(cached_settings.callsign+8));
 		}
-		memcpy(cached_settings.callsign, settings->callsign, 10);
 	}
 
-	if( (cached_settings.audio_vol != settings->audio_vol) ){
-			//|| (cached_settings.reserved != settings->reserved) ){
-		//buffer = settings->audio_vol + ( ( (uint16_t)settings->reserved ) << 8 );
-		buffer = settings->audio_vol;
+	if( (cached_settings.audio_vol != saved_settings.audio_vol)
+		|| (cached_settings.mic_gain != saved_settings.mic_gain) ){
+		buffer = cached_settings.audio_vol + ( ( (uint16_t)cached_settings.mic_gain ) << 8 );
 		EEEPROM_write_data(&user_settings_eeeprom, AV_MODE_EEEPROM_ADDR, (void *)(&buffer));
-		cached_settings.audio_vol = settings->audio_vol;
-		//cached_settings.reserved = settings->reserved;
 	}
 
-	if( (cached_settings.use_freq_offset != settings->use_freq_offset)
-			|| (cached_settings.split_mode != settings->split_mode)
-			|| (cached_settings.use_soft_ptt != settings->use_soft_ptt) ){
-		buffer = (settings->use_freq_offset << 0) +
-				 (settings->split_mode << 1) +
-				 (settings->use_soft_ptt << 2);
+	if( (cached_settings.use_freq_offset != saved_settings.use_freq_offset)
+			|| (cached_settings.split_mode != saved_settings.split_mode)
+			|| (cached_settings.use_soft_ptt != saved_settings.use_soft_ptt) ){
+		buffer = (cached_settings.use_freq_offset << 0) +
+				 (cached_settings.split_mode << 1) +
+				 (cached_settings.use_soft_ptt << 2);
 		EEEPROM_write_data(&user_settings_eeeprom, CONFIG_BITS_EEEPROM_ADDR, (void *)(&buffer));
-		cached_settings.use_freq_offset = settings->use_freq_offset;
-		cached_settings.split_mode = settings->split_mode;
-		cached_settings.use_soft_ptt = settings->use_soft_ptt;
 	}
+
+	// update the saved_settings to be equal to cached_settings now that the EEEPROM has been updated.
+	memcpy(&saved_settings, &cached_settings, sizeof(user_settings_t));
 }
 
-void user_settings_get(user_settings_t *settings)
+void user_settings_set_callsign(const char * callsign)
 {
-
-	BSP_LED_Off(LED_ORANGE);
-	BSP_LED_Off(LED_GREEN);
-
-	if(!init_done){
-		user_settings_init();
-	}
-
-	memcpy(settings, &cached_settings, sizeof(user_settings_t));
+	strcpy(cached_settings.callsign, callsign);
 }
 
-const char * user_settings_callsign()
+const char * user_settings_get_callsign()
 {
 	if(!init_done){
 		user_settings_init();
 	}
 
 	return (const char *) cached_settings.callsign;
+}
+
+void user_settings_set_audio_vol(uint8_t audio_vol)
+{
+	cached_settings.audio_vol = audio_vol;
+}
+
+uint8_t user_settings_get_audio_vol(void)
+{
+	return cached_settings.audio_vol;
+}
+
+void user_settings_set_mic_gain(uint8_t mic_gain)
+{
+	cached_settings.mic_gain = mic_gain;
+}
+
+uint8_t user_settings_get_mic_gain(void)
+{
+	return cached_settings.mic_gain;
+}
+
+void user_settings_set_use_freq_offset(bool use_freq_offset)
+{
+	cached_settings.use_freq_offset = use_freq_offset;
+}
+
+bool user_settings_get_use_freq_offset(void)
+{
+	return cached_settings.use_freq_offset;
+}
+
+void user_settings_set_split_mode(bool split_mode)
+{
+	cached_settings.split_mode = split_mode;
+}
+
+bool user_settings_get_split_mode(void)
+{
+	return cached_settings.split_mode;
+}
+
+void user_settings_set_use_soft_ptt(bool use_soft_ptt)
+{
+	cached_settings.use_soft_ptt = use_soft_ptt;
+}
+
+bool user_settings_get_use_soft_ptt(void)
+{
+	return cached_settings.use_soft_ptt;
 }
 
 

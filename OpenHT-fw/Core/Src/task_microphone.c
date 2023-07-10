@@ -20,6 +20,7 @@
 
 #include "main.h"
 #include "task_audio_process.h"
+#include "user_settings.h"
 
 #include "cmsis_os2.h"
 #include "pdm2pcm.h"
@@ -65,6 +66,8 @@ FRESULT save_wav_file(const char *filename, const uint8_t *data, const uint32_t 
 */
 void StartMicrophonesTask(void *argument)
 {
+	int16_t mic_gain = user_settings_get_mic_gain();
+
 
 	//Init the PDM2PCM library
 	PDM_Filter_Handler_t pdm_handle = {
@@ -77,7 +80,7 @@ void StartMicrophonesTask(void *argument)
 
 	PDM_Filter_Config_t pdm_config = {
 			.decimation_factor = PDM_FILTER_DEC_FACTOR_128,
-			.mic_gain = 18,
+			.mic_gain = mic_gain,
 			.output_samples_number = PCM_SAMPLES
 	};
 
@@ -124,6 +127,16 @@ void StartMicrophonesTask(void *argument)
 			f_close(&fp);*/
 			save_file = 0;
 		}else{
+
+			// From docs: Gain is in the interval [-12 dB: +51 dB], with 1 dB steps.
+			// get mic gain changes
+			int16_t new_mic_gain = (int16_t)user_settings_get_mic_gain();
+			if (new_mic_gain != mic_gain) {
+				mic_gain = new_mic_gain;
+				pdm_config.mic_gain = mic_gain;
+				PDM_Filter_setConfig(&pdm_handle, &pdm_config);
+			}
+
 			/*if(raw_buffer_offset < sizeof(raw_pdm_storage)){
 				memcpy(raw_pdm_storage + raw_buffer_offset, pdm_reading_ptr, PDM_BYTES);
 				raw_buffer_offset += PDM_BYTES;
@@ -142,7 +155,7 @@ void start_microphone_acquisition() {
 	// Start DMA acquisition
 	save_file = false;
 	HAL_I2S_Receive_DMA(&hi2s3, (uint16_t *)pdm_buffer, PDM_SAMPLES*2);
-	LOG(CLI_LOG_MIC, "Start mic acquisition.\r\n");
+	LOG(CLI_LOG_MIC, "Start mic acquisition. Gain: %d\r\n", user_settings_get_mic_gain());
 }
 
 void stop_microphone_acquisition() {

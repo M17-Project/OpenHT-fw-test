@@ -42,6 +42,9 @@ lv_obj_t * ui_Label3;
 lv_obj_t * ui_vol_label;
 void ui_event_vol_slider(lv_event_t * e);
 lv_obj_t * ui_vol_slider;
+lv_obj_t * ui_mic_label;
+void ui_event_mic_slider(lv_event_t * e);
+lv_obj_t * ui_mic_slider;
 
 // SCREEN: ui_log_screen
 void ui_log_screen_screen_init(void);
@@ -319,6 +322,14 @@ void ui_event_vol_slider(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_VALUE_CHANGED) {
         on_vol_changed(e);
+    }
+}
+void ui_event_mic_slider(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_VALUE_CHANGED) {
+        on_mic_changed(e);
     }
 }
 void ui_event_Panel2(lv_event_t * e)

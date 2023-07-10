@@ -47,7 +47,7 @@ void init_freq_change_panel()
 {
 	rx_freq = radio_settings_get_rx_freq();
 
-	if (user_settings.split_mode) {
+	if (user_settings_get_split_mode()) {
 		split_mode = true;
 		tx_freq = radio_settings_get_tx_freq();
 		lv_obj_add_state(ui_split_freq_cb, LV_STATE_CHECKED);
@@ -59,7 +59,7 @@ void init_freq_change_panel()
 
 	update_split_mode();
 
-	if (user_settings.use_freq_offset) {
+	if (user_settings_get_use_freq_offset()) {
 		lv_obj_clear_flag(ui_offset_tx_panel, LV_OBJ_FLAG_HIDDEN);
 		lv_obj_add_flag(ui_tx_freq_panel, LV_OBJ_FLAG_HIDDEN);
 	} else {
@@ -116,7 +116,7 @@ void on_freq_ok_clicked(lv_event_t *e)
 	// HACK WARNING: now unhide
 	lv_obj_clear_flag(ui_vfo_panel, LV_OBJ_FLAG_HIDDEN);
 
-	if (user_settings.use_soft_ptt) {
+	if (user_settings_get_use_soft_ptt()) {
 		lv_obj_clear_flag(ui_ptt_btn, LV_OBJ_FLAG_HIDDEN);
 	}
 	// End HACK
@@ -127,7 +127,7 @@ void on_freq_ok_clicked(lv_event_t *e)
 
 	radio_settings_set_rx_freq(rx_freq);
 	radio_settings_set_tx_freq(tx_freq);
-	user_settings.split_mode = split_mode;
+	user_settings_set_split_mode(split_mode);
 
 
 	// update fm settings...
@@ -145,7 +145,7 @@ void on_freq_ok_clicked(lv_event_t *e)
 
 	// save to non-volatile storage...
 	radio_settings_save();//&radio_settings);
-	user_settings_save(&user_settings);
+	user_settings_save();//&user_settings);
 
 	char rx_buffer[10];
 	//get_str_from_freq(rx_freq, rx_buffer, -1);
@@ -167,7 +167,7 @@ void on_freq_cancel_clicked(lv_event_t *e)
 	// HACK WARNING: now unhide
 	lv_obj_clear_flag(ui_vfo_panel, LV_OBJ_FLAG_HIDDEN);
 
-	if (user_settings.use_soft_ptt) {
+	if (user_settings_get_use_soft_ptt()) {
 		lv_obj_clear_flag(ui_ptt_btn, LV_OBJ_FLAG_HIDDEN);
 	}
 

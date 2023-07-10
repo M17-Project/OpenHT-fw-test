@@ -35,18 +35,36 @@ typedef struct
 {
 	char callsign[10];
 	uint8_t audio_vol;
-	//uint8_t reserved;
+	uint8_t mic_gain;
 	bool use_freq_offset;  // using eeeprom bits for settings
 	bool split_mode;
 	bool use_soft_ptt;
 } __attribute__((packed)) user_settings_t;
 
 void user_settings_reset();
-void user_settings_save(const user_settings_t *settings);
-void user_settings_get(user_settings_t *settings);
+void user_settings_init();
+void user_settings_save();//const user_settings_t *settings);
+//void user_settings_get(user_settings_t *settings);
 
 typedef const char * (*user_callsign_func_t)();
-const char * user_settings_callsign();
+void user_settings_set_callsign(const char *);
+const char * user_settings_get_callsign(void);
+
+void user_settings_set_audio_vol(uint8_t audio_vol);
+uint8_t user_settings_get_audio_vol(void);
+
+void user_settings_set_mic_gain(uint8_t mic_gain);
+uint8_t user_settings_get_mic_gain(void);
+
+void user_settings_set_use_freq_offset(bool use_freq_offset);
+bool user_settings_get_use_freq_offset(void);
+
+void user_settings_set_split_mode(bool split_mode);
+bool user_settings_get_split_mode(void);
+
+void user_settings_set_use_soft_ptt(bool use_soft_ptt);
+bool user_settings_get_use_soft_ptt(void);
+
 
 #ifdef __cplusplus
 }

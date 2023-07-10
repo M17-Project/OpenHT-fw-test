@@ -48,6 +48,9 @@ extern lv_obj_t * ui_Label3;
 extern lv_obj_t * ui_vol_label;
 void ui_event_vol_slider(lv_event_t * e);
 extern lv_obj_t * ui_vol_slider;
+extern lv_obj_t * ui_mic_label;
+void ui_event_mic_slider(lv_event_t * e);
+extern lv_obj_t * ui_mic_slider;
 // SCREEN: ui_log_screen
 void ui_log_screen_screen_init(void);
 extern lv_obj_t * ui_log_screen;

@@ -19,6 +19,7 @@ void on_freq_click(lv_event_t * e);
 void on_xmit_button_press(lv_event_t * e);
 void on_xmit_button_release(lv_event_t * e);
 void on_vol_changed(lv_event_t * e);
+void on_mic_changed(lv_event_t * e);
 void on_screen_pressed(lv_event_t * e);
 void on_freq_button_down_press(lv_event_t * e);
 void on_freq_button_down_press(lv_event_t * e);
