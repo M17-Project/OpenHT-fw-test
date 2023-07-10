@@ -24,13 +24,16 @@
 
 struct mode_datum openht_mode_data[] =
 {
-    {OpMode_M17, "M17"}, // digital
-    {OpMode_FreeDV, "FreeDV"}, // digital
-    {OpMode_NFM,  "NFM"},  // 12.5k
-    {OpMode_WFM,  "WFM"},  // 25k
-    {OpMode_AM,  "AM"},
-    {OpMode_LSB,  "LSB"}, // Lower
-    {OpMode_USB,  "USB"}, // Upper
+    {OpMode_M17,    "M17"},   // digital
+    {OpMode_FreeDV, "FreeDV"},// digital
+    {OpMode_NFM,    "NFM"},   // 12.5k
+    {OpMode_WFM,    "WFM"},   // 25k
+    {OpMode_AM,     "AM"},
+    {OpMode_LSB,    "LSB"},   // Lower
+    {OpMode_USB,    "USB"},   // Upper
+    {OpMode_TEST1,  "TEST1"}, // Debug
+    {OpMode_TEST2,  "TEST2"}, // Debug
+    {OpMode_TEST3,  "TEST3"}, // Debug
 };
 
 uint32_t openht_mode_count = sizeof(openht_mode_data)/sizeof(openht_mode_data[0]);

@@ -60,6 +60,9 @@ typedef enum
 	OpMode_AM,
 	OpMode_LSB,
 	OpMode_USB,
+	OpMode_TEST1,
+	OpMode_TEST2,
+	OpMode_TEST3,
 } openht_mode_t;
 
 struct mode_datum
