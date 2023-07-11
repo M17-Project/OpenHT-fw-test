@@ -90,9 +90,9 @@ void rx_changed_cb()
 	task_radio_event(CONFIG);
 }
 
-void mode_changed_cb()
+void radio_settings_changed_cb()
 {
-	LOG(CLI_LOG_RADIO, "Mode settings changed. Updating them.\r\n");
+	LOG(CLI_LOG_RADIO, "Radio settings changed. Updating them.\r\n");
 	task_radio_event(CONFIG);
 }
 
@@ -118,7 +118,7 @@ void StartTaskRadio(void *argument) {
 	// init
 	radio_settings_init();
 	radio_settings_sub_rx_freq_cb(rx_changed_cb);
-	radio_settings_sub_mode_cb(mode_changed_cb);
+	radio_settings_sub_changed_cb(radio_settings_changed_cb);
 
 	xcvr_settings_t		xcvr_settings	= radio_settings_get_xcvr_settings();
 	openht_mode_t 		mode 			= radio_settings_get_mode();

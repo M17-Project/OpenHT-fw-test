@@ -243,7 +243,7 @@ void numpad_btnmatrix_event_cb(lv_event_t *e)
 		uint32_t id = lv_btnmatrix_get_selected_btn(obj);
 		const char *txt = lv_btnmatrix_get_btn_text(obj, id);
 
-		LOG(CLI_LOG_GUI, "%s was pressed\r\n", txt);
+		//LOG(CLI_LOG_GUI, "%s was pressed\r\n", txt);
 
 		if (current_freq_ta == NULL)
 			return;

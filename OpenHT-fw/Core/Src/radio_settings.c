@@ -189,7 +189,7 @@ void radio_settings_init()
 	// XCVR Settings5
 	if(EEEPROM_read_data(&radio_settings_eeeprom, XCVR_SETTINGS5_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		saved_settings.xcvr_settings.tx_pwr = (uint16_t)buffer;
-		saved_settings.xcvr_settings.phase_dither = (uint16_t)(buffer>>16);
+		//saved_settings.xcvr_settings.phase_dither = (uint16_t)(buffer>>16);
 	}
 
 	// set the saved_settings (which represents the contents of the EEEPROM) and the
@@ -285,15 +285,22 @@ void radio_settings_save()
 	}
 
 	// XCVR Settings 5
-	if( (saved_settings.xcvr_settings.tx_pwr != cached_settings.xcvr_settings.tx_pwr) ||
-		(saved_settings.xcvr_settings.phase_dither != cached_settings.xcvr_settings.phase_dither) ){
-		buffer = cached_settings.xcvr_settings.tx_pwr +
-				( ( (uint32_t)cached_settings.xcvr_settings.phase_dither ) << 16 );
+	if( (saved_settings.xcvr_settings.tx_pwr != cached_settings.xcvr_settings.tx_pwr) ){//||
+//		(saved_settings.xcvr_settings.phase_dither != cached_settings.xcvr_settings.phase_dither) ){
+//		buffer = cached_settings.xcvr_settings.tx_pwr +
+//				( ( (uint32_t)cached_settings.xcvr_settings.phase_dither ) << 16 );
+		buffer = cached_settings.xcvr_settings.tx_pwr;
 		EEEPROM_write_data(&radio_settings_eeeprom, XCVR_SETTINGS5_EEEPROM_ADDR, (void *)(&buffer));
 	}
 
 	// update the saved_settings to be equal to cached_settings now that the EEEPROM has been updated.
 	memcpy(&saved_settings, &cached_settings, sizeof(radio_settings_t));
+}
+
+// cb called when settings are changed..
+void radio_settings_sub_changed_cb(radio_setting_changed_func_t cb)
+{
+	radio_settings_mode_changed_cb = cb;
 }
 
 void radio_settings_sub_rx_freq_cb(radio_setting_changed_func_t cb)
@@ -318,6 +325,10 @@ freq_t radio_settings_get_rx_freq (void)
 void radio_settings_set_tx_freq (freq_t freq)
 {
 	cached_settings.tx_freq = freq;
+
+	if (radio_settings_rx_changed_cb != NULL) {
+		radio_settings_rx_changed_cb();
+	}
 }
 
 freq_t radio_settings_get_tx_freq (void)
@@ -328,6 +339,10 @@ freq_t radio_settings_get_tx_freq (void)
 void radio_settings_set_radio_agc (openht_radio_agc agc_target)
 {
 	cached_settings.radio_agc = agc_target;
+
+	if (radio_settings_rx_changed_cb != NULL) {
+		radio_settings_rx_changed_cb();
+	}
 }
 
 openht_radio_agc radio_settings_get_radio_agc (void)
@@ -338,16 +353,15 @@ openht_radio_agc radio_settings_get_radio_agc (void)
 void radio_settings_set_output_pwr (uint8_t output_pwr)
 {
 	cached_settings.output_pwr = output_pwr;
+
+	if (radio_settings_rx_changed_cb != NULL) {
+		radio_settings_rx_changed_cb();
+	}
 }
 
 uint8_t radio_settings_get_output_pwr (void)
 {
 	return cached_settings.output_pwr;
-}
-
-void radio_settings_sub_mode_cb(radio_setting_changed_func_t cb)
-{
-	radio_settings_mode_changed_cb = cb;
 }
 
 void radio_settings_set_mode (openht_mode_t mode)
@@ -376,6 +390,10 @@ const char * radio_settings_get_m17_callsign(void)
 void radio_settings_set_m17_dst (const char * m17_dst)
 {
 	strcpy(cached_settings.m17_dst, m17_dst);
+
+	if (radio_settings_rx_changed_cb != NULL) {
+		radio_settings_rx_changed_cb();
+	}
 }
 
 const char * radio_settings_get_m17_dst (void)
@@ -386,6 +404,10 @@ const char * radio_settings_get_m17_dst (void)
 void radio_settings_set_m17_info (m17Info_t m17_info)
 {
 	cached_settings.m17_info = m17_info;
+
+	if (radio_settings_rx_changed_cb != NULL) {
+		radio_settings_rx_changed_cb();
+	}
 }
 
 m17Info_t radio_settings_get_m17_info (void)
@@ -396,6 +418,10 @@ m17Info_t radio_settings_get_m17_info (void)
 void radio_settings_set_fm_settings (fmInfo_t fm_settings)
 {
 	cached_settings.fm_settings = fm_settings;
+
+	if (radio_settings_rx_changed_cb != NULL) {
+		radio_settings_rx_changed_cb();
+	}
 }
 
 fmInfo_t radio_settings_get_fm_settings (void)
@@ -406,6 +432,10 @@ fmInfo_t radio_settings_get_fm_settings (void)
 void radio_settings_set_fpga_rev(maj_min_rev_t fpga_revision)
 {
 	cached_settings.fpga_revision = fpga_revision;
+
+	if (radio_settings_rx_changed_cb != NULL) {
+		radio_settings_rx_changed_cb();
+	}
 }
 
 maj_min_rev_t radio_settings_get_fpga_rev(void)
@@ -442,7 +472,6 @@ xcvr_settings_t radio_settings_get_default_xcvr_settings(void)
 
 	// range 0 to 31
 	xcvr_settings.tx_pwr = 31; // max power
-	xcvr_settings.phase_dither = true; // dither on by default
 
 	return xcvr_settings;
 }
@@ -450,6 +479,10 @@ xcvr_settings_t radio_settings_get_default_xcvr_settings(void)
 void radio_settings_set_xcvr_settings (xcvr_settings_t xcvr_settings)
 {
 	cached_settings.xcvr_settings = xcvr_settings;
+
+	if (radio_settings_rx_changed_cb != NULL) {
+		radio_settings_rx_changed_cb();
+	}
 }
 
 xcvr_settings_t radio_settings_get_xcvr_settings (void)

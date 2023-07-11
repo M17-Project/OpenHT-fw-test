@@ -169,8 +169,6 @@ extern lv_obj_t * ui_Label34;
 extern lv_obj_t * ui_Label35;
 extern lv_obj_t * ui_tx_pwr_spinbox_panel;
 extern lv_obj_t * ui_Label36;
-void ui_event_xcvr_dither_cb(lv_event_t * e);
-extern lv_obj_t * ui_xcvr_dither_cb;
 void ui_event_xcvr_reset_btn(lv_event_t * e);
 extern lv_obj_t * ui_xcvr_reset_btn;
 extern lv_obj_t * ui_Label37;

@@ -42,7 +42,6 @@ void on_settings_c_clicked(lv_event_t * e);
 void on_settings_d_clicked(lv_event_t * e);
 void on_settings_e_clicked(lv_event_t * e);
 void on_settings_f_clicked(lv_event_t * e);
-void on_split_txrx_clicked(lv_event_t * e);
 void on_xcvr_settings_reset_clicked(lv_event_t * e);
 void on_settings_ok_clicked(lv_event_t * e);
 void on_callsign_ok_clicked(lv_event_t * e);

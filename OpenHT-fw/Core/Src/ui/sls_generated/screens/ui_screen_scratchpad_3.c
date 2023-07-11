@@ -577,25 +577,9 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_style_text_align(ui_Label36, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_Label36, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_xcvr_dither_cb = lv_checkbox_create(ui_xcvr_tab_panel);
-    lv_checkbox_set_text(ui_xcvr_dither_cb, "Phase Dither");
-    lv_obj_set_width(ui_xcvr_dither_cb, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_xcvr_dither_cb, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_xcvr_dither_cb, 21);
-    lv_obj_set_y(ui_xcvr_dither_cb, 472);
-    lv_obj_add_flag(ui_xcvr_dither_cb, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
-    lv_obj_set_style_text_color(ui_xcvr_dither_cb, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_xcvr_dither_cb, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_xcvr_dither_cb, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    lv_obj_set_style_bg_color(ui_xcvr_dither_cb, lv_color_hex(0x4E4E4E), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_xcvr_dither_cb, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-
     ui_xcvr_reset_btn = lv_btn_create(ui_xcvr_tab_panel);
     lv_obj_set_height(ui_xcvr_reset_btn, 50);
     lv_obj_set_width(ui_xcvr_reset_btn, LV_SIZE_CONTENT);   /// 100
-    lv_obj_set_x(ui_xcvr_reset_btn, 90);
-    lv_obj_set_y(ui_xcvr_reset_btn, 0);
     lv_obj_set_align(ui_xcvr_reset_btn, LV_ALIGN_BOTTOM_MID);
     lv_obj_add_flag(ui_xcvr_reset_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_xcvr_reset_btn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -643,7 +627,6 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_add_event_cb(ui_settings_d_btn, ui_event_settings_d_btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_settings_e_btn, ui_event_settings_e_btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_settings_f_btn, ui_event_settings_f_btn, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_xcvr_dither_cb, ui_event_xcvr_dither_cb, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_xcvr_reset_btn, ui_event_xcvr_reset_btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_settings_ok_btn, ui_event_settings_ok_btn, LV_EVENT_ALL, NULL);
 

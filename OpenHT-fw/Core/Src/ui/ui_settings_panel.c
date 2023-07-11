@@ -225,12 +225,6 @@ static void _get_xcvr_settings(bool default_xcvr_settings)
     lv_spinbox_set_value(tx_pwr_spinbox, xcvr_settings.tx_pwr);
     lv_spinbox_set_cursor_pos(tx_pwr_spinbox, 0);
 
-    if (xcvr_settings.phase_dither) {
-    	lv_obj_add_state(ui_xcvr_dither_cb, LV_STATE_CHECKED);
-    } else {
-    	lv_obj_clear_state(ui_xcvr_dither_cb, LV_STATE_CHECKED);
-    }
-
 }
 
 static void _save_xcvr_settings()
@@ -250,12 +244,6 @@ static void _save_xcvr_settings()
 	xcvr_settings.balance_q = (int16_t)lv_spinbox_get_value(balance_q_spinbox);
 
 	xcvr_settings.tx_pwr = (int16_t)lv_spinbox_get_value(tx_pwr_spinbox);
-
-	if (lv_obj_has_state(ui_xcvr_dither_cb, LV_STATE_CHECKED)) {
-		xcvr_settings.phase_dither = true;
-	} else {
-		xcvr_settings.phase_dither = false;
-	}
 
 	// save the xcvr settings into radio_settings
 	radio_settings_set_xcvr_settings(xcvr_settings);

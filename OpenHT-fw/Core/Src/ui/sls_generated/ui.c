@@ -168,8 +168,6 @@ lv_obj_t * ui_Label34;
 lv_obj_t * ui_Label35;
 lv_obj_t * ui_tx_pwr_spinbox_panel;
 lv_obj_t * ui_Label36;
-void ui_event_xcvr_dither_cb(lv_event_t * e);
-lv_obj_t * ui_xcvr_dither_cb;
 void ui_event_xcvr_reset_btn(lv_event_t * e);
 lv_obj_t * ui_xcvr_reset_btn;
 lv_obj_t * ui_Label37;
@@ -509,14 +507,6 @@ void ui_event_settings_f_btn(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
         on_settings_f_clicked(e);
-    }
-}
-void ui_event_xcvr_dither_cb(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_CLICKED) {
-        on_split_txrx_clicked(e);
     }
 }
 void ui_event_xcvr_reset_btn(lv_event_t * e)

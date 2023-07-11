@@ -45,8 +45,6 @@ typedef struct
 	int16_t balance_q;
 
 	int16_t tx_pwr;
-	bool     phase_dither;
-
 } __attribute__((packed)) xcvr_settings_t;
 
 typedef struct
@@ -83,6 +81,7 @@ void radio_settings_save();
 
 typedef void (*radio_setting_changed_func_t)();
 
+void radio_settings_sub_changed_cb(radio_setting_changed_func_t cb);
 void radio_settings_sub_rx_freq_cb(radio_setting_changed_func_t cb);
 void radio_settings_set_rx_freq (freq_t freq);
 freq_t radio_settings_get_rx_freq (void);
@@ -96,7 +95,6 @@ openht_radio_agc radio_settings_get_radio_agc (void);
 void radio_settings_set_output_pwr (uint8_t output_pwr);
 uint8_t radio_settings_get_output_pwr (void);
 
-void radio_settings_sub_mode_cb(radio_setting_changed_func_t cb);
 void radio_settings_set_mode (openht_mode_t mode);
 openht_mode_t radio_settings_get_mode (void);
 
