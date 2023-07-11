@@ -158,15 +158,21 @@ void StartTaskRadio(void *argument) {
 
 		if(flag & FPGA_SEND_SAMPLES){
 			osThreadFlagsClear(FPGA_SEND_SAMPLES);
-			uint8_t samples[34];
-			*(uint16_t *)samples = MOD_IN | REG_WR;
-			read_voice_samples((int16_t *)(samples+2), 16, 0);
 
-			FPGA_chip_select(true);
-			HAL_SPI_Transmit_IT(&hspi1, samples, sizeof(samples));
-			wait_spi_xfer_done(WAIT_TIMEOUT);
-			if(!startup_done){
-				FPGA_chip_select(false);
+			mode = radio_settings_get_mode();
+
+			if(mode!=OpMode_TEST1)
+			{
+				uint8_t samples[34];
+				*(uint16_t *)samples = MOD_IN | REG_WR;
+				read_voice_samples((int16_t *)(samples+2), 16, 0);
+
+				FPGA_chip_select(true);
+				HAL_SPI_Transmit_IT(&hspi1, samples, sizeof(samples));
+				wait_spi_xfer_done(WAIT_TIMEOUT);
+				if(!startup_done){
+					FPGA_chip_select(false);
+				}
 			}
 		}else if(flag & FPGA_READ_SAMPLES){
 			osThreadFlagsClear(FPGA_READ_SAMPLES);
@@ -215,7 +221,10 @@ void StartTaskRadio(void *argument) {
 			// Disable IO3 IRQ
 			HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
 
-			start_microphone_acquisition();
+			mode = radio_settings_get_mode();
+
+			if(mode!=OpMode_TEST1)
+				start_microphone_acquisition();
 			BSP_LED_On(LED_RED);
 			xcvr_settings = radio_settings_get_xcvr_settings();
 			ppm = xcvr_settings.ppm/10.0f;
@@ -223,17 +232,20 @@ void StartTaskRadio(void *argument) {
 			fm_info = radio_settings_get_fm_settings();
 			radio_configure_tx(tx_freq, ppm, mode, fm_info, xcvr_settings);
 			tx_nRx = true;
-			uint8_t voice[66];
-			*(uint16_t *)(voice) = MOD_IN | REG_WR;
-			read_voice_samples((int16_t *)(voice+2), 32, 10);
 
-			FPGA_chip_select(true);
+			if(mode!=OpMode_TEST1)
+			{
+				uint8_t voice[66];
+				*(uint16_t *)(voice) = MOD_IN | REG_WR;
+				read_voice_samples((int16_t *)(voice+2), 32, 10);
 
-			HAL_SPI_Transmit_IT(&hspi1, voice, sizeof(voice));
-			wait_spi_xfer_done(WAIT_TIMEOUT);
-			if(!startup_done)
-				FPGA_chip_select(false);
+				FPGA_chip_select(true);
 
+				HAL_SPI_Transmit_IT(&hspi1, voice, sizeof(voice));
+				wait_spi_xfer_done(WAIT_TIMEOUT);
+				if(!startup_done)
+					FPGA_chip_select(false);
+			}
 			// Enable IO3 IRQ
 			__HAL_GPIO_EXTI_CLEAR_FLAG(IO3_Pin);
 			HAL_NVIC_ClearPendingIRQ(EXTI15_10_IRQn);

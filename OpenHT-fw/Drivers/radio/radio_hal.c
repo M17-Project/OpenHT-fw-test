@@ -309,6 +309,27 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 		}
 		break;
 
+		//TEST1 mode - FM carrier at +1kHz
+		case OpMode_TEST1: {
+			//control regs setting
+			FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | band);
+			FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_N | CTCSS_TX_NONE | STATE_TX);
+
+			//modulation word to +1kHz: round(1000/400e3*2^21)
+			FPGA_write_reg(MOD_IN, 0x147B);
+
+			//I branch gain to +1.0
+			FPGA_write_reg(I_GAIN, 0x4000);
+
+			//for a constant envelope modulation, we don't need DPD anymore
+			FPGA_write_reg(DPD_1, (int16_t)0x4000);
+			FPGA_write_reg(DPD_2, (int16_t)0);
+			FPGA_write_reg(DPD_3, (int16_t)0);
+
+			supported_mode = true;
+		}
+		break;
+
 		default: {
 			LOG(CLI_LOG_RADIO, "Unsupported Mode\r\n");
 			supported_mode = false;
