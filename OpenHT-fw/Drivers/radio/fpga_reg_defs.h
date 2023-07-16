@@ -17,7 +17,7 @@
 #define ADDR_INCR					((uint16_t)1<<6)
 
 //Register 0 - Control Register 1
-#define CR_1						((uint16_t)0)
+#define CR_1						((uint16_t)0)		// Addr 00
 #define SSB_USB						((uint16_t)0<<15)
 #define SSB_LSB						((uint16_t)1<<15)
 #define MOD_FM						((uint16_t)0<<12)
@@ -97,56 +97,48 @@
 #define STATE_RX					((uint16_t)2<<0)
 #define FIFO_TX						((uint16_t)1<<11)
 
-//Register 2 - I branch offset null
-#define I_OFFS_NULL					((uint16_t)0x0200) // Addr 02
+//Register 2 - Control Register 3
+#define CR_3					((uint16_t)0x0200) // Addr 02
 
-//Register 3 - Q branch offset null
-#define Q_OFFS_NULL					((uint16_t)0x0300) // Addr 03
+//Register 3 - Control Register 4
+#define CR_4					((uint16_t)0x0300) // Addr 03
 
-//Register 4 - I branch gain
-#define I_GAIN						((uint16_t)0x0400) // Addr 04
+//Register 4 - I branch offset null
+#define I_OFFS_NULL					((uint16_t)0x0400) // Addr 04
 
-//Register 5 - Q branch gain
-#define Q_GAIN						((uint16_t)0x0500) // Addr 05
+//Register 5 - Q branch offset null
+#define Q_OFFS_NULL					((uint16_t)0x0500) // Addr 05
 
-//Register 6 - Digital Predistortion Register 1
-#define DPD_1						((uint16_t)0x0600) // Addr 06
+//Register 6 - I branch gain
+#define I_GAIN						((uint16_t)0x0600) // Addr 06
 
-//Register 7 - Digital Predistortion Register 2
-#define DPD_2						((uint16_t)0x0700) // Addr 07
+//Register 7 - Q branch gain
+#define Q_GAIN						((uint16_t)0x0700) // Addr 07
 
-//Register 8 - Digital Predistortion Register 3
-#define DPD_3						((uint16_t)0x0800) // Addr 08
+//Register 8 - Digital Predistortion Register 1
+#define DPD_1						((uint16_t)0x0800) // Addr 08
 
-//Register 9 - Modulation Word Register
-#define MOD_IN						((uint16_t)0x0900) // Addr 09
+//Register 9 - Digital Predistortion Register 2
+#define DPD_2						((uint16_t)0x0900) // Addr 09
 
-//Registers 10-12 are reserved for later use
+//Register 10 - Digital Predistortion Register 3
+#define DPD_3						((uint16_t)0x0A00) // Addr 10
 
-//Register 13 - Status Register 1
-#define SR_1						((uint16_t)0x0D00) // Addr 13
+//Register 11 - Modulation Word Register
+#define MOD_IN						((uint16_t)0x0B00) // Addr 11
 
-//Register 14 - Status Register 2
-#define SR_2						((uint16_t)0x0E00) // Addr 14
-#define PLL0_LOCK					((uint16_t)1<<0)
-#define PLL1_LOCK					((uint16_t)1<<1)
+//Registers 12 - 15 reserved
 
-//Register 15 - Demodulation Register
-#define DEMOD						((uint16_t)0x0F00) // Addr 15
+//Register 16 - Status Register 1
+#define SR_1						((uint16_t)0x1000) // Addr 16
 
-//Register 16 - RSSI Register
-#define RSSI						((uint16_t)0x1000) // Addr 16
+//Register 17 - Status Register 2
+#define SR_2						((uint16_t)0x1100) // Addr 17
+#define PLL_LOCK					((uint16_t)1<<0)
 
-//Register 17 - Raw I branch readout
-#define I_RAW						((uint16_t)0x1100) // Addr 17
+//Registers 18 - 22 reserved
 
-//Register 18 - Raw Q branch readout
-#define Q_RAW						((uint16_t)0x1200) // Addr 18
-
-//Register 19 - Filtered I branch readout
-#define I_FLT						((uint16_t)0x1300) // Addr 19
-
-//Register 20 - Filtered Q branch readout
-#define Q_FLT						((uint16_t)0x1400) // Addr 20
+//Register 23 - Demodulator Word Register
+#define SR_2						((uint16_t)0x1700) // Addr 23
 
 #endif
