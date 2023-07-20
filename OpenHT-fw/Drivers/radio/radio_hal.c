@@ -316,7 +316,7 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 			FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_N | CTCSS_TX_NONE | STATE_TX);
 
 			//modulation word to +1kHz: round(1000/400e3*2^21)
-			FPGA_write_reg(MOD_IN, 0x147B);
+			FPGA_write_reg(MOD_IN, 0x7B14); //0x147B, little endian
 
 			//I branch gain to +1.0
 			FPGA_write_reg(I_GAIN, 0x4000);

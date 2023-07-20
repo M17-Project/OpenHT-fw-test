@@ -139,6 +139,6 @@
 //Registers 18 - 22 reserved
 
 //Register 23 - Demodulator Word Register
-#define SR_2						((uint16_t)0x1700) // Addr 23
+#define DEMOD_OUT					((uint16_t)0x1700) // Addr 23
 
 #endif
