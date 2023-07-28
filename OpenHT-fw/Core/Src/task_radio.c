@@ -126,7 +126,6 @@ void StartTaskRadio(void *argument) {
 	freq_t 				tx_freq 		= radio_settings_get_tx_freq();
 	fmInfo_t 			fm_info 		= radio_settings_get_fm_settings();
 	openht_radio_agc	agc 			= radio_settings_get_radio_agc();
-	uint8_t				tx_power		= xcvr_settings.tx_pwr; //radio_settings_get_output_pwr(); //somehow this doesn't work
 	float				ppm 			= xcvr_settings.ppm/10.0f;
 
 	if(EEEPROM_init(&eeeprom) == EXIT_FAILURE){
@@ -193,7 +192,6 @@ void StartTaskRadio(void *argument) {
 			tx_freq 		= radio_settings_get_tx_freq();
 			fm_info 		= radio_settings_get_fm_settings();
 			agc				= radio_settings_get_radio_agc();
-			tx_power		= xcvr_settings.tx_pwr; //radio_settings_get_output_pwr(); //somehow this doesn't work
 			ppm 			= xcvr_settings.ppm/10.0f;
 
 			// Simulate a PTT press to re-send all settings
@@ -228,7 +226,6 @@ void StartTaskRadio(void *argument) {
 			BSP_LED_On(LED_RED);
 			xcvr_settings = radio_settings_get_xcvr_settings();
 			ppm = xcvr_settings.ppm/10.0f;
-			tx_power = xcvr_settings.tx_pwr; //radio_settings_get_output_pwr(); //somehow this doesn't work
 			fm_info = radio_settings_get_fm_settings();
 			radio_configure_tx(tx_freq, ppm, mode, fm_info, xcvr_settings);
 			tx_nRx = true;

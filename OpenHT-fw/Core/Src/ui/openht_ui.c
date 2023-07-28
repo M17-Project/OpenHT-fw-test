@@ -30,6 +30,7 @@
 #include "ui/ui_callsign_change_panel.h"
 #include "ui/ui_freq_change_panel.h"
 #include "ui/ui_fpga_status_panel.h"
+#include "ui/ui_settings_panel.h"
 #include "ui/lvht_numpad.h"
 #include "ui/lvht_qwertypad.h"
 #include "utils/str_builder.h"

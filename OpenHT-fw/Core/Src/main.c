@@ -31,6 +31,7 @@
 #include "touch_sensor_driver.h"
 #include "screen_driver.h"
 #include "event_groups.h"
+#include "../../Drivers/radio/radio_hal.h"
 
 #include "../shell/inc/sys_command_line.h"
 #include <lvgl.h>
