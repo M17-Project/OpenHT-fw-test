@@ -165,7 +165,7 @@ void StartTaskRadio(void *argument) {
 			{
 				uint8_t samples[34];
 				*(uint16_t *)samples = MOD_IN | REG_WR;
-				read_voice_samples((int16_t *)(samples+2), 16, 0);
+				read_tx_baseband_samples((int16_t *)(samples+2), 16, 0);
 
 				FPGA_chip_select(true);
 				HAL_SPI_Transmit_IT(&hspi1, samples, sizeof(samples));
@@ -237,7 +237,7 @@ void StartTaskRadio(void *argument) {
 			{
 				uint8_t voice[66];
 				*(uint16_t *)(voice) = MOD_IN | REG_WR;
-				read_voice_samples((int16_t *)(voice+2), 32, 10);
+				read_tx_baseband_samples((int16_t *)(voice+2), 32, 10);
 
 				FPGA_chip_select(true);
 
