@@ -35,7 +35,6 @@
 #define SPI_PORT_ACTIVATION_KEY	0x8AF4C6A4 // Swapped for endianness
 
 extern SPI_HandleTypeDef 	hspi1;
-extern volatile bool		startup_done;
 
 void radio_on(){
 	HAL_GPIO_WritePin(MAIN_KILL_GPIO_Port, MAIN_KILL_Pin, GPIO_PIN_SET);
@@ -360,21 +359,21 @@ void radio_sw_24(){
 
 inline void FPGA_chip_select(bool selected){
 	if(selected){
-		//HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
-		FPGA_NSS_GPIO_Port->BSRR=(uint32_t)FPGA_NSS_Pin<<16;
+		HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_RESET);
+		//FPGA_NSS_GPIO_Port->BSRR=(uint32_t)FPGA_NSS_Pin<<16;
 	}else{
-		//HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
-		FPGA_NSS_GPIO_Port->BSRR=FPGA_NSS_Pin;
+		HAL_GPIO_WritePin(FPGA_NSS_GPIO_Port, FPGA_NSS_Pin, GPIO_PIN_SET);
+		//FPGA_NSS_GPIO_Port->BSRR=FPGA_NSS_Pin;
 	}
 }
 
 inline void XCVR_chip_select(bool selected){
 	if(selected){
-		//HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_RESET);
-		XCVR_NSS_GPIO_Port->BSRR=(uint32_t)XCVR_NSS_Pin<<16;
+		HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_RESET);
+		//XCVR_NSS_GPIO_Port->BSRR=(uint32_t)XCVR_NSS_Pin<<16;
 	}else{
-		//HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_SET);
-		XCVR_NSS_GPIO_Port->BSRR=XCVR_NSS_Pin;
+		HAL_GPIO_WritePin(XCVR_NSS_GPIO_Port, XCVR_NSS_Pin, GPIO_PIN_SET);
+		//XCVR_NSS_GPIO_Port->BSRR=XCVR_NSS_Pin;
 	}
 }
 
@@ -438,8 +437,7 @@ uint32_t XCVR_write_reg(uint16_t addr, uint8_t data){
 	buffer[2] = data;
 	HAL_SPI_Transmit_IT(&hspi1, buffer, 3);
 	wait_spi_xfer_done(WAIT_TIMEOUT);
-	if(!startup_done)
-		XCVR_chip_select(false);
+	XCVR_chip_select(false);
 
 	return EXIT_SUCCESS;
 }
@@ -454,8 +452,7 @@ uint32_t XCVR_read_reg(uint16_t addr, uint8_t *data){
 	HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 3);
 	wait_spi_xfer_done(WAIT_TIMEOUT);
 	*data = bufferRX[2];
-	if(!startup_done)
-		XCVR_chip_select(false);
+	XCVR_chip_select(false);
 
 	return EXIT_SUCCESS;
 }
