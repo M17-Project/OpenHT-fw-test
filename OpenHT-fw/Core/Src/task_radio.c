@@ -233,19 +233,20 @@ void StartTaskRadio(void *argument) {
 			radio_configure_tx(tx_freq, ppm, mode, fm_info, xcvr_settings);
 			tx_nRx = true;
 
+			uint8_t voice[66];
+			*(uint16_t *)(voice) = MOD_IN | REG_WR;
 			if(mode!=OpMode_TEST1)
-			{
-				uint8_t voice[66];
-				*(uint16_t *)(voice) = MOD_IN | REG_WR;
 				read_voice_samples((int16_t *)(voice+2), 32, 10);
+			else
+				memset((int16_t*)(voice+2), 0x7B14, 32); //little-endian 0x147B
 
-				FPGA_chip_select(true);
+			FPGA_chip_select(true);
 
-				HAL_SPI_Transmit_IT(&hspi1, voice, sizeof(voice));
-				wait_spi_xfer_done(WAIT_TIMEOUT);
-				if(!startup_done)
-					FPGA_chip_select(false);
-			}
+			HAL_SPI_Transmit_IT(&hspi1, voice, sizeof(voice));
+			wait_spi_xfer_done(WAIT_TIMEOUT);
+			if(!startup_done)
+				FPGA_chip_select(false);
+
 			// Enable IO3 IRQ
 			__HAL_GPIO_EXTI_CLEAR_FLAG(IO3_Pin);
 			HAL_NVIC_ClearPendingIRQ(EXTI15_10_IRQn);

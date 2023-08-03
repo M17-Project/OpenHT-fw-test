@@ -294,7 +294,6 @@ void EXTI15_10_IRQHandler(void)
 	__HAL_GPIO_EXTI_CLEAR_IT(IO3_Pin);
 	task_radio_event(SAMPLES_IRQ);
   /* USER CODE END EXTI15_10_IRQn 0 */
-
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
 
   /* USER CODE END EXTI15_10_IRQn 1 */
