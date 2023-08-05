@@ -14,7 +14,9 @@ SET(SOURCES screens/ui_main_screen.c
     images/ui_img_gear_w_png.c
     images/ui_img_m17_logo_sm_png.c
     images/ui_img_openht_logo_png.c
-    fonts/ui_font_RobotoBold.c
+    images/ui_img_wiggles_png.c
+    images/ui_img_m17_logo_300_w_png.c
+    fonts/ui_font_RobotoBold_48.c
     fonts/ui_font_number_50.c
     fonts/ui_font_number_60.c)
 

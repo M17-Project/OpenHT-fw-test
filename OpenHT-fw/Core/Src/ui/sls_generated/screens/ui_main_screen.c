@@ -183,7 +183,7 @@ void ui_main_screen_screen_init(void)
     lv_label_set_text(ui_rx_display_label, "000.00000");
     lv_obj_set_style_text_color(ui_rx_display_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_rx_display_label, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_rx_display_label, &ui_font_RobotoBold, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_rx_display_label, &ui_font_RobotoBold_48, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_tx_display_label = lv_label_create(ui_vfo_panel);
     lv_obj_set_width(ui_tx_display_label, 250);
@@ -195,7 +195,7 @@ void ui_main_screen_screen_init(void)
     lv_label_set_text(ui_tx_display_label, "000.00000");
     lv_obj_set_style_text_color(ui_tx_display_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_tx_display_label, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_tx_display_label, &ui_font_RobotoBold, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_tx_display_label, &ui_font_RobotoBold_48, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_rx_lbl = lv_label_create(ui_vfo_panel);
     lv_obj_set_width(ui_rx_lbl, LV_SIZE_CONTENT);   /// 50
@@ -204,7 +204,7 @@ void ui_main_screen_screen_init(void)
     lv_label_set_text(ui_rx_lbl, "Rx");
     lv_obj_set_style_text_color(ui_rx_lbl, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_rx_lbl, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_rx_lbl, &ui_font_RobotoBold, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_rx_lbl, &ui_font_RobotoBold_48, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_rx_lbl1 = lv_label_create(ui_vfo_panel);
     lv_obj_set_width(ui_rx_lbl1, LV_SIZE_CONTENT);   /// 50
@@ -215,7 +215,7 @@ void ui_main_screen_screen_init(void)
     lv_label_set_text(ui_rx_lbl1, "Tx");
     lv_obj_set_style_text_color(ui_rx_lbl1, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_rx_lbl1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_rx_lbl1, &ui_font_RobotoBold, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_rx_lbl1, &ui_font_RobotoBold_48, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_ptt_btn = lv_btn_create(ui_main_panel);
     lv_obj_set_width(ui_ptt_btn, 145);

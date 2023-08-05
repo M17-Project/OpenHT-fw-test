@@ -1449,7 +1449,7 @@ __weak void StartGeneralTask(void *argument)
 /* USER CODE END Header_StartLVGLTask */
 void StartLVGLTask(void *argument)
 {
-  /* USER CODE BEGIN StartLVGLTask */
+    /* USER CODE BEGIN StartLVGLTask */
 	// init the LVGL gui library (draws UI on screen and handles user input)
 	lv_init();
 
@@ -1457,11 +1457,23 @@ void StartLVGLTask(void *argument)
 	screen_driver_init();
 	touch_sensor_driver_init();
 
+	lv_obj_t * splash = ui_boot_splash();
+
+	// TODO: this loop should only work until the radio is ready to go
+	for( int i=0; i < 600; i++ ){
+	    lv_task_handler();
+	    osDelay(5);
+	}
+
 	// SquareLine Studio ui_init...
 	ui_init();
 
 	// Custom ui init code unsupported by SquareLine...
 	custom_ui_init();
+
+	// delete the splash screen after the main UI has been initialized...
+	lv_obj_del(splash);
+
   /* Infinite loop */
   for(;;)
   {
