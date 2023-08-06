@@ -18,6 +18,7 @@ SET(SOURCES screens/ui_main_screen.c
     images/ui_img_m17_logo_300_w_png.c
     fonts/ui_font_RobotoBold_48.c
     fonts/ui_font_number_50.c
-    fonts/ui_font_number_60.c)
+    fonts/ui_font_number_60.c
+    fonts/ui_font_RobotoMonoRegular_24.c)
 
 add_library(ui ${SOURCES})

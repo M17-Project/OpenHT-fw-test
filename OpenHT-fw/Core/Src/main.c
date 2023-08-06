@@ -1457,7 +1457,7 @@ void StartLVGLTask(void *argument)
 	screen_driver_init();
 	touch_sensor_driver_init();
 
-	lv_obj_t * splash = ui_boot_splash();
+	start_boot_splash();
 
 	// TODO: this loop should only work until the radio is ready to go
 	for( int i=0; i < 600; i++ ){
@@ -1472,7 +1472,7 @@ void StartLVGLTask(void *argument)
 	custom_ui_init();
 
 	// delete the splash screen after the main UI has been initialized...
-	lv_obj_del(splash);
+	stop_boot_splash();
 
   /* Infinite loop */
   for(;;)

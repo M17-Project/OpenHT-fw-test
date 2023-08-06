@@ -248,6 +248,7 @@ LV_IMG_DECLARE(ui_img_m17_logo_300_w_png);    // assets/m17_logo_300_w.png
 LV_FONT_DECLARE(ui_font_RobotoBold_48);
 LV_FONT_DECLARE(ui_font_number_50);
 LV_FONT_DECLARE(ui_font_number_60);
+LV_FONT_DECLARE(ui_font_RobotoMonoRegular_24);
 
 void ui_init(void);
 

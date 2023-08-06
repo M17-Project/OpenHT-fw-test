@@ -51,7 +51,9 @@ extern char * callsign_prefix;
 extern char * mode_prefix;
 extern char * ctcss_options_str;
 
-lv_obj_t * ui_boot_splash(void);
+void start_boot_splash(void);
+void stop_boot_splash(void);
+
 void custom_ui_init(void);
 
 void numpad_btnmatrix_event_cb(lv_event_t *e);
