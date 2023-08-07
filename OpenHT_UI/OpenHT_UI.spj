@@ -13347,7 +13347,7 @@
                       {
                         "nid": -1839957877,
                         "strtype": "TEXTAREA/Text",
-                        "strval": "The software running on OpenHT is (c) M17 Project contributors and licensed under the GPLv2. Sources are available on the M17 Project page on Github.\\n\\nContributors to this release include:\\n- Wojciech SP5WWP\\n- Morgan ON4MOD\\n- Jae K5JAE\\n- Alvaro EA4HGZ",
+                        "strval": "The software running on OpenHT is (c) M17 Project contributors and licensed under the GPLv2. Sources are available on the M17 Project page on Github.\\n\\nContributors to this release include:\\n- Wojciech SP5WWP\\n- Morgan ON4MOD\\n- Jae K5JAE\\n- Alvaro EA4HGZ\\n- Sebastien ON4SEB",
                         "InheritedType": 10
                       },
                       {
@@ -17171,8 +17171,7 @@
             "InheritedType": 11
           }
         ],
-        "saved_objtypeKey": "SCREEN",
-        "tree_closed": true
+        "saved_objtypeKey": "SCREEN"
       },
       {
         "guid": "GUID68144515-481194S3452104",
@@ -50616,7 +50615,7 @@
     "theme_color2": 0,
     "exportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/ui/sls_generated",
     "projectExportFolderPath": "/home/jae/Devel/ham/OpenHT-fw-test/OpenHT-fw/Core/Src/ui/sls_generated",
-    "backup_cnt": 299,
+    "backup_cnt": 300,
     "autosave_cnt": 0,
     "lvgl_version": "8.3.6",
     "callfuncsexport": "C_FILE",

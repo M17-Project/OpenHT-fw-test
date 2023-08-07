@@ -74,7 +74,7 @@ void ui_screen_scratchpad_1_screen_init(void)
     lv_obj_set_width(ui_about_credits_text_area, lv_pct(100));
     lv_obj_set_height(ui_about_credits_text_area, lv_pct(100));
     lv_textarea_set_text(ui_about_credits_text_area,
-                         "The software running on OpenHT is (c) M17 Project contributors and licensed under the GPLv2. Sources are available on the M17 Project page on Github.\n\nContributors to this release include:\n- Wojciech SP5WWP\n- Morgan ON4MOD\n- Jae K5JAE\n- Alvaro EA4HGZ");
+                         "The software running on OpenHT is (c) M17 Project contributors and licensed under the GPLv2. Sources are available on the M17 Project page on Github.\n\nContributors to this release include:\n- Wojciech SP5WWP\n- Morgan ON4MOD\n- Jae K5JAE\n- Alvaro EA4HGZ\n- Sebastien ON4SEB");
     lv_obj_add_flag(ui_about_credits_text_area, LV_OBJ_FLAG_HIDDEN);     /// Flags
     lv_obj_clear_flag(ui_about_credits_text_area,
                       LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
