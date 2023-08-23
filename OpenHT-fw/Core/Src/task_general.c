@@ -21,6 +21,7 @@
 #include "main.h"
 #include "cli_commands.h"
 #include "ui/openht_ui.h"
+#include "task_audio_out.h"
 
 #include "../shell/inc/sys_command_line.h"
 #include <cmsis_os2.h>
@@ -79,6 +80,17 @@ void StartGeneralTask(void *argument)
 	// Add commands
 	CLI_ADD_CMD("nor", nor_help, cli_nor_cmd);
 	CLI_ADD_CMD("radio", radio_help, cli_radio_cmd);
+
+	// generate sound
+	osDelay(5000);
+	audio_output_beep(440, 125, 255);
+	LOG(CLI_LOG_GENERAL, "Beep 1\r\n");
+	osDelay(135);
+	audio_output_beep(880, 125, 255);
+	LOG(CLI_LOG_GENERAL, "Beep 2\r\n");
+	osDelay(135);
+	audio_output_beep(1760, 125, 255);
+	LOG(CLI_LOG_GENERAL, "Beep 3\r\n");
 
 	/* Infinite loop */
 	for(;;)

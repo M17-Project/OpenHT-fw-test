@@ -33,5 +33,8 @@ uint32_t write_tx_voice_samples(int16_t *samples, uint32_t number, uint32_t time
 
 uint32_t read_tx_baseband_samples(int16_t *samples, uint32_t number, uint32_t timeout);
 
+uint32_t write_rx_baseband_samples(int16_t *samples, uint32_t number, uint32_t timeout);
+
+uint32_t read_rx_audio_samples(int16_t *samples, uint32_t number, uint32_t timeout);
 
 #endif /* INC_TASK_AUDIO_PROCESS_H_ */

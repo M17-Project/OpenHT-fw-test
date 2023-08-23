@@ -51,12 +51,13 @@ extern "C" {
 #define CLI_NAME openHT
 
 #define CLI_ADDITIONAL_LOG_CATEGORIES \
-	X(EEEPROM, false) \
-	X(FPGA, true) \
-	X(RADIO, true) \
-	X(GUI, true) \
-	X(GENERAL, true) \
-	X(MIC, true) \
+	X(EEEPROM, false)	\
+	X(FPGA, true) 		\
+	X(RADIO, true) 		\
+	X(GUI, true) 		\
+	X(GENERAL, true) 	\
+	X(MIC, true) 		\
+	X(AUDIO_OUT, true) 	\
 
 /* USER CODE END EM */
 
@@ -64,6 +65,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
+void MX_I2C2_Init(void);
 
 /* USER CODE BEGIN EFP */
 void wait_spi_xfer_done(uint32_t timeout);

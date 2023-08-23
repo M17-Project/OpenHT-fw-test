@@ -27,12 +27,14 @@
 
 
 // Because CMSIS-OS2 does not provide anything resembling stream buffers, we use the ones from FreeRTOS
-StreamBufferHandle_t audio_in_buffer = NULL;
+StreamBufferHandle_t audio_in_buffer = NULL; // From mic to FPGA
+StreamBufferHandle_t audio_out_buffer = NULL; // From FPGA to speaker
 
 void audio_process_init(){
 	/* 64 samples = 128 bytes. Total size = 128 samples */
 	/* Trigger level = 32 bytes = 16 samples */
 	audio_in_buffer = xStreamBufferGenericCreate(256, 32, pdFALSE);
+	audio_out_buffer = xStreamBufferGenericCreate(256, 32, pdFALSE);
 }
 
 void audio_process_set_mode(openht_mode_t mode){
@@ -45,8 +47,26 @@ uint32_t write_tx_voice_samples(int16_t *samples, uint32_t number, uint32_t time
 	return sent/2;
 }
 
+uint32_t write_tx_voice_samples_from_isr(int16_t *samples, uint32_t number, uint32_t timeout){
+	size_t sent = xStreamBufferSend(audio_in_buffer, samples, number*2, timeout);
+
+	return sent/2;
+}
+
 uint32_t read_tx_baseband_samples(int16_t *samples, uint32_t number, uint32_t timeout){
 	size_t read = xStreamBufferReceive(audio_in_buffer, samples, number*2, timeout);
+
+	return read/2;
+}
+
+uint32_t write_rx_baseband_samples(int16_t *samples, uint32_t number, uint32_t timeout){
+	size_t sent = xStreamBufferSend(audio_out_buffer, samples, number*2, timeout);
+
+	return sent/2;
+}
+
+uint32_t read_rx_audio_samples(int16_t *samples, uint32_t number, uint32_t timeout){
+	size_t read = xStreamBufferReceive(audio_out_buffer, samples, number*2, timeout);
 
 	return read/2;
 }

@@ -145,6 +145,13 @@ const osThreadAttr_t radio_attributes = {
   .stack_size = 768 * 4,
   .priority = (osPriority_t) osPriorityRealtime1,
 };
+/* Definitions for audioOut */
+osThreadId_t audioOutHandle;
+const osThreadAttr_t audioOut_attributes = {
+  .name = "audioOut",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityRealtime,
+};
 /* Definitions for SPI1Access */
 osMutexId_t SPI1AccessHandle;
 const osMutexAttr_t SPI1Access_attributes = {
@@ -190,13 +197,13 @@ static void MX_SPI1_Init(void);
 static void MX_QUADSPI_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_CRC_Init(void);
-static void MX_I2C2_Init(void);
 static void MX_RNG_Init(void);
 static void MX_SAI1_Init(void);
 void StartGeneralTask(void *argument);
 void StartLVGLTask(void *argument);
 extern void StartMicrophonesTask(void *argument);
 extern void StartTaskRadio(void *argument);
+extern void StartTaskAudioOut(void *argument);
 
 /* USER CODE BEGIN PFP */
 void spi_xfer_done_event();
@@ -253,7 +260,6 @@ int main(void)
   MX_CRC_Init();
   MX_I2C2_Init();
   MX_RNG_Init();
-  MX_SAI1_Init();
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(MAIN_KILL_GPIO_Port, MAIN_KILL_Pin, GPIO_PIN_SET);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
@@ -334,6 +340,9 @@ int main(void)
 
   /* creation of radio */
   radioHandle = osThreadNew(StartTaskRadio, NULL, &radio_attributes);
+
+  /* creation of audioOut */
+  audioOutHandle = osThreadNew(StartTaskAudioOut, NULL, &audioOut_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -435,7 +444,7 @@ void PeriphCommonClock_Config(void)
   PeriphClkInitStruct.PLLSAI.PLLSAIN = 240;
   PeriphClkInitStruct.PLLSAI.PLLSAIR = 7;
   PeriphClkInitStruct.PLLSAI.PLLSAIP = RCC_PLLSAIP_DIV8;
-  PeriphClkInitStruct.PLLI2SDivQ = 1;
+  PeriphClkInitStruct.PLLI2SDivQ = 5;
   PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_2;
   PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48CLKSOURCE_PLLSAIP;
   PeriphClkInitStruct.SdioClockSelection = RCC_SDIOCLKSOURCE_CLK48;
@@ -651,7 +660,7 @@ static void MX_I2C1_Init(void)
   * @param None
   * @retval None
   */
-static void MX_I2C2_Init(void)
+void MX_I2C2_Init(void)
 {
 
   /* USER CODE BEGIN I2C2_Init 0 */
@@ -827,20 +836,20 @@ static void MX_SAI1_Init(void)
   hsai_BlockA1.Init.Synchro = SAI_ASYNCHRONOUS;
   hsai_BlockA1.Init.OutputDrive = SAI_OUTPUTDRIVE_ENABLE;
   hsai_BlockA1.Init.NoDivider = SAI_MASTERDIVIDER_ENABLE;
-  hsai_BlockA1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_1QF;
+  hsai_BlockA1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
   hsai_BlockA1.Init.ClockSource = SAI_CLKSOURCE_PLLI2S;
   hsai_BlockA1.Init.AudioFrequency = SAI_AUDIO_FREQUENCY_8K;
   hsai_BlockA1.Init.SynchroExt = SAI_SYNCEXT_DISABLE;
   hsai_BlockA1.Init.MonoStereoMode = SAI_MONOMODE;
   hsai_BlockA1.Init.CompandingMode = SAI_NOCOMPANDING;
   hsai_BlockA1.Init.TriState = SAI_OUTPUT_NOTRELEASED;
-  hsai_BlockA1.FrameInit.FrameLength = 32;
-  hsai_BlockA1.FrameInit.ActiveFrameLength = 1;
-  hsai_BlockA1.FrameInit.FSDefinition = SAI_FS_STARTFRAME;
+  hsai_BlockA1.FrameInit.FrameLength = 64;
+  hsai_BlockA1.FrameInit.ActiveFrameLength = 32;
+  hsai_BlockA1.FrameInit.FSDefinition = SAI_FS_CHANNEL_IDENTIFICATION;
   hsai_BlockA1.FrameInit.FSPolarity = SAI_FS_ACTIVE_LOW;
   hsai_BlockA1.FrameInit.FSOffset = SAI_FS_FIRSTBIT;
   hsai_BlockA1.SlotInit.FirstBitOffset = 0;
-  hsai_BlockA1.SlotInit.SlotSize = SAI_SLOTSIZE_DATASIZE;
+  hsai_BlockA1.SlotInit.SlotSize = SAI_SLOTSIZE_32B;
   hsai_BlockA1.SlotInit.SlotNumber = 2;
   hsai_BlockA1.SlotInit.SlotActive = 0x00000003;
   if (HAL_SAI_Init(&hsai_BlockA1) != HAL_OK)
