@@ -383,7 +383,7 @@ void FPGA_send_bitstream(uint32_t address, size_t length){
 
 	cmd_buffer[0] = 0x7A; // LSC_BITSTREAM_BURST
 	FPGA_chip_select(true);
-	HAL_SPI_Transmit_IT(&hspi1, cmd_buffer, 4);
+	HAL_SPI_Transmit_DMA(&hspi1, cmd_buffer, 4);
 	wait_spi_xfer_done(WAIT_TIMEOUT);
 
 
@@ -407,7 +407,7 @@ uint32_t FPGA_write_reg(uint16_t addr, uint16_t data){
 	*(uint16_t *)buffer = addr | REG_WR;
 	buffer[2] = (data>>8) & 0xFF;
 	buffer[3] = (uint8_t)data;
-	HAL_SPI_Transmit_IT(&hspi1, buffer, 4);
+	HAL_SPI_Transmit_DMA(&hspi1, buffer, 4);
 	wait_spi_xfer_done(WAIT_TIMEOUT);
 	FPGA_chip_select(false);
 
@@ -421,7 +421,7 @@ uint32_t FPGA_read_reg(uint16_t addr, uint16_t *data){
 	FPGA_chip_select(true);
 	*(uint16_t *)bufferTX = addr;
 	*(uint16_t *)(bufferTX + 2) = 0;
-	HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 4);
+	HAL_SPI_TransmitReceive_DMA(&hspi1, bufferTX, bufferRX, 4);
 	wait_spi_xfer_done(WAIT_TIMEOUT);
 	*data = ((uint16_t)bufferRX[2]<<8) + bufferRX[3];
 	FPGA_chip_select(false);
@@ -435,7 +435,7 @@ uint32_t XCVR_write_reg(uint16_t addr, uint8_t data){
 	XCVR_chip_select(true);
 	*(uint16_t *)buffer = addr | (1<<7);
 	buffer[2] = data;
-	HAL_SPI_Transmit_IT(&hspi1, buffer, 3);
+	HAL_SPI_Transmit_DMA(&hspi1, buffer, 3);
 	wait_spi_xfer_done(WAIT_TIMEOUT);
 	XCVR_chip_select(false);
 
@@ -449,7 +449,7 @@ uint32_t XCVR_read_reg(uint16_t addr, uint8_t *data){
 	XCVR_chip_select(true);
 	*(uint16_t *)bufferTX = addr;
 	bufferTX[2] = 0;
-	HAL_SPI_TransmitReceive_IT(&hspi1, bufferTX, bufferRX, 3);
+	HAL_SPI_TransmitReceive_DMA(&hspi1, bufferTX, bufferRX, 3);
 	wait_spi_xfer_done(WAIT_TIMEOUT);
 	*data = bufferRX[2];
 	XCVR_chip_select(false);
@@ -460,9 +460,9 @@ uint32_t XCVR_read_reg(uint16_t addr, uint8_t *data){
 uint32_t FPGA_config_classA(uint32_t length, uint8_t *tx, uint8_t *rx){
 	uint32_t res = 0;
 	FPGA_chip_select(true);
-	res = HAL_SPI_TransmitReceive_IT(&hspi1, tx, rx, length);
+	res = HAL_SPI_TransmitReceive_DMA(&hspi1, tx, rx, length);
 	if(res != HAL_OK){
-		LOG(CLI_LOG_FPGA, "HAL_SPI_TransmitReceive_IT returned %lu.\r\n", res);
+		LOG(CLI_LOG_FPGA, "HAL_SPI_TransmitReceive_DMA returned %lu.\r\n", res);
 	}
 	wait_spi_xfer_done(WAIT_TIMEOUT);
 	FPGA_chip_select(false);
@@ -472,9 +472,9 @@ uint32_t FPGA_config_classA(uint32_t length, uint8_t *tx, uint8_t *rx){
 uint32_t FPGA_config_classB(uint32_t length, uint8_t *tx){
 	uint32_t res = 0;
 	FPGA_chip_select(true);
-	res = HAL_SPI_Transmit_IT(&hspi1, tx, length);
+	res = HAL_SPI_Transmit_DMA(&hspi1, tx, length);
 	if(res != HAL_OK){
-		LOG(CLI_LOG_FPGA, "HAL_SPI_TransmitReceive_IT returned %lu.\r\n", res);
+		LOG(CLI_LOG_FPGA, "HAL_SPI_TransmitReceive_DMA returned %lu.\r\n", res);
 	}
 	wait_spi_xfer_done(WAIT_TIMEOUT);
 	FPGA_chip_select(false);
@@ -485,9 +485,9 @@ uint32_t FPGA_config_classC(uint8_t cmd){
 	uint32_t res = 0;
 	uint8_t tx[4] = {cmd, 0, 0, 0};
 	FPGA_chip_select(true);
-	res = HAL_SPI_Transmit_IT(&hspi1, tx, 4);
+	res = HAL_SPI_Transmit_DMA(&hspi1, tx, 4);
 	if(res != HAL_OK){
-		LOG(CLI_LOG_FPGA, "HAL_SPI_TransmitReceive_IT returned %lu.\r\n", res);
+		LOG(CLI_LOG_FPGA, "HAL_SPI_TransmitReceive_DMA returned %lu.\r\n", res);
 	}
 	wait_spi_xfer_done(WAIT_TIMEOUT);
 	FPGA_chip_select(false);

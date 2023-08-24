@@ -108,6 +108,7 @@ DMA_HandleTypeDef hdma_sdio;
 
 SPI_HandleTypeDef hspi1;
 DMA_HandleTypeDef hdma_spi1_tx;
+DMA_HandleTypeDef hdma_spi1_rx;
 
 TIM_HandleTypeDef htim4;
 
@@ -1067,6 +1068,9 @@ static void MX_DMA_Init(void)
   /* DMA2_Stream1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
+  /* DMA2_Stream2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
   /* DMA2_Stream3_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
@@ -1449,7 +1453,7 @@ __weak void StartGeneralTask(void *argument)
 /* USER CODE END Header_StartLVGLTask */
 void StartLVGLTask(void *argument)
 {
-    /* USER CODE BEGIN StartLVGLTask */
+  /* USER CODE BEGIN StartLVGLTask */
 	// init the LVGL gui library (draws UI on screen and handles user input)
 	lv_init();
 
