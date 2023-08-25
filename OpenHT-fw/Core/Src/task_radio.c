@@ -168,7 +168,7 @@ void StartTaskRadio(void *argument) {
 				read_voice_samples((int16_t *)(samples+2), 16, 0);
 
 				FPGA_chip_select(true);
-				HAL_SPI_Transmit_IT(&hspi1, samples, sizeof(samples));
+				HAL_SPI_Transmit_DMA(&hspi1, samples, sizeof(samples));
 				wait_spi_xfer_done(WAIT_TIMEOUT);
 				if(!startup_done){
 					FPGA_chip_select(false);
@@ -242,7 +242,7 @@ void StartTaskRadio(void *argument) {
 
 			FPGA_chip_select(true);
 
-			HAL_SPI_Transmit_IT(&hspi1, voice, sizeof(voice));
+			HAL_SPI_Transmit_DMA(&hspi1, voice, sizeof(voice));
 			wait_spi_xfer_done(WAIT_TIMEOUT);
 			if(!startup_done)
 				FPGA_chip_select(false);
