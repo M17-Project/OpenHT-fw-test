@@ -230,7 +230,7 @@ void StartTaskRadio(void *argument) {
 			uint8_t voice[66];
 			*(uint16_t *)(voice) = MOD_IN | REG_WR;
 			if(mode!=OpMode_TEST1)
-				read_voice_samples((int16_t *)(voice+2), 32, 10);
+				read_tx_baseband_samples((int16_t *)(voice+2), 32, 10);
 			else
 				memset((int16_t*)(voice+2), 0x7B14, 32); //little-endian 0x147B
 

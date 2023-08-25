@@ -133,8 +133,8 @@ typedef enum
 typedef enum
 {
     PLAIN     = 0,              //< No encryption, plaintext data is sent
-    AES256    = 1,              //< AES-256 Encryption
-    SCRAMBLER = 2               //< Scrambler
+    SCRAMBLER = 1,              //< Scrambler
+    AES       = 2               //< AES
 } m17crypto_t;
 
 /**
