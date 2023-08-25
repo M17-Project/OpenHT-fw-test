@@ -211,6 +211,12 @@ void custom_ui_init(void)
 		lv_obj_clear_state(ui_use_freq_offset_cb, LV_STATE_CHECKED);
 	}
 
+	if (user_settings_get_show_callsign_boot()) {
+		lv_obj_add_state(ui_show_callsign_boot_cb, LV_STATE_CHECKED);
+	} else {
+		lv_obj_clear_state(ui_show_callsign_boot_cb, LV_STATE_CHECKED);
+	}
+
 	if (user_settings_get_use_soft_ptt()) {
 		lv_obj_clear_flag(ui_ptt_btn, LV_OBJ_FLAG_HIDDEN);
 		lv_obj_add_state(ui_use_soft_ptt_cb, LV_STATE_CHECKED);

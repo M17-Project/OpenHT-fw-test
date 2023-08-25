@@ -33,6 +33,7 @@ void on_settings_reboot_clicked(lv_event_t * e);
 void on_settings_erase_radio_clicked(lv_event_t * e);
 void on_settings_load_fpga_clicked(lv_event_t * e);
 void on_settings_erase_fpga_clicked(lv_event_t * e);
+void on_show_callsign_boot_clicked(lv_event_t * e);
 void on_use_soft_ptt_clicked(lv_event_t * e);
 void on_use_tx_offset_clicked(lv_event_t * e);
 void on_disp_brightness_changed(lv_event_t * e);

@@ -112,10 +112,12 @@ void user_settings_init()
 	if(EEEPROM_read_data(&user_settings_eeeprom, CONFIG_BITS_EEEPROM_ADDR, &buffer) == EXIT_SUCCESS){
 		saved_settings.use_freq_offset = buffer >> 0 & 0x01;
 		saved_settings.split_mode = buffer >> 1 & 0x01;
-		saved_settings.use_soft_ptt = buffer >> 2 & 0x01;
+		saved_settings.show_callsign_boot = buffer >> 2 & 0x01;
+		saved_settings.use_soft_ptt = buffer >> 3 & 0x01;
 	}else{
 		saved_settings.use_freq_offset = false;
 		saved_settings.split_mode = false;
+		saved_settings.show_callsign_boot = false;
 		saved_settings.use_soft_ptt = false;
 	}
 
@@ -152,10 +154,13 @@ void user_settings_save()
 
 	if( (cached_settings.use_freq_offset != saved_settings.use_freq_offset)
 			|| (cached_settings.split_mode != saved_settings.split_mode)
+			|| (cached_settings.show_callsign_boot != saved_settings.show_callsign_boot)
 			|| (cached_settings.use_soft_ptt != saved_settings.use_soft_ptt) ){
 		buffer = (cached_settings.use_freq_offset << 0) +
 				 (cached_settings.split_mode << 1) +
-				 (cached_settings.use_soft_ptt << 2);
+				 (cached_settings.show_callsign_boot << 2) +
+				 (cached_settings.use_soft_ptt << 3);
+
 		EEEPROM_write_data(&user_settings_eeeprom, CONFIG_BITS_EEEPROM_ADDR, (void *)(&buffer));
 	}
 
@@ -184,6 +189,10 @@ void user_settings_set_audio_vol(uint8_t audio_vol)
 
 uint8_t user_settings_get_audio_vol(void)
 {
+	if(!init_done){
+		user_settings_init();
+	}
+
 	return cached_settings.audio_vol;
 }
 
@@ -194,6 +203,10 @@ void user_settings_set_mic_gain(uint8_t mic_gain)
 
 uint8_t user_settings_get_mic_gain(void)
 {
+	if(!init_done){
+		user_settings_init();
+	}
+
 	return cached_settings.mic_gain;
 }
 
@@ -204,6 +217,10 @@ void user_settings_set_use_freq_offset(bool use_freq_offset)
 
 bool user_settings_get_use_freq_offset(void)
 {
+	if(!init_done){
+		user_settings_init();
+	}
+
 	return cached_settings.use_freq_offset;
 }
 
@@ -214,7 +231,25 @@ void user_settings_set_split_mode(bool split_mode)
 
 bool user_settings_get_split_mode(void)
 {
+	if(!init_done){
+		user_settings_init();
+	}
+
 	return cached_settings.split_mode;
+}
+
+void user_settings_set_show_callsign_boot(bool show_callsign_boot)
+{
+	cached_settings.show_callsign_boot = show_callsign_boot;
+}
+
+bool user_settings_get_show_callsign_boot(void)
+{
+	if(!init_done){
+		user_settings_init();
+	}
+
+	return cached_settings.show_callsign_boot;
 }
 
 void user_settings_set_use_soft_ptt(bool use_soft_ptt)
@@ -224,6 +259,10 @@ void user_settings_set_use_soft_ptt(bool use_soft_ptt)
 
 bool user_settings_get_use_soft_ptt(void)
 {
+	if(!init_done){
+		user_settings_init();
+	}
+
 	return cached_settings.use_soft_ptt;
 }
 

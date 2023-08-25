@@ -653,6 +653,17 @@ void on_settings_f_clicked(lv_event_t *e)
 	set_fpga_status(FPGA_Running);
 }
 
+void on_show_callsign_boot_clicked(lv_event_t *e)
+{
+	if (lv_obj_has_state(ui_show_callsign_boot_cb, LV_STATE_CHECKED)) {
+		user_settings_set_show_callsign_boot(true);
+	} else {
+		user_settings_set_show_callsign_boot(false);
+	}
+
+	user_settings_save();
+}
+
 void on_use_soft_ptt_clicked(lv_event_t *e)
 {
 	if (lv_obj_has_state(ui_use_soft_ptt_cb, LV_STATE_CHECKED)) {
