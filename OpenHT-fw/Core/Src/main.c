@@ -31,6 +31,7 @@
 #include "touch_sensor_driver.h"
 #include "screen_driver.h"
 #include "event_groups.h"
+#include "../../Drivers/radio/radio_hal.h"
 
 #include "../shell/inc/sys_command_line.h"
 #include <lvgl.h>
@@ -107,6 +108,7 @@ DMA_HandleTypeDef hdma_sdio;
 
 SPI_HandleTypeDef hspi1;
 DMA_HandleTypeDef hdma_spi1_tx;
+DMA_HandleTypeDef hdma_spi1_rx;
 
 TIM_HandleTypeDef htim4;
 
@@ -170,7 +172,6 @@ extern uint32_t gpio_port_g_state;
 
 EventGroupHandle_t peripheralEventsGroup;
 
-extern volatile bool startup_done;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -1048,7 +1049,7 @@ static void MX_DMA_Init(void)
   hdma_memtomem_dma2_stream0.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
   hdma_memtomem_dma2_stream0.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
   hdma_memtomem_dma2_stream0.Init.Mode = DMA_NORMAL;
-  hdma_memtomem_dma2_stream0.Init.Priority = DMA_PRIORITY_LOW;
+  hdma_memtomem_dma2_stream0.Init.Priority = DMA_PRIORITY_MEDIUM;
   hdma_memtomem_dma2_stream0.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
   hdma_memtomem_dma2_stream0.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
   hdma_memtomem_dma2_stream0.Init.MemBurst = DMA_MBURST_SINGLE;
@@ -1068,6 +1069,9 @@ static void MX_DMA_Init(void)
   /* DMA2_Stream1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
+  /* DMA2_Stream2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
   /* DMA2_Stream3_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
@@ -1415,11 +1419,6 @@ void spi_xfer_done_event(SPI_HandleTypeDef *hspi){
 		}else{
 			portYIELD_FROM_ISR(yield);
 		}
-		if(startup_done)
-		{
-			FPGA_chip_select(false);
-			XCVR_chip_select(false);
-		}
 	}
 }
 
@@ -1463,11 +1462,23 @@ void StartLVGLTask(void *argument)
 	screen_driver_init();
 	touch_sensor_driver_init();
 
+	start_boot_splash();
+
+	// TODO: this loop should only work until the radio is ready to go
+	for( int i=0; i < 600; i++ ){
+	    lv_task_handler();
+	    osDelay(5);
+	}
+
 	// SquareLine Studio ui_init...
 	ui_init();
 
 	// Custom ui init code unsupported by SquareLine...
 	custom_ui_init();
+
+	// delete the splash screen after the main UI has been initialized...
+	stop_boot_splash();
+
   /* Infinite loop */
   for(;;)
   {

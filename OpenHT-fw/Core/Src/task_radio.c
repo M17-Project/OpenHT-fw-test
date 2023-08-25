@@ -51,7 +51,6 @@ extern osMutexId_t 			SPI1AccessHandle;
 extern osMutexId_t 			NORAccessHandle;
 
 volatile bool				radio_enabled = false;
-volatile bool				startup_done = false;
 volatile bool				tx_nRx = false; 						// 0 when RX, 1 when TX
 
 osThreadId_t 				FPGA_thread_id 			= NULL;
@@ -126,7 +125,6 @@ void StartTaskRadio(void *argument) {
 	freq_t 				tx_freq 		= radio_settings_get_tx_freq();
 	fmInfo_t 			fm_info 		= radio_settings_get_fm_settings();
 	openht_radio_agc	agc 			= radio_settings_get_radio_agc();
-	uint8_t				tx_power		= xcvr_settings.tx_pwr; //radio_settings_get_output_pwr(); //somehow this doesn't work
 	float				ppm 			= xcvr_settings.ppm/10.0f;
 
 	if(EEEPROM_init(&eeeprom) == EXIT_FAILURE){
@@ -165,14 +163,12 @@ void StartTaskRadio(void *argument) {
 			{
 				uint8_t samples[34];
 				*(uint16_t *)samples = MOD_IN | REG_WR;
-				read_voice_samples((int16_t *)(samples+2), 16, 0);
+				read_tx_baseband_samples((int16_t *)(samples+2), 16, 0);
 
 				FPGA_chip_select(true);
 				HAL_SPI_Transmit_DMA(&hspi1, samples, sizeof(samples));
 				wait_spi_xfer_done(WAIT_TIMEOUT);
-				if(!startup_done){
-					FPGA_chip_select(false);
-				}
+				FPGA_chip_select(false);
 			}
 		}else if(flag & FPGA_READ_SAMPLES){
 			osThreadFlagsClear(FPGA_READ_SAMPLES);
@@ -193,7 +189,6 @@ void StartTaskRadio(void *argument) {
 			tx_freq 		= radio_settings_get_tx_freq();
 			fm_info 		= radio_settings_get_fm_settings();
 			agc				= radio_settings_get_radio_agc();
-			tx_power		= xcvr_settings.tx_pwr; //radio_settings_get_output_pwr(); //somehow this doesn't work
 			ppm 			= xcvr_settings.ppm/10.0f;
 
 			// Simulate a PTT press to re-send all settings
@@ -228,7 +223,6 @@ void StartTaskRadio(void *argument) {
 			BSP_LED_On(LED_RED);
 			xcvr_settings = radio_settings_get_xcvr_settings();
 			ppm = xcvr_settings.ppm/10.0f;
-			tx_power = xcvr_settings.tx_pwr; //radio_settings_get_output_pwr(); //somehow this doesn't work
 			fm_info = radio_settings_get_fm_settings();
 			radio_configure_tx(tx_freq, ppm, mode, fm_info, xcvr_settings);
 			tx_nRx = true;
@@ -241,12 +235,9 @@ void StartTaskRadio(void *argument) {
 				memset((int16_t*)(voice+2), 0x7B14, 32); //little-endian 0x147B
 
 			FPGA_chip_select(true);
-
 			HAL_SPI_Transmit_DMA(&hspi1, voice, sizeof(voice));
 			wait_spi_xfer_done(WAIT_TIMEOUT);
-			if(!startup_done)
-				FPGA_chip_select(false);
-
+			FPGA_chip_select(false);
 			// Enable IO3 IRQ
 			__HAL_GPIO_EXTI_CLEAR_FLAG(IO3_Pin);
 			HAL_NVIC_ClearPendingIRQ(EXTI15_10_IRQn);
@@ -263,7 +254,6 @@ void StartTaskRadio(void *argument) {
 				radio_off();
 				set_fpga_status(FPGA_Offline);
 				LOG(CLI_LOG_RADIO, "PoC powered off.\r\n");
-				startup_done = false;
 
 				HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
 
@@ -430,7 +420,6 @@ void StartTaskRadio(void *argument) {
 			// Release SPI mutex and restore thread priority
 			osMutexRelease(SPI1AccessHandle);
 			LOG(CLI_LOG_FPGA, "Done!\r\n");
-			startup_done = true;
 
 			osThreadSetPriority(FPGA_thread_id, prev_prio);
 		}else if(flag & FPGA_DOWNLOAD_BIN){

@@ -188,6 +188,8 @@ lv_obj_t * ui_Label20;
 void ui_event_text_area_callsign(lv_event_t * e);
 lv_obj_t * ui_text_area_callsign;
 lv_obj_t * ui_Label29;
+lv_obj_t * ui_Image3;
+lv_obj_t * ui_Image4;
 
 // SCREEN: ui_screen_scratchpad_5
 void ui_screen_scratchpad_5_screen_init(void);

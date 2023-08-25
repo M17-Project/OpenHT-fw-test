@@ -144,7 +144,7 @@ void StartMicrophonesTask(void *argument)
 
 			//PDM_Filter(pdm_reading_ptr, sound_buffer + sound_buffer_offset, &pdm_handle);
 			PDM_Filter(pdm_reading_ptr, pcm_buffer, &pdm_handle);
-			write_voice_samples((int16_t *)pcm_buffer, PCM_SAMPLES, 0);
+			write_tx_voice_samples((int16_t *)pcm_buffer, PCM_SAMPLES, 0);
 			sound_buffer_offset += PCM_BYTES;
 		}
 	}
