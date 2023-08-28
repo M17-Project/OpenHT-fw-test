@@ -159,17 +159,19 @@ void StartTaskRadio(void *argument) {
 
 			mode = radio_settings_get_mode();
 
-			if(mode!=OpMode_TEST1)
-			{
-				uint8_t samples[34];
-				*(uint16_t *)samples = MOD_IN | REG_WR;
-				read_tx_baseband_samples((int16_t *)(samples+2), 16, 0);
+			uint8_t samples[34];
+			*(uint16_t *)samples = MOD_IN | REG_WR;
 
-				FPGA_chip_select(true);
-				HAL_SPI_Transmit_DMA(&hspi1, samples, sizeof(samples));
-				wait_spi_xfer_done(WAIT_TIMEOUT);
-				FPGA_chip_select(false);
-			}
+			if(mode!=OpMode_TEST1)
+				read_tx_baseband_samples((int16_t *)(samples+2), 16, 0);
+			else
+				memset((int16_t*)(samples+2), 0x7B14, 16); //little-endian 0x147B
+
+			FPGA_chip_select(true);
+			HAL_SPI_Transmit_DMA(&hspi1, samples, sizeof(samples));
+			wait_spi_xfer_done(WAIT_TIMEOUT);
+			FPGA_chip_select(false);
+
 		}else if(flag & FPGA_READ_SAMPLES){
 			osThreadFlagsClear(FPGA_READ_SAMPLES);
 
