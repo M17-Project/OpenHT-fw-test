@@ -127,7 +127,17 @@
 //Register 11 - Modulation Word Register
 #define MOD_IN						((uint16_t)0x0B00) // Addr 11
 
-//Registers 12 - 15 reserved
+//Register 12 - Frequency Modulation Settings Register 1
+#define FM_1						((uint16_t)0x0C00) // Addr 12
+
+//Register 13 - Frequency Modulation Settings Register 2
+#define FM_2						((uint16_t)0x0D00) // Addr 13
+
+//Register 14 - SSB Modulation Settings Register 1
+#define SSB_1						((uint16_t)0x0E00) // Addr 14
+
+//Register 15 - SSB Modulation Settings Register 2
+#define SSB_2						((uint16_t)0x0F00) // Addr 15
 
 //Register 16 - Status Register 1
 #define SR_1						((uint16_t)0x1000) // Addr 16

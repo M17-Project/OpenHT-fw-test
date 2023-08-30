@@ -243,8 +243,9 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 	        FPGA_write_reg(CR_1, MOD_AM | IO3_FIFO_AE | PD_ON | band);
 	        FPGA_write_reg(CR_2, FIFO_TX | STATE_TX);
 
-	        //I branch gain to +1.0
+	        //I/Q branches gain to +1.0
 	        FPGA_write_reg(I_GAIN, 0x4000);
+	        FPGA_write_reg(Q_GAIN, 0x4000);
 
 			// set DPD_1, DPD_2, DPD_3
 	        FPGA_write_reg(DPD_1, (int16_t)round((float)xcvr_settings.dpd1*16.384f) & 0xFFFF);
@@ -267,8 +268,9 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 			FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | band);
 			FPGA_write_reg(CR_2, FIFO_TX | CH_RX_12_5 | fm_mode | ctcss | STATE_TX);
 
-			//I branch gain to +1.0
+			//I/Q branches gain to +1.0
 			FPGA_write_reg(I_GAIN, 0x4000);
+			FPGA_write_reg(Q_GAIN, 0x4000);
 
 			//for a constant envelope modulation, we don't need DPD anymore
 			FPGA_write_reg(DPD_1, (int16_t)0x4000);
@@ -288,6 +290,7 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 
 	        //I branch gain to +0.75
 	        FPGA_write_reg(I_GAIN, 0x3000); //needed to compensate for the Hilbert block's gain
+	        FPGA_write_reg(Q_GAIN, 0x4000);
 
 			// set DPD_1, DPD_2, DPD_3
 	        FPGA_write_reg(DPD_1, (int16_t)round((float)xcvr_settings.dpd1*16.384f) & 0xFFFF);
@@ -315,10 +318,14 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 			FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_N | CTCSS_TX_NONE | STATE_TX);
 
 			//modulation word to +1kHz: round(1000/400e3*2^21)
-			FPGA_write_reg(MOD_IN, 0x7B14); //0x147B, little endian
+			//FPGA_write_reg(MOD_IN, 0x7B14); //0x147B, little endian
 
-			//I branch gain to +1.0
+			//I/Q branches gain to +1.0, +offset
 			FPGA_write_reg(I_GAIN, 0x4000);
+			FPGA_write_reg(Q_GAIN, 0x4000);
+			FPGA_write_reg(I_OFFS_NULL, xcvr_settings.offset_i);
+			FPGA_write_reg(Q_OFFS_NULL, xcvr_settings.offset_q);
+			LOG(CLI_LOG_FPGA, "Offsets: I=%d, Q=%d\r\n", xcvr_settings.offset_i, xcvr_settings.offset_q);
 
 			//for a constant envelope modulation, we don't need DPD anymore
 			FPGA_write_reg(DPD_1, (int16_t)0x4000);
