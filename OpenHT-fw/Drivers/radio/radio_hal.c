@@ -243,9 +243,11 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 	        FPGA_write_reg(CR_1, MOD_AM | IO3_FIFO_AE | PD_ON | band);
 	        FPGA_write_reg(CR_2, FIFO_TX | STATE_TX);
 
-	        //I/Q branches gain to +1.0
-	        FPGA_write_reg(I_GAIN, 0x4000);
-	        FPGA_write_reg(Q_GAIN, 0x4000);
+			//I/Q branches gain+offset
+			FPGA_write_reg(I_GAIN, (int16_t)round(xcvr_settings.balance_i/1000.0*16384.0)); //setting of 1000 is 1.0, just as 0x4000
+			FPGA_write_reg(Q_GAIN, (int16_t)round(xcvr_settings.balance_q/1000.0*16384.0));
+			FPGA_write_reg(I_OFFS_NULL, xcvr_settings.offset_i);
+			FPGA_write_reg(Q_OFFS_NULL, xcvr_settings.offset_q);
 
 			// set DPD_1, DPD_2, DPD_3
 	        FPGA_write_reg(DPD_1, (int16_t)round((float)xcvr_settings.dpd1*16.384f) & 0xFFFF);
@@ -268,9 +270,11 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 			FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | band);
 			FPGA_write_reg(CR_2, FIFO_TX | CH_RX_12_5 | fm_mode | ctcss | STATE_TX);
 
-			//I/Q branches gain to +1.0
-			FPGA_write_reg(I_GAIN, 0x4000);
-			FPGA_write_reg(Q_GAIN, 0x4000);
+			//I/Q branches gain+offset
+			FPGA_write_reg(I_GAIN, (int16_t)round(xcvr_settings.balance_i/1000.0*16384.0)); //setting of 1000 is 1.0, just as 0x4000
+			FPGA_write_reg(Q_GAIN, (int16_t)round(xcvr_settings.balance_q/1000.0*16384.0));
+			FPGA_write_reg(I_OFFS_NULL, xcvr_settings.offset_i);
+			FPGA_write_reg(Q_OFFS_NULL, xcvr_settings.offset_q);
 
 			//for a constant envelope modulation, we don't need DPD anymore
 			FPGA_write_reg(DPD_1, (int16_t)0x4000);
