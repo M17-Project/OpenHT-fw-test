@@ -320,11 +320,14 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 			//modulation word to +1kHz: round(1000/400e3*2^21)
 			//FPGA_write_reg(MOD_IN, 0x7B14); //0x147B, little endian
 
-			//I/Q branches gain to +1.0, +offset
-			FPGA_write_reg(I_GAIN, 0x4000);
-			FPGA_write_reg(Q_GAIN, 0x4000);
+			//I/Q branches gain+offset
+			FPGA_write_reg(I_GAIN, (int16_t)round(xcvr_settings.balance_i/1000.0*16384.0)); //setting of 1000 is 1.0, just as 0x4000
+			FPGA_write_reg(Q_GAIN, (int16_t)round(xcvr_settings.balance_q/1000.0*16384.0));
 			FPGA_write_reg(I_OFFS_NULL, xcvr_settings.offset_i);
 			FPGA_write_reg(Q_OFFS_NULL, xcvr_settings.offset_q);
+			LOG(CLI_LOG_FPGA, "Balance: I=0x%04X, Q=0x%04X\r\n",
+						(int16_t)((float)xcvr_settings.balance_i/1000.0*16384.0),
+						(int16_t)((float)xcvr_settings.balance_q/1000.0*16384.0) );
 			LOG(CLI_LOG_FPGA, "Offsets: I=%d, Q=%d\r\n", xcvr_settings.offset_i, xcvr_settings.offset_q);
 
 			//for a constant envelope modulation, we don't need DPD anymore
