@@ -124,6 +124,8 @@ extern lv_obj_t * ui_Label12;
 void ui_event_settings_erase_fpga_btn(lv_event_t * e);
 extern lv_obj_t * ui_settings_erase_fpga_btn;
 extern lv_obj_t * ui_Label13;
+void ui_event_show_callsign_boot_cb(lv_event_t * e);
+extern lv_obj_t * ui_show_callsign_boot_cb;
 void ui_event_use_soft_ptt_cb(lv_event_t * e);
 extern lv_obj_t * ui_use_soft_ptt_cb;
 void ui_event_use_freq_offset_cb(lv_event_t * e);
@@ -188,8 +190,6 @@ extern lv_obj_t * ui_Label20;
 void ui_event_text_area_callsign(lv_event_t * e);
 extern lv_obj_t * ui_text_area_callsign;
 extern lv_obj_t * ui_Label29;
-extern lv_obj_t * ui_Image3;
-extern lv_obj_t * ui_Image4;
 // SCREEN: ui_screen_scratchpad_5
 void ui_screen_scratchpad_5_screen_init(void);
 extern lv_obj_t * ui_screen_scratchpad_5;
@@ -242,13 +242,11 @@ LV_IMG_DECLARE(ui_img_492966190);    // assets/reception-3_w.png
 LV_IMG_DECLARE(ui_img_gear_w_png);    // assets/gear_w.png
 LV_IMG_DECLARE(ui_img_m17_logo_sm_png);    // assets/m17_logo_sm.png
 LV_IMG_DECLARE(ui_img_openht_logo_png);    // assets/openht_logo.png
-LV_IMG_DECLARE(ui_img_wiggles_png);    // assets/wiggles.png
-LV_IMG_DECLARE(ui_img_m17_logo_300_w_png);    // assets/m17_logo_300_w.png
 
 LV_FONT_DECLARE(ui_font_RobotoBold_48);
+LV_FONT_DECLARE(ui_font_RobotoMonoRegular_24);
 LV_FONT_DECLARE(ui_font_number_50);
 LV_FONT_DECLARE(ui_font_number_60);
-LV_FONT_DECLARE(ui_font_RobotoMonoRegular_24);
 
 void ui_init(void);
 

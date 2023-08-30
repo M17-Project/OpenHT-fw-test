@@ -123,6 +123,8 @@ lv_obj_t * ui_Label12;
 void ui_event_settings_erase_fpga_btn(lv_event_t * e);
 lv_obj_t * ui_settings_erase_fpga_btn;
 lv_obj_t * ui_Label13;
+void ui_event_show_callsign_boot_cb(lv_event_t * e);
+lv_obj_t * ui_show_callsign_boot_cb;
 void ui_event_use_soft_ptt_cb(lv_event_t * e);
 lv_obj_t * ui_use_soft_ptt_cb;
 void ui_event_use_freq_offset_cb(lv_event_t * e);
@@ -188,8 +190,6 @@ lv_obj_t * ui_Label20;
 void ui_event_text_area_callsign(lv_event_t * e);
 lv_obj_t * ui_text_area_callsign;
 lv_obj_t * ui_Label29;
-lv_obj_t * ui_Image3;
-lv_obj_t * ui_Image4;
 
 // SCREEN: ui_screen_scratchpad_5
 void ui_screen_scratchpad_5_screen_init(void);
@@ -437,6 +437,14 @@ void ui_event_settings_erase_fpga_btn(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
         on_settings_erase_fpga_clicked(e);
+    }
+}
+void ui_event_show_callsign_boot_cb(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        on_show_callsign_boot_clicked(e);
     }
 }
 void ui_event_use_soft_ptt_cb(lv_event_t * e)

@@ -38,6 +38,7 @@ typedef struct
 	uint8_t mic_gain;
 	bool use_freq_offset;  // using eeeprom bits for settings
 	bool split_mode;
+	bool show_callsign_boot;
 	bool use_soft_ptt;
 } __attribute__((packed)) user_settings_t;
 
@@ -61,6 +62,9 @@ bool user_settings_get_use_freq_offset(void);
 
 void user_settings_set_split_mode(bool split_mode);
 bool user_settings_get_split_mode(void);
+
+void user_settings_set_show_callsign_boot(bool show_callsign_boot);
+bool user_settings_get_show_callsign_boot(void);
 
 void user_settings_set_use_soft_ptt(bool use_soft_ptt);
 bool user_settings_get_use_soft_ptt(void);

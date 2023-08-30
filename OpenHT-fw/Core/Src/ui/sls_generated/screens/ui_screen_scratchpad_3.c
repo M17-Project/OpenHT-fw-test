@@ -37,7 +37,6 @@ void ui_screen_scratchpad_3_screen_init(void)
     ui_settings_tab_panel = lv_obj_create(ui_settings_tabview_panel);
     lv_obj_set_height(ui_settings_tab_panel, 520);
     lv_obj_set_width(ui_settings_tab_panel, lv_pct(100));
-    lv_obj_add_flag(ui_settings_tab_panel, LV_OBJ_FLAG_HIDDEN);     /// Flags
     lv_obj_clear_flag(ui_settings_tab_panel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_settings_tab_panel, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_settings_tab_panel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -153,6 +152,20 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_set_align(ui_Label13, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label13, "Erase NOR");
     lv_obj_set_style_text_font(ui_Label13, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_show_callsign_boot_cb = lv_checkbox_create(ui_settings_tab_panel);
+    lv_checkbox_set_text(ui_show_callsign_boot_cb, "Show Callsign on boot");
+    lv_obj_set_width(ui_show_callsign_boot_cb, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_show_callsign_boot_cb, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_show_callsign_boot_cb, 0);
+    lv_obj_set_y(ui_show_callsign_boot_cb, 310);
+    lv_obj_add_flag(ui_show_callsign_boot_cb, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_set_style_text_color(ui_show_callsign_boot_cb, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_show_callsign_boot_cb, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_show_callsign_boot_cb, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_bg_color(ui_show_callsign_boot_cb, lv_color_hex(0x4E4E4E), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_show_callsign_boot_cb, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
     ui_use_soft_ptt_cb = lv_checkbox_create(ui_settings_tab_panel);
     lv_checkbox_set_text(ui_use_soft_ptt_cb, "Use Soft PTT Button");
@@ -361,6 +374,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     ui_xcvr_tab_panel = lv_obj_create(ui_settings_tabview_panel);
     lv_obj_set_height(ui_xcvr_tab_panel, 520);
     lv_obj_set_width(ui_xcvr_tab_panel, lv_pct(100));
+    lv_obj_add_flag(ui_xcvr_tab_panel, LV_OBJ_FLAG_HIDDEN);     /// Flags
     lv_obj_clear_flag(ui_xcvr_tab_panel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_xcvr_tab_panel, lv_color_hex(0x464B55), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_xcvr_tab_panel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -618,6 +632,7 @@ void ui_screen_scratchpad_3_screen_init(void)
     lv_obj_add_event_cb(ui_settings_erase_radio_btn, ui_event_settings_erase_radio_btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_settings_load_fpga_btn, ui_event_settings_load_fpga_btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_settings_erase_fpga_btn, ui_event_settings_erase_fpga_btn, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_show_callsign_boot_cb, ui_event_show_callsign_boot_cb, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_use_soft_ptt_cb, ui_event_use_soft_ptt_cb, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_use_freq_offset_cb, ui_event_use_freq_offset_cb, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_display_brightness_slider, ui_event_display_brightness_slider, LV_EVENT_ALL, NULL);
