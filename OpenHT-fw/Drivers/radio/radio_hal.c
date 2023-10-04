@@ -128,8 +128,8 @@ void radio_configure_rx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
 		osDelay(2);
 
-		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_24);
-		FPGA_write_reg(CR_2, CH_RX_12_5 | fm_mode | ctcss | STATE_RX);
+		FPGA_write_reg(CR_2, CH_RX_12_5 | fm_mode | ctcss);
+		FPGA_write_reg(COM_CTRL, COM_CTRL_RX);
 
 		XCVR_write_reg(RF24_CMD, RFn_CMD_RX);
 
@@ -164,8 +164,10 @@ void radio_configure_rx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
 		osDelay(2);
 
-		FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | BAND_09);
-		FPGA_write_reg(CR_2, CH_RX_12_5 | fm_mode | ctcss | STATE_RX);
+		FPGA_write_reg(CR_1, MOD_FM | PD_ON | DEM_FM | BAND_09);
+		FPGA_write_reg(COM_IO, COM_IO_IO3_TX_AE);
+		FPGA_write_reg(CR_2, CH_RX_12_5 | fm_mode | ctcss);
+		FPGA_write_reg(COM_CTRL, COM_CTRL_TX);
 
 		XCVR_write_reg(RF09_CMD, RFn_CMD_RX);
 
@@ -240,19 +242,22 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 	LOG(CLI_LOG_RADIO, "Radio mode: %s\r\n", openht_get_mode_str(mode));
 	switch (mode) {
 		case OpMode_AM: {
-	        FPGA_write_reg(CR_1, MOD_AM | IO3_FIFO_AE | PD_ON | band);
-	        FPGA_write_reg(CR_2, FIFO_TX | STATE_TX);
+			FPGA_write_reg(COM_IO, COM_IO_IO3_TX_AE);
+			FPGA_write_reg(COM_CTRL, COM_CTRL_TX);
+	        FPGA_write_reg(CR_1, MOD_AM | PD_ON | band);
+	        FPGA_write_reg(CR_2, FIFO_TX);
+
 
 			//I/Q branches gain+offset
-			FPGA_write_reg(I_GAIN, (int16_t)round(xcvr_settings.balance_i/1000.0*16384.0)); //setting of 1000 is 1.0, just as 0x4000
-			FPGA_write_reg(Q_GAIN, (int16_t)round(xcvr_settings.balance_q/1000.0*16384.0));
-			FPGA_write_reg(I_OFFS_NULL, xcvr_settings.offset_i);
-			FPGA_write_reg(Q_OFFS_NULL, xcvr_settings.offset_q);
+			//FPGA_write_reg(I_GAIN, (int16_t)round(xcvr_settings.balance_i/1000.0*16384.0)); //setting of 1000 is 1.0, just as 0x4000
+			//FPGA_write_reg(Q_GAIN, (int16_t)round(xcvr_settings.balance_q/1000.0*16384.0));
+			//FPGA_write_reg(I_OFFS_NULL, xcvr_settings.offset_i);
+			//FPGA_write_reg(Q_OFFS_NULL, xcvr_settings.offset_q);
 
 			// set DPD_1, DPD_2, DPD_3
-	        FPGA_write_reg(DPD_1, (int16_t)round((float)xcvr_settings.dpd1*16.384f) & 0xFFFF);
-	        FPGA_write_reg(DPD_2, (int16_t)round((float)xcvr_settings.dpd2*16.384f) & 0xFFFF);
-	        FPGA_write_reg(DPD_3, (int16_t)round((float)xcvr_settings.dpd3*16.384f) & 0xFFFF);
+	        //FPGA_write_reg(DPD_1, (int16_t)round((float)xcvr_settings.dpd1*16.384f) & 0xFFFF);
+	        //FPGA_write_reg(DPD_2, (int16_t)round((float)xcvr_settings.dpd2*16.384f) & 0xFFFF);
+	        //FPGA_write_reg(DPD_3, (int16_t)round((float)xcvr_settings.dpd3*16.384f) & 0xFFFF);
 
 			supported_mode = true;
 		}
@@ -260,26 +265,28 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 
 		case OpMode_NFM:
 		case OpMode_WFM: {
-			uint16_t fm_mode = (mode == OpMode_WFM) ? FM_TX_W : FM_TX_N;
+			uint16_t fm_mode = (mode == OpMode_WFM) ? TX_CTRL_FMW : TX_CTRL_FMN;
 
 			uint16_t ctcss = 0;
 			if(fm.txToneEn){
 				ctcss = fm.txTone << 2;
 			}
 
-			FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_ON | DEM_FM | band);
-			FPGA_write_reg(CR_2, FIFO_TX | CH_RX_12_5 | fm_mode | ctcss | STATE_TX);
+			FPGA_write_reg(COM_IO, COM_IO_IO3_TX_AE);
+			FPGA_write_reg(CR_1, MOD_FM | PD_ON | DEM_FM | band);
+			FPGA_write_reg(CR_2, FIFO_TX | CH_RX_12_5 | fm_mode | ctcss);
+			FPGA_write_reg(COM_CTRL, COM_CTRL_TX);
 
 			//I/Q branches gain+offset
-			FPGA_write_reg(I_GAIN, (int16_t)round(xcvr_settings.balance_i/1000.0*16384.0)); //setting of 1000 is 1.0, just as 0x4000
-			FPGA_write_reg(Q_GAIN, (int16_t)round(xcvr_settings.balance_q/1000.0*16384.0));
-			FPGA_write_reg(I_OFFS_NULL, xcvr_settings.offset_i);
-			FPGA_write_reg(Q_OFFS_NULL, xcvr_settings.offset_q);
+			//FPGA_write_reg(I_GAIN, (int16_t)round(xcvr_settings.balance_i/1000.0*16384.0)); //setting of 1000 is 1.0, just as 0x4000
+			//FPGA_write_reg(Q_GAIN, (int16_t)round(xcvr_settings.balance_q/1000.0*16384.0));
+			//FPGA_write_reg(I_OFFS_NULL, xcvr_settings.offset_i);
+			//FPGA_write_reg(Q_OFFS_NULL, xcvr_settings.offset_q);
 
 			//for a constant envelope modulation, we don't need DPD anymore
-			FPGA_write_reg(DPD_1, (int16_t)0x4000);
-			FPGA_write_reg(DPD_2, (int16_t)0);
-			FPGA_write_reg(DPD_3, (int16_t)0);
+			//FPGA_write_reg(DPD_1, (int16_t)0x4000);
+			//FPGA_write_reg(DPD_2, (int16_t)0);
+			//FPGA_write_reg(DPD_3, (int16_t)0);
 
 			supported_mode = true;
 		}
@@ -287,19 +294,21 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 
 		case OpMode_LSB:
 		case OpMode_USB: {
-			uint16_t ssb_mode = (mode == OpMode_LSB) ? SSB_LSB : SSB_USB;
+			uint16_t ssb_mode = (mode == OpMode_LSB) ? TX_CTRL_LSB : TX_CTRL_USB;
 
-	        FPGA_write_reg(CR_1, ssb_mode | MOD_SSB | IO3_FIFO_AE | PD_ON | band);
-	        FPGA_write_reg(CR_2, FIFO_TX | STATE_TX);
+			FPGA_write_reg(COM_IO, COM_IO_IO3_TX_AE);
+	        FPGA_write_reg(CR_1, ssb_mode | MOD_SSB | PD_ON | band);
+	        FPGA_write_reg(CR_2, FIFO_TX);
+	        FPGA_write_reg(COM_CTRL, COM_CTRL_TX);
 
 	        //I branch gain to +0.75
-	        FPGA_write_reg(I_GAIN, 0x3000); //needed to compensate for the Hilbert block's gain
-	        FPGA_write_reg(Q_GAIN, 0x4000);
+	        //FPGA_write_reg(I_GAIN, 0x3000); //needed to compensate for the Hilbert block's gain
+	        //FPGA_write_reg(Q_GAIN, 0x4000);
 
 			// set DPD_1, DPD_2, DPD_3
-	        FPGA_write_reg(DPD_1, (int16_t)round((float)xcvr_settings.dpd1*16.384f) & 0xFFFF);
-	        FPGA_write_reg(DPD_2, (int16_t)round((float)xcvr_settings.dpd2*16.384f) & 0xFFFF);
-	        FPGA_write_reg(DPD_3, (int16_t)round((float)xcvr_settings.dpd3*16.384f) & 0xFFFF);
+	        //FPGA_write_reg(DPD_1, (int16_t)round((float)xcvr_settings.dpd1*16.384f) & 0xFFFF);
+	        //FPGA_write_reg(DPD_2, (int16_t)round((float)xcvr_settings.dpd2*16.384f) & 0xFFFF);
+	        //FPGA_write_reg(DPD_3, (int16_t)round((float)xcvr_settings.dpd3*16.384f) & 0xFFFF);
 
 			supported_mode = true;
 		}
@@ -318,26 +327,28 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 		//TEST1 mode - FM carrier at +1kHz
 		case OpMode_TEST1: {
 			//control regs setting
-			FPGA_write_reg(CR_1, MOD_FM | IO3_FIFO_AE | PD_OFF | DEM_FM | band);
-			FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_N | CTCSS_TX_NONE | STATE_TX);
+			FPGA_write_reg(COM_IO, COM_IO_IO3_TX_AE);
+			FPGA_write_reg(CR_1, MOD_FM | PD_OFF | DEM_FM | band);
+			FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_N | CTCSS_TX_NONE);
+			FPGA_write_reg(COM_CTRL, COM_CTRL_TX);
 
 			//modulation word to +1kHz: round(1000/400e3*2^21)
 			//FPGA_write_reg(MOD_IN, 0x7B14); //0x147B, little endian
 
 			//I/Q branches gain+offset
-			FPGA_write_reg(I_GAIN, (int16_t)round(xcvr_settings.balance_i/1000.0*16384.0)); //setting of 1000 is 1.0, just as 0x4000
-			FPGA_write_reg(Q_GAIN, (int16_t)round(xcvr_settings.balance_q/1000.0*16384.0));
-			FPGA_write_reg(I_OFFS_NULL, xcvr_settings.offset_i);
-			FPGA_write_reg(Q_OFFS_NULL, xcvr_settings.offset_q);
+			//FPGA_write_reg(I_GAIN, (int16_t)round(xcvr_settings.balance_i/1000.0*16384.0)); //setting of 1000 is 1.0, just as 0x4000
+			//FPGA_write_reg(Q_GAIN, (int16_t)round(xcvr_settings.balance_q/1000.0*16384.0));
+			//FPGA_write_reg(I_OFFS_NULL, xcvr_settings.offset_i);
+			//FPGA_write_reg(Q_OFFS_NULL, xcvr_settings.offset_q);
 			LOG(CLI_LOG_FPGA, "Balance: I=0x%04X, Q=0x%04X\r\n",
 						(int16_t)((float)xcvr_settings.balance_i/1000.0*16384.0),
 						(int16_t)((float)xcvr_settings.balance_q/1000.0*16384.0) );
 			LOG(CLI_LOG_FPGA, "Offsets: I=%d, Q=%d\r\n", xcvr_settings.offset_i, xcvr_settings.offset_q);
 
 			//for a constant envelope modulation, we don't need DPD anymore
-			FPGA_write_reg(DPD_1, (int16_t)0x4000);
-			FPGA_write_reg(DPD_2, (int16_t)0);
-			FPGA_write_reg(DPD_3, (int16_t)0);
+			//FPGA_write_reg(DPD_1, (int16_t)0x4000);
+			//FPGA_write_reg(DPD_2, (int16_t)0);
+			//FPGA_write_reg(DPD_3, (int16_t)0);
 
 			supported_mode = true;
 		}

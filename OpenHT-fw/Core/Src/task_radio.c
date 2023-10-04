@@ -387,15 +387,15 @@ void StartTaskRadio(void *argument) {
 			}
 			LOG(CLI_LOG_FPGA, "FPGA PLL is locked. Querying revision number.\r\n");
 
-			FPGA_read_reg(SR_1, (uint16_t *)bufferRX);
+			FPGA_read_reg(COM_VERSION, (uint16_t *)bufferRX);
 			maj_min_rev_t fpga_revision;
 			fpga_revision.maj_rev = bufferRX[1];
 			fpga_revision.min_rev = bufferRX[0];
 			radio_settings_set_fpga_rev(fpga_revision);
-			if(fpga_revision.maj_rev == 0 && fpga_revision.min_rev == 3){
+			if(fpga_revision.maj_rev == 0 && fpga_revision.min_rev == 4){
 				DBG("FPGA revision is %u.%u.\r\n", fpga_revision.maj_rev, fpga_revision.min_rev);
 			}else if(fpga_revision.maj_rev == 0 && fpga_revision.min_rev <= 2){
-				ERR("You are running FPGA image version %u.%u which is not supported anymore. Please update your FPGA image.\r\n", fpga_revision.maj_rev, fpga_revision.min_rev);
+				ERR("You are running FPGA image version %u.%u which is not supported. Please update your FPGA image.\r\n", fpga_revision.maj_rev, fpga_revision.min_rev);
 				set_fpga_status(FPGA_Error);
 			}else {
 				ERR("FPGA version %u.%u is not supported!!\r\n", fpga_revision.maj_rev, fpga_revision.min_rev);

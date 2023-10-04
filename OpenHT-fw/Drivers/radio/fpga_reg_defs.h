@@ -2,6 +2,7 @@
 // OpenHT's FPGA register #defines set
 //
 // W. Kaczmarski SP5WWP
+// Sebastien Van Cauwenberghe, ON4SEB
 // M17 Project, June 2023
 //----------------------------------------------------
 
@@ -10,12 +11,43 @@
 
 #include <stdint.h>
 
-//Read/Write
-#define REG_RD						((uint16_t)0<<7)
-#define REG_WR						((uint16_t)1<<7)
-#define ADDR_NORM					((uint16_t)0<<6)
-#define ADDR_INCR					((uint16_t)1<<6)
+// Match with FPGA regs
+#define APB_DECODE_BITS 3
 
+
+//Read/Write
+#define REG_RD						((uint16_t)0<<15)
+#define REG_WR						((uint16_t)1<<15)
+#define ADDR_NORM					((uint16_t)0<<14)
+#define ADDR_INCR					((uint16_t)1<<14)
+
+#define REG(slave, reg) ((slave << (14 - APB_DECODE_BITS)) | reg)
+
+#define COM_VERSION REG(0, 0)
+#define COM_STATUS REG(0, 1)
+#define COM_CTRL REG(0, 2)
+#define COM_CTRL_IDLE (0)
+#define COM_CTRL_TX (1)
+#define COM_CTRL_RX (2)
+
+#define COM_IO REG(0, 3)
+#define COM_IO_IO3_PLL_LOCK (0)
+#define COM_IO_IO3_TX_AE (5)
+
+#define COM_TX_FIFO REG(0, 4)
+#define COM_TX_FIFO_STS REG(0, 5)
+
+#define TX_CTRL REG(1, 0)
+#define TX_CTRL_MOD_FM (0)
+#define TX_CTRL_MOD_AM (1)
+#define TX_CTRL_MOD_SSB (2)
+#define TX_CTRL_FMN (0 << 3)
+#define TX_CTRL_FMW (1 << 3)
+#define TX_CTRL_LSB (0 << 4)
+#define TX_CTRL_USB (1 << 4)
+
+// Remove this
+#if 0
 //Register 0 - Control Register 1
 #define CR_1						((uint16_t)0)		// Addr 00
 #define SSB_USB						((uint16_t)0<<15)
@@ -151,4 +183,5 @@
 //Register 23 - Demodulator Word Register
 #define DEMOD_OUT					((uint16_t)0x1700) // Addr 23
 
+#endif
 #endif
