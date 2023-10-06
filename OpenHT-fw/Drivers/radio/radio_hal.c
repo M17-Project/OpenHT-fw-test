@@ -68,9 +68,9 @@ void radio_configure_rx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 	}
 
 	// TODO: Since we only support FM at the moment, this is fine
-	uint16_t fm_mode = CH_RX_12_5;
+	uint16_t fm_mode = TX_CTRL_FMN;
 	if (mode == OpMode_WFM) {
-		fm_mode = CH_RX_25;
+		fm_mode = TX_CTRL_FMW;
 	}
 
 	// Set frequency
@@ -128,7 +128,8 @@ void radio_configure_rx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
 		osDelay(2);
 
-		FPGA_write_reg(CR_2, CH_RX_12_5 | fm_mode | ctcss);
+		//FPGA_write_reg(CR_2, CH_RX_12_5 | fm_mode | ctcss);
+		FPGA_write_reg(TX_CTRL, TX_CTRL_MOD_FM | fm_mode);
 		FPGA_write_reg(COM_CTRL, COM_CTRL_RX);
 
 		XCVR_write_reg(RF24_CMD, RFn_CMD_RX);
@@ -164,10 +165,14 @@ void radio_configure_rx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 		HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
 		osDelay(2);
 
-		FPGA_write_reg(CR_1, MOD_FM | PD_ON | DEM_FM | BAND_09);
-		FPGA_write_reg(COM_IO, COM_IO_IO3_TX_AE);
-		FPGA_write_reg(CR_2, CH_RX_12_5 | fm_mode | ctcss);
-		FPGA_write_reg(COM_CTRL, COM_CTRL_TX);
+		//FPGA_write_reg(CR_1, MOD_FM | PD_ON | DEM_FM | BAND_09);
+		//FPGA_write_reg(CR_2, CH_RX_12_5 | fm_mode | ctcss);
+
+		// TODO: need confirmation that this is correct
+		FPGA_write_reg(COM_IO, COM_IO_IO3_PLL_LOCK);
+		//FPGA_write_reg(COM_IO, COM_IO_IO3_TX_AE);
+		FPGA_write_reg(TX_CTRL, TX_CTRL_MOD_FM | fm_mode);
+		FPGA_write_reg(COM_CTRL, COM_CTRL_RX);
 
 		XCVR_write_reg(RF09_CMD, RFn_CMD_RX);
 
@@ -184,7 +189,8 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 
 	// Set frequency
 	uint32_t val = round(freq*(1.0f+ppm/1e6));
-	uint16_t band = BAND_09;
+
+	openht_band_t band = Band_09;
 
 	if(freq>1e9){
 		LOG(CLI_LOG_RADIO, "Radio set in TX 2.4G.\r\n");
@@ -207,7 +213,7 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 		XCVR_write_reg(RF24_TXDFE, RFn_TXDFE_RCUT_0_25 | RFn_TXDFE_SR_400K);
 		XCVR_write_reg(RF24_CMD, RFn_CMD_TXPREP);
 
-		band = BAND_24;
+		band = Band_24;
 	}else{
 		LOG(CLI_LOG_RADIO, "Radio set in TX Sub-GHz.\r\n");
 
@@ -229,7 +235,7 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 		XCVR_write_reg(RF09_TXDFE, RFn_TXDFE_RCUT_0_25 | RFn_TXDFE_SR_400K);
 		XCVR_write_reg(RF09_CMD, RFn_CMD_TXPREP);
 
-		band = BAND_09;
+		band = Band_09;
 	}
 
 	// reset FPGA...
@@ -243,9 +249,12 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 	switch (mode) {
 		case OpMode_AM: {
 			FPGA_write_reg(COM_IO, COM_IO_IO3_TX_AE);
+			FPGA_write_reg(TX_CTRL, TX_CTRL_MOD_AM);
 			FPGA_write_reg(COM_CTRL, COM_CTRL_TX);
-	        FPGA_write_reg(CR_1, MOD_AM | PD_ON | band);
-	        FPGA_write_reg(CR_2, FIFO_TX);
+
+			//FPGA_write_reg(CR_1, MOD_AM | PD_ON | band);
+
+	        //FPGA_write_reg(CR_2, FIFO_TX);
 
 
 			//I/Q branches gain+offset
@@ -273,8 +282,8 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 			}
 
 			FPGA_write_reg(COM_IO, COM_IO_IO3_TX_AE);
-			FPGA_write_reg(CR_1, MOD_FM | PD_ON | DEM_FM | band);
-			FPGA_write_reg(CR_2, FIFO_TX | CH_RX_12_5 | fm_mode | ctcss);
+			FPGA_write_reg(TX_CTRL, TX_CTRL_MOD_FM | fm_mode);
+			//FPGA_write_reg(CR_2, FIFO_TX | CH_RX_12_5 | fm_mode | ctcss);
 			FPGA_write_reg(COM_CTRL, COM_CTRL_TX);
 
 			//I/Q branches gain+offset
@@ -297,8 +306,9 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 			uint16_t ssb_mode = (mode == OpMode_LSB) ? TX_CTRL_LSB : TX_CTRL_USB;
 
 			FPGA_write_reg(COM_IO, COM_IO_IO3_TX_AE);
-	        FPGA_write_reg(CR_1, ssb_mode | MOD_SSB | PD_ON | band);
-	        FPGA_write_reg(CR_2, FIFO_TX);
+			FPGA_write_reg(TX_CTRL, ssb_mode);
+	        //FPGA_write_reg(CR_1, ssb_mode | MOD_SSB | PD_ON | band);
+	        //FPGA_write_reg(CR_2, FIFO_TX);
 	        FPGA_write_reg(COM_CTRL, COM_CTRL_TX);
 
 	        //I branch gain to +0.75
@@ -328,8 +338,8 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 		case OpMode_TEST1: {
 			//control regs setting
 			FPGA_write_reg(COM_IO, COM_IO_IO3_TX_AE);
-			FPGA_write_reg(CR_1, MOD_FM | PD_OFF | DEM_FM | band);
-			FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_N | CTCSS_TX_NONE);
+			//FPGA_write_reg(CR_1, MOD_FM | PD_OFF | DEM_FM | band);
+			//FPGA_write_reg(CR_2, CH_RX_12_5 | FM_TX_N | CTCSS_TX_NONE);
 			FPGA_write_reg(COM_CTRL, COM_CTRL_TX);
 
 			//modulation word to +1kHz: round(1000/400e3*2^21)
@@ -363,9 +373,9 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 
 	// if mode is supported, start tx'ing in the correct band
 	if (supported_mode) {
-		if (band == BAND_09) {
+		if (band == Band_09) {
 			XCVR_write_reg(RF09_CMD, RFn_CMD_TX);
-		} else if (band == BAND_24) {
+		} else if (band == Band_24) {
 			XCVR_write_reg(RF24_CMD, RFn_CMD_TX);
 		}
 	}

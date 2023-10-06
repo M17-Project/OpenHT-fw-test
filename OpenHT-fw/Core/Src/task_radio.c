@@ -160,7 +160,8 @@ void StartTaskRadio(void *argument) {
 			mode = radio_settings_get_mode();
 
 			uint8_t samples[34];
-			*(uint16_t *)samples = MOD_IN | REG_WR;
+			// TODO: verify use of COM_TX_FIFO
+			*(uint16_t *)samples = COM_TX_FIFO | REG_WR;
 
 			if(mode!=OpMode_TEST1)
 				read_tx_baseband_samples((int16_t *)(samples+2), 16, 0);
@@ -230,7 +231,8 @@ void StartTaskRadio(void *argument) {
 			tx_nRx = true;
 
 			uint8_t voice[66];
-			*(uint16_t *)(voice) = MOD_IN | REG_WR;
+			// TODO: verify use of COM_TX_FIFO
+			*(uint16_t *)(voice) = COM_TX_FIFO | REG_WR;
 			if(mode!=OpMode_TEST1)
 				read_tx_baseband_samples((int16_t *)(voice+2), 32, 10);
 			else

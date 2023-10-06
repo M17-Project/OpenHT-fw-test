@@ -94,6 +94,12 @@ extern struct fpga_status_datum openht_fpga_status_data[];
 extern uint32_t openht_fpga_status_count;
 char * openht_get_fpga_status_str(openht_fpga_status_t fpga_status);
 
+typedef enum
+{
+    Band_09,
+	Band_24,
+} openht_band_t;
+
 
 #ifdef __cplusplus
 }
