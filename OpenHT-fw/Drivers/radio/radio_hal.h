@@ -31,6 +31,9 @@
 #define WAIT_TIMEOUT 1500
 #endif
 
+#define FPGA_MAJOR (0)
+#define FPGA_MINOR (4)
+
 void radio_on();
 
 void radio_off();
