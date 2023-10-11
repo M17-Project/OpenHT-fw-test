@@ -438,13 +438,16 @@ void FPGA_send_bitstream(uint32_t address, size_t length){
 uint32_t FPGA_write_reg(uint16_t addr, uint16_t data){
 	uint8_t buffer[4];
 
+	//LOG(CLI_LOG_FPGA, "WR 0x%04x 0x%04x\r\n", addr, data);
 	FPGA_chip_select(true);
 	*(uint16_t *)buffer = addr | REG_WR;
-	buffer[2] = (data>>8) & 0xFF;
-	buffer[3] = (uint8_t)data;
+	buffer[2] = data & 0xFF;
+	buffer[3] = (uint8_t)(data >> 8);
 	HAL_SPI_Transmit_DMA(&hspi1, buffer, 4);
 	wait_spi_xfer_done(WAIT_TIMEOUT);
 	FPGA_chip_select(false);
+	uint16_t check_data;
+	FPGA_read_reg(addr, &check_data);
 
 	return EXIT_SUCCESS;
 }
@@ -458,8 +461,9 @@ uint32_t FPGA_read_reg(uint16_t addr, uint16_t *data){
 	*(uint16_t *)(bufferTX + 2) = 0;
 	HAL_SPI_TransmitReceive_DMA(&hspi1, bufferTX, bufferRX, 4);
 	wait_spi_xfer_done(WAIT_TIMEOUT);
-	*data = ((uint16_t)bufferRX[2]<<8) + bufferRX[3];
+	*data = ((uint16_t)bufferRX[3]<<8) + bufferRX[2];
 	FPGA_chip_select(false);
+	//LOG(CLI_LOG_FPGA, "RD 0x%04x 0x%04x\r\n", addr, *data);
 
 	return EXIT_SUCCESS;
 }
