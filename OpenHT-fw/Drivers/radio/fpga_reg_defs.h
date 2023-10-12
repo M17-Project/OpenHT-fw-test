@@ -37,6 +37,7 @@
 #define COM_TX_FIFO REG(0, 4)
 #define COM_TX_FIFO_STS REG(0, 5)
 
+// TX Chain
 #define TX_CTRL REG(1, 0)
 #define TX_CTRL_MOD_FM (0)
 #define TX_CTRL_MOD_AM (1)
@@ -45,6 +46,12 @@
 #define TX_CTRL_FMW (1 << 3)
 #define TX_CTRL_LSB (0 << 4)
 #define TX_CTRL_USB (1 << 4)
+
+#define TX_GAIN_I REG(2, 0)
+#define TX_GAIN_Q REG(2, 1)
+
+#define TX_OFFSET_I REG(3, 0)
+#define TX_OFFSET_Q REG(3, 1)
 
 // Remove this
 #if 0

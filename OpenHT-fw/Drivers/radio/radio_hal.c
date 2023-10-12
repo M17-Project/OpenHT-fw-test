@@ -283,6 +283,9 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 
 			FPGA_write_reg(COM_IO, COM_IO_IO3_TX_AE);
 			FPGA_write_reg(TX_CTRL, TX_CTRL_MOD_FM | fm_mode);
+			FPGA_write_reg(TX_GAIN_I, 0x1FFF);
+			FPGA_write_reg(TX_GAIN_Q, 0x1FFF);
+
 			//FPGA_write_reg(CR_2, FIFO_TX | CH_RX_12_5 | fm_mode | ctcss);
 			FPGA_write_reg(COM_CTRL, COM_CTRL_TX);
 
