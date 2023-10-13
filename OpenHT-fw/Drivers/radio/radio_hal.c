@@ -283,15 +283,13 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 
 			FPGA_write_reg(COM_IO, COM_IO_IO3_TX_AE);
 			FPGA_write_reg(TX_CTRL, TX_CTRL_MOD_FM | fm_mode);
-			FPGA_write_reg(TX_GAIN_I, 0x1FFF);
-			FPGA_write_reg(TX_GAIN_Q, 0x1FFF);
 
 			//FPGA_write_reg(CR_2, FIFO_TX | CH_RX_12_5 | fm_mode | ctcss);
 			FPGA_write_reg(COM_CTRL, COM_CTRL_TX);
 
 			//I/Q branches gain+offset
-			//FPGA_write_reg(I_GAIN, (int16_t)round(xcvr_settings.balance_i/1000.0*16384.0)); //setting of 1000 is 1.0, just as 0x4000
-			//FPGA_write_reg(Q_GAIN, (int16_t)round(xcvr_settings.balance_q/1000.0*16384.0));
+			FPGA_write_reg(TX_GAIN_I, (int16_t)round(xcvr_settings.balance_i/1000.0*(float)0x1FFF)); //setting of 1000 is 1.0, 0x1FFF = 1.0
+			FPGA_write_reg(TX_GAIN_Q, (int16_t)round(xcvr_settings.balance_q/1000.0*(float)0x1FFF));
 			//FPGA_write_reg(I_OFFS_NULL, xcvr_settings.offset_i);
 			//FPGA_write_reg(Q_OFFS_NULL, xcvr_settings.offset_q);
 
@@ -316,7 +314,7 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 
 	        //I branch gain to +0.75
 	        //FPGA_write_reg(I_GAIN, 0x3000); //needed to compensate for the Hilbert block's gain
-	        //FPGA_write_reg(Q_GAIN, 0x4000);
+	        //FPGA_write_reg(Q_GAIN, 0x4000); //this won't be needed anymore after SSB mode is reimplemented
 
 			// set DPD_1, DPD_2, DPD_3
 	        //FPGA_write_reg(DPD_1, (int16_t)round((float)xcvr_settings.dpd1*16.384f) & 0xFFFF);
