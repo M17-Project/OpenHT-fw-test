@@ -352,12 +352,13 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 			FPGA_write_reg(TX_OFFSET_I, xcvr_settings.offset_i);
 			FPGA_write_reg(TX_OFFSET_Q, xcvr_settings.offset_q);
 
+			/*
 			int16_t rb=0;
 			FPGA_read_reg(TX_GAIN_I, (uint16_t*)&rb);
 			LOG(CLI_LOG_RADIO, "TX_GAIN_I=0x%04X (want 0x%04X)\n", (uint16_t)rb, (int16_t)round(xcvr_settings.balance_i/1000.0*0x1FFF));
 			FPGA_read_reg(TX_GAIN_Q, (uint16_t*)&rb);
 			LOG(CLI_LOG_RADIO, "TX_GAIN_Q=0x%04X (want 0x%04X)\n", (uint16_t)rb, (int16_t)round(xcvr_settings.balance_q/1000.0*0x1FFF));
-
+			*/
 
 			//for a constant envelope modulation, we don't need DPD anymore
 			//FPGA_write_reg(DPD_1, (int16_t)0x4000);
