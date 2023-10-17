@@ -179,6 +179,8 @@ void radio_configure_rx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 	}
 }
 
+#define TX_SAMPLE_RATE 8000.0f
+
 void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, xcvr_settings_t xcvr_settings){
 	// Switch FPGA to TX
 	XCVR_stop_operation();
@@ -277,9 +279,16 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 			uint16_t fm_mode = (mode == OpMode_WFM) ? TX_CTRL_FMW : TX_CTRL_FMN;
 
 			uint16_t ctcss = 0;
-			if(fm.txToneEn){
-				ctcss = fm.txTone << 2;
+			if(fm.txToneEn && (fm.txTone < MAX_TONE_INDEX+1)){
+				ctcss = (uint16_t)((float)(ctcss_tone[fm.txTone]) / TX_SAMPLE_RATE / 10.0f * powf(2.0, 16));
+				FPGA_write_reg(TX_CTCSS_CTRL, TX_CTCSS_CTRL_ENABLED | TX_CTCSS_CTRL_IN_CONST | TX_CTCSS_CTRL_ADD);
+				FPGA_write_reg(TX_CTCSS_AMPLITUDE, 0x400);
+				FPGA_write_reg(TX_CTCSS_FREQ, ctcss);
 			}
+			else {
+				FPGA_write_reg(TX_CTCSS_CTRL, TX_CTCSS_CTRL_DISABLED);
+			}
+
 
 			FPGA_write_reg(COM_IO, COM_IO_IO3_TX_AE);
 			FPGA_write_reg(TX_CTRL, TX_CTRL_MOD_FM | fm_mode);
@@ -443,7 +452,7 @@ void FPGA_send_bitstream(uint32_t address, size_t length){
 uint32_t FPGA_write_reg(uint16_t addr, uint16_t data){
 	uint8_t buffer[4];
 
-	//LOG(CLI_LOG_FPGA, "WR 0x%04x 0x%04x\r\n", addr, data);
+	LOG(CLI_LOG_FPGA, "WR 0x%04x 0x%04x\r\n", addr, data);
 	FPGA_chip_select(true);
 	*(uint16_t *)buffer = addr | REG_WR;
 	buffer[2] = data & 0xFF;
@@ -468,7 +477,7 @@ uint32_t FPGA_read_reg(uint16_t addr, uint16_t *data){
 	wait_spi_xfer_done(WAIT_TIMEOUT);
 	*data = ((uint16_t)bufferRX[3]<<8) + bufferRX[2];
 	FPGA_chip_select(false);
-	//LOG(CLI_LOG_FPGA, "RD 0x%04x 0x%04x\r\n", addr, *data);
+	LOG(CLI_LOG_FPGA, "RD 0x%04x 0x%04x\r\n", addr, *data);
 
 	return EXIT_SUCCESS;
 }
