@@ -21,9 +21,29 @@
 #define ADDR_NORM					((uint16_t)0<<14)
 #define ADDR_INCR					((uint16_t)1<<14)
 
+// APB slaves list
+#define SLV_COM (0)
+#define SLV_TX_COM (1)
+#define SLV_TX_FIR0 (2)
+#define SLV_TX_CTCSS (3)
+#define SLV_TX_FIR1 (4)
+#define SLV_TX_FIR2 (5)
+#define SLV_TX_FIR3 (6)
+#define SLV_TX_IQ_GAIN (7)
+#define SLV_TX_IQ_OFFSET (8)
+
 #define REG(slave, reg) ((slave << (14 - APB_DECODE_BITS)) | reg)
 
 // Filter definition macros
+#define FILTER_CTRL (0)
+#define FILTER_TAPS_CNT (1)
+#define FILTER_L (2)
+#define FILTER_M (3)
+#define FILTER_TAPS_ADDR (4)
+#define FILTER_TAPS_DATA (5)
+#define FILTER_ACC_SHIFT_I (6)
+#define FILTER_ACC_SHIFT_Q (7)
+
 #define _REG_FILTER_CTRL(slave) (REG(slave, 0))
 #define _REG_FILTER_TAPS_CNT(slave) (REG(slave, 1))
 #define _REG_FILTER_L(slave) (REG(slave, 2))
@@ -39,22 +59,22 @@
 #define FILTER_DUPLICATE_I (1 << 1)
 
 // FPGA Common info
-#define COM_VERSION REG(0, 0)
-#define COM_STATUS REG(0, 1)
-#define COM_CTRL REG(0, 2)
+#define COM_VERSION REG(SLV_COM, 0)
+#define COM_STATUS REG(SLV_COM, 1)
+#define COM_CTRL REG(SLV_COM, 2)
 #define COM_CTRL_IDLE (0)
 #define COM_CTRL_TX (1)
 #define COM_CTRL_RX (2)
 
-#define COM_IO REG(0, 3)
+#define COM_IO REG(SLV_COM, 3)
 #define COM_IO_IO3_PLL_LOCK (0)
 #define COM_IO_IO3_TX_AE (5)
 
-#define COM_TX_FIFO REG(0, 4)
-#define COM_TX_FIFO_STS REG(0, 5)
+#define COM_TX_FIFO REG(SLV_COM, 4)
+#define COM_TX_FIFO_STS REG(SLV_COM, 5)
 
 // TX Chain Common
-#define TX_CTRL REG(1, 0)
+#define TX_CTRL REG(SLV_TX_COM, 0)
 #define TX_CTRL_MOD_FM (0)
 #define TX_CTRL_MOD_AM (1)
 #define TX_CTRL_MOD_SSB (2)
@@ -74,7 +94,7 @@
 #define TX_FIR0_ACC_SHIFT_Q _REG_FILTER_ACC_SHIFT_Q(2)
 
 // TX CTCSS
-#define TX_CTCSS_CTRL REG(3, 0)
+#define TX_CTCSS_CTRL REG(SLV_TX_CTCSS, 0)
 #define TX_CTCSS_CTRL_DISABLED (0 << 0)
 #define TX_CTCSS_CTRL_ENABLED (1 << 0)
 #define TX_CTCSS_CTRL_IN_CONST (0 << 1)
@@ -82,8 +102,8 @@
 #define TX_CTCSS_CTRL_REPLACE (0 << 2)
 #define TX_CTCSS_CTRL_ADD (1 << 2)
 
-#define TX_CTCSS_AMPLITUDE REG(3, 1)
-#define TX_CTCSS_FREQ REG(3, 2)
+#define TX_CTCSS_AMPLITUDE REG(SLV_TX_CTCSS, 1)
+#define TX_CTCSS_FREQ REG(SLV_TX_CTCSS, 2)
 
 // TX interpolators
 #define TX_FIR1_CTRL _REG_FILTER_CTRL(4)
@@ -114,10 +134,10 @@
 #define TX_FIR3_ACC_SHIFT_Q _REG_FILTER_ACC_SHIFT_Q(6)
 
 // TX IQ Gain/Offset
-#define TX_GAIN_I REG(7, 0)
-#define TX_GAIN_Q REG(7, 1)
+#define TX_GAIN_I REG(SLV_TX_IQ_GAIN, 0)
+#define TX_GAIN_Q REG(SLV_TX_IQ_GAIN, 1)
 
-#define TX_OFFSET_I REG(8, 0)
-#define TX_OFFSET_Q REG(8, 1)
+#define TX_OFFSET_I REG(SLV_TX_IQ_OFFSET, 0)
+#define TX_OFFSET_Q REG(SLV_TX_IQ_OFFSET, 1)
 
 #endif
