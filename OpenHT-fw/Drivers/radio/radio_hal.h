@@ -32,7 +32,7 @@
 #endif
 
 #define FPGA_MAJOR (0)
-#define FPGA_MINOR (4)
+#define FPGA_MINOR (5)
 
 void radio_on();
 

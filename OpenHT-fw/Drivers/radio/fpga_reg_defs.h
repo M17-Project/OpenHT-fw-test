@@ -12,7 +12,7 @@
 #include <stdint.h>
 
 // Match with FPGA regs
-#define APB_DECODE_BITS 3
+#define APB_DECODE_BITS 4
 
 
 //Read/Write
@@ -23,6 +23,22 @@
 
 #define REG(slave, reg) ((slave << (14 - APB_DECODE_BITS)) | reg)
 
+// Filter definition macros
+#define _REG_FILTER_CTRL(slave) (REG(slave, 0))
+#define _REG_FILTER_TAPS_CNT(slave) (REG(slave, 1))
+#define _REG_FILTER_L(slave) (REG(slave, 2))
+#define _REG_FILTER_M(slave) (REG(slave, 3))
+#define _REG_FILTER_TAPS_ADDR(slave) (REG(slave, 4))
+#define _REG_FILTER_TAPS_DATA(slave) (REG(slave, 5))
+#define _REG_FILTER_ACC_SHIFT_I(slave) (REG(slave, 6))
+#define _REG_FILTER_ACC_SHIFT_Q(slave) (REG(slave, 7))
+
+#define FILTER_ENABLE (1 << 0)
+#define FILTER_DISABLE (0 << 0)
+#define FILTER_PASS_IQ (0 << 1)
+#define FILTER_DUPLICATE_I (1 << 1)
+
+// FPGA Common info
 #define COM_VERSION REG(0, 0)
 #define COM_STATUS REG(0, 1)
 #define COM_CTRL REG(0, 2)
@@ -37,7 +53,7 @@
 #define COM_TX_FIFO REG(0, 4)
 #define COM_TX_FIFO_STS REG(0, 5)
 
-// TX Chain
+// TX Chain Common
 #define TX_CTRL REG(1, 0)
 #define TX_CTRL_MOD_FM (0)
 #define TX_CTRL_MOD_AM (1)
@@ -47,13 +63,18 @@
 #define TX_CTRL_LSB (0 << 4)
 #define TX_CTRL_USB (1 << 4)
 
-#define TX_GAIN_I REG(2, 0)
-#define TX_GAIN_Q REG(2, 1)
+// TX Prefilter
+#define TX_FIR0_CTRL _REG_FILTER_CTRL(2)
+#define TX_FIR0_TAPS_CNT _REG_FILTER_TAPS_CNT(2)
+#define TX_FIR0_L _REG_FILTER_L(2)
+#define TX_FIR0_M _REG_FILTER_M(2)
+#define TX_FIR0_TAPS_ADDR _REG_FILTER_TAPS_ADDR(2)
+#define TX_FIR0_TAPS_DATA _REG_FILTER_TAPS_DATA(2)
+#define TX_FIR0_ACC_SHIFT_I _REG_FILTER_ACC_SHIFT_I(2)
+#define TX_FIR0_ACC_SHIFT_Q _REG_FILTER_ACC_SHIFT_Q(2)
 
-#define TX_OFFSET_I REG(3, 0)
-#define TX_OFFSET_Q REG(3, 1)
-
-#define TX_CTCSS_CTRL REG(4, 0)
+// TX CTCSS
+#define TX_CTCSS_CTRL REG(3, 0)
 #define TX_CTCSS_CTRL_DISABLED (0 << 0)
 #define TX_CTCSS_CTRL_ENABLED (1 << 0)
 #define TX_CTCSS_CTRL_IN_CONST (0 << 1)
@@ -61,7 +82,42 @@
 #define TX_CTCSS_CTRL_REPLACE (0 << 2)
 #define TX_CTCSS_CTRL_ADD (1 << 2)
 
-#define TX_CTCSS_AMPLITUDE REG(4, 1)
-#define TX_CTCSS_FREQ REG(4, 2)
+#define TX_CTCSS_AMPLITUDE REG(3, 1)
+#define TX_CTCSS_FREQ REG(3, 2)
+
+// TX interpolators
+#define TX_FIR1_CTRL _REG_FILTER_CTRL(4)
+#define TX_FIR1_TAPS_CNT _REG_FILTER_TAPS_CNT(4)
+#define TX_FIR1_L _REG_FILTER_L(4)
+#define TX_FIR1_M _REG_FILTER_M(4)
+#define TX_FIR1_TAPS_ADDR _REG_FILTER_TAPS_ADDR(4)
+#define TX_FIR1_TAPS_DATA _REG_FILTER_TAPS_DATA(4)
+#define TX_FIR1_ACC_SHIFT_I _REG_FILTER_ACC_SHIFT_I(4)
+#define TX_FIR1_ACC_SHIFT_Q _REG_FILTER_ACC_SHIFT_Q(4)
+
+#define TX_FIR2_CTRL _REG_FILTER_CTRL(5)
+#define TX_FIR2_TAPS_CNT _REG_FILTER_TAPS_CNT(5)
+#define TX_FIR2_L _REG_FILTER_L(5)
+#define TX_FIR2_M _REG_FILTER_M(5)
+#define TX_FIR2_TAPS_ADDR _REG_FILTER_TAPS_ADDR(5)
+#define TX_FIR2_TAPS_DATA _REG_FILTER_TAPS_DATA(5)
+#define TX_FIR2_ACC_SHIFT_I _REG_FILTER_ACC_SHIFT_I(5)
+#define TX_FIR2_ACC_SHIFT_Q _REG_FILTER_ACC_SHIFT_Q(5)
+
+#define TX_FIR3_CTRL _REG_FILTER_CTRL(6)
+#define TX_FIR3_TAPS_CNT _REG_FILTER_TAPS_CNT(6)
+#define TX_FIR3_L _REG_FILTER_L(6)
+#define TX_FIR3_M _REG_FILTER_M(6)
+#define TX_FIR3_TAPS_ADDR _REG_FILTER_TAPS_ADDR(6)
+#define TX_FIR3_TAPS_DATA _REG_FILTER_TAPS_DATA(6)
+#define TX_FIR3_ACC_SHIFT_I _REG_FILTER_ACC_SHIFT_I(6)
+#define TX_FIR3_ACC_SHIFT_Q _REG_FILTER_ACC_SHIFT_Q(6)
+
+// TX IQ Gain/Offset
+#define TX_GAIN_I REG(7, 0)
+#define TX_GAIN_Q REG(7, 1)
+
+#define TX_OFFSET_I REG(8, 0)
+#define TX_OFFSET_Q REG(8, 1)
 
 #endif
