@@ -212,7 +212,7 @@ void StartTaskRadio(void *argument) {
 			xcvr_settings = radio_settings_get_xcvr_settings();
 			ppm = xcvr_settings.ppm/10.0f;
 			fm_info = radio_settings_get_fm_settings();
-			radio_configure_rx(rx_freq, ppm, mode, fm_info, agc);
+			radio_start_rx(rx_freq, ppm, mode, fm_info, agc);
 		}else if(flag & RADIO_START_TX){
 			osThreadFlagsClear(RADIO_START_TX);
 
@@ -227,7 +227,7 @@ void StartTaskRadio(void *argument) {
 			xcvr_settings = radio_settings_get_xcvr_settings();
 			ppm = xcvr_settings.ppm/10.0f;
 			fm_info = radio_settings_get_fm_settings();
-			radio_configure_tx(tx_freq, ppm, mode, fm_info, xcvr_settings);
+			radio_start_tx(tx_freq, ppm, mode, fm_info, xcvr_settings);
 			tx_nRx = true;
 
 			uint8_t voice[66];

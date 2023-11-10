@@ -39,9 +39,9 @@ void radio_on();
 void radio_off();
 
 // AGC target. negative to disable
-void radio_configure_rx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, openht_radio_agc agc);
+void radio_start_rx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, openht_radio_agc agc);
 
-void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, xcvr_settings_t xcvr_settings);
+void radio_start_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, xcvr_settings_t xcvr_settings);
 
 void radio_sw_09();
 

@@ -17,7 +17,7 @@
  */
 
 #include "radio_hal.h"
-
+#include "tx_chain.h"
 #include "main.h"
 #include "ui/openht_ui.h"
 #include "openht_types.h"
@@ -58,7 +58,7 @@ void radio_off(){
 	HAL_GPIO_WritePin(RF_RST_GPIO_Port, RF_RST_Pin, GPIO_PIN_RESET);
 }
 
-void radio_configure_rx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, openht_radio_agc agc){
+void radio_start_rx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, openht_radio_agc agc){
 	XCVR_stop_operation();
 
 	// TODO: CTCSS doesn't work on RX yet
@@ -181,7 +181,57 @@ void radio_configure_rx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 
 #define TX_SAMPLE_RATE 8000.0f
 
-void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, xcvr_settings_t xcvr_settings){
+void radio_update_tx_mode(){
+	openht_mode_t mode = radio_settings_get_mode();
+	switch (mode) {
+			// Analog modes
+			case OpMode_WFM:
+			case OpMode_NFM:
+			case OpMode_TEST1:
+			case OpMode_AM:
+			{
+				FPGA_write_reg(TX_FIR1_CTRL, 0);
+				FPGA_write_reg(TX_FIR2_CTRL, 0);
+				FPGA_write_reg(TX_FIR3_CTRL, 0);
+				FPGA_write_reg(TX_FIR1_TAPS_CNT, 405);
+				FPGA_write_reg(TX_FIR1_L, 5);
+				FPGA_write_reg(TX_FIR1_M, 1);
+				FPGA_write_reg(TX_FIR2_TAPS_CNT, 205);
+				FPGA_write_reg(TX_FIR2_L, 5);
+				FPGA_write_reg(TX_FIR2_M, 1);
+				FPGA_write_reg(TX_FIR3_TAPS_CNT, 100);
+				FPGA_write_reg(TX_FIR3_L, 2);
+				FPGA_write_reg(TX_FIR3_M, 1);
+
+				FPGA_write_reg(TX_FIR1_TAPS_ADDR, 0);
+				for (int i = 0; i < 405; i++) {
+					FPGA_write_reg(TX_FIR1_TAPS_DATA, tx_analog8k_5_8k[i]);
+				}
+				FPGA_write_reg(TX_FIR2_TAPS_ADDR, 0);
+				for (int i = 0; i < 205; i++) {
+					FPGA_write_reg(TX_FIR2_TAPS_DATA, tx_analog8k_5_40k[i]);
+				}
+				FPGA_write_reg(TX_FIR3_TAPS_ADDR, 0);
+				for (int i = 0; i < 100; i++) {
+					FPGA_write_reg(TX_FIR3_TAPS_DATA, tx_analog8k_2_200k[i]);
+				}
+				FPGA_write_reg(TX_FIR1_ACC_SHIFT_I, 10);
+				FPGA_write_reg(TX_FIR2_ACC_SHIFT_I, 10);
+				FPGA_write_reg(TX_FIR3_ACC_SHIFT_I, 10);
+
+				FPGA_write_reg(TX_FIR1_CTRL, 1);
+				FPGA_write_reg(TX_FIR2_CTRL, 1);
+				FPGA_write_reg(TX_FIR3_CTRL, 1);
+			}
+			break;
+
+			default:
+				break;
+	}
+
+}
+
+void radio_start_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t fm, xcvr_settings_t xcvr_settings){
 	// Switch FPGA to TX
 	XCVR_stop_operation();
 
@@ -194,6 +244,7 @@ void radio_configure_tx(uint32_t freq, float ppm, openht_mode_t mode, fmInfo_t f
 
 	openht_band_t band = Band_09;
 
+	radio_update_tx_mode();
 	if(freq>1e9){
 		LOG(CLI_LOG_RADIO, "Radio set in TX 2.4G.\r\n");
 
@@ -461,7 +512,7 @@ uint32_t FPGA_write_reg(uint16_t addr, uint16_t data){
 	wait_spi_xfer_done(WAIT_TIMEOUT);
 	FPGA_chip_select(false);
 	uint16_t check_data;
-	FPGA_read_reg(addr, &check_data);
+	//FPGA_read_reg(addr, &check_data);
 
 	return EXIT_SUCCESS;
 }
@@ -477,7 +528,7 @@ uint32_t FPGA_read_reg(uint16_t addr, uint16_t *data){
 	wait_spi_xfer_done(WAIT_TIMEOUT);
 	*data = ((uint16_t)bufferRX[3]<<8) + bufferRX[2];
 	FPGA_chip_select(false);
-	LOG(CLI_LOG_FPGA, "RD 0x%04x 0x%04x\r\n", addr, *data);
+	//LOG(CLI_LOG_FPGA, "RD 0x%04x 0x%04x\r\n", addr, *data);
 
 	return EXIT_SUCCESS;
 }
