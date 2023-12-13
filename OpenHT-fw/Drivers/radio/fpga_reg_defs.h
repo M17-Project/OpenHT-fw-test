@@ -33,7 +33,9 @@
 #define SLV_RX_FIR0 (9)
 #define SLV_RX_FIR1 (10)
 #define SLV_RX_FIR2 (11)
-#define SLV_RX_FIR3 (12)
+#define SLV_RX_DEMOD (12)
+#define SLV_RX_FIR3 (13)
+#define SLV_RX_RSSI (14)
 
 #define REG(slave, reg) ((slave << (14 - APB_DECODE_BITS)) | reg)
 
@@ -185,5 +187,20 @@
 #define RX_FIR3_TAPS_DATA _REG_FILTER_TAPS_DATA(SLV_RX_FIR3)
 #define RX_FIR3_ACC_SHIFT_I _REG_FILTER_ACC_SHIFT_I(SLV_RX_FIR3)
 #define RX_FIR3_ACC_SHIFT_Q _REG_FILTER_ACC_SHIFT_Q(SLV_RX_FIR3)
+
+#define RX_DEMOD_CTRL REG(SLV_RX_DEMOD, 0)
+#define RX_DEMOD_CTRL_DISABLED (0 << 0)
+#define RX_DEMOD_CTRL_ENABLED (1 << 0)
+#define RX_DEMOD_CTRL_MODE_AM (0 << 1)
+#define RX_DEMOD_CTRL_MODE_PM (1 << 1)
+#define RX_DEMOD_CTRL_MODE_FM (2 << 1)
+
+#define RX_RSSI_CTRL REG(SLV_RX_RSSI, 0)
+#define RX_RSSI_CTRL_CLEAR (1 << 0)
+
+#define RX_RSSI_MAG REG(SLV_RX_RSSI, 0)
+#define RX_RSSI_ATTACK REG(SLV_RX_RSSI, 1)
+#define RX_RSSI_DECAY REG(SLV_RX_RSSI, 2)
+#define RX_RSSI_HOLD REG(SLV_RX_RSSI, 3)
 
 #endif
