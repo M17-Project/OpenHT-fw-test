@@ -30,7 +30,7 @@
 #include <math.h>
 #include <string.h>
 
-#define SAI_DMA_BUFFER_SAMPLES 	(24)
+#define SAI_DMA_BUFFER_SAMPLES 	(80)
 #define SAI_DMA_BUFFER_BYTES 	(SAI_DMA_BUFFER_SAMPLES*2)
 
 #define DMA_INTERRUPT_FLAG 		(1 << 0)
@@ -40,10 +40,9 @@
 extern SAI_HandleTypeDef hsai_BlockA1;
 
 /* DMA buffer variables */
-int16_t sai_tx_buffer[SAI_DMA_BUFFER_SAMPLES*2]; // Two times 24 samples, 6ms of audio
+int16_t sai_tx_buffer[SAI_DMA_BUFFER_SAMPLES*2]; // Two times 80 samples, 20ms of audio
 int16_t *buffer_wr_pointer;
 
-uint8_t current_output_volume = -60;
 osThreadId_t audio_thread_id;
 
 /* Beeps variables */
@@ -70,13 +69,16 @@ volatile bool dma_underrun = false;
 size_t audio_output_beeps_run(size_t samples, int16_t *buffer);
 
 void StartTaskAudioOut(void *argument){
-	static uint32_t status_tick = 0;
 	audio_thread_id = osThreadGetId();
 	MX_I2C2_Init();
 
-	audio_out_enable();
+
+	audio_out_init();
 
 	audio_output_start();
+
+	audio_output_volume(60);
+	audio_output_speaker(true);
 
 	for(;;){
 		uint32_t flags = osThreadFlagsWait(ALL_FLAGS, osFlagsNoClear, osWaitForever);
@@ -106,15 +108,6 @@ void StartTaskAudioOut(void *argument){
 				dma_underrun = false;
 			}
 		} /* end flags tests */
-
-		if( (osKernelGetTickCount()-status_tick) > 10000){
-			uint8_t tmp;
-			codec_get_register(STATUS, &tmp);
-			LOG(CLI_LOG_AUDIO_OUT, "Status reg = 0x%02x.\r\n", tmp);
-			codec_get_register(SPK_STATUS, &tmp);
-			LOG(CLI_LOG_AUDIO_OUT, "SPK Status reg = 0x%02x.\r\n", tmp);
-			status_tick = osKernelGetTickCount();
-		}
 	} /* end for(;;) */
 }
 
@@ -144,8 +137,8 @@ void audio_output_volume(uint8_t volume){
 		volume = 100;
 	}
 
-	volume = MSTRx_VOLUME_MIN + 1.0*volume*(MSTRx_VOLUME_MAX - MSTRx_VOLUME_MIN)/100;
-	audio_set_volume(volume);
+	volume = volume*(24+204)/100 - 204;
+	audio_set_volume((uint8_t)volume_converted);
 }
 
 void audio_output_speaker(bool enable){

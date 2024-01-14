@@ -44,7 +44,7 @@ void codec_set_register(uint8_t address, uint8_t value);
  */
 void codec_get_register(uint8_t address, uint8_t *value);
 
-void audio_out_enable(){
+void audio_out_init(){
 
 	// Frame Sync Active Length => Half the frame for LR
 	hsai_BlockA1.Instance = SAI1_Block_A;
@@ -69,7 +69,7 @@ void audio_out_enable(){
 	hsai_BlockA1.FrameInit.FSDefinition = SAI_FS_CHANNEL_IDENTIFICATION;
 	hsai_BlockA1.FrameInit.FSOffset = SAI_FS_FIRSTBIT;
 	hsai_BlockA1.FrameInit.FSPolarity = SAI_FS_ACTIVE_LOW;
-	hsai_BlockA1.FrameInit.FrameLength = 16;
+	hsai_BlockA1.FrameInit.FrameLength = 64;
 
 	hsai_BlockA1.SlotInit.FirstBitOffset = 0;
 	hsai_BlockA1.SlotInit.SlotSize = SAI_SLOTSIZE_32B;
@@ -102,12 +102,12 @@ void audio_out_enable(){
 	codec_set_register(IFC_CTRL_1, IFC_SLAVE | IFC_DAC_FMT_LEFT| IFC_AUDIO_WORD_16_16);
 
 	// Set volume of PCM channels
-	codec_set_register(PCMA_VOLUME, -12&PCMx_VOL_MASK); // -6 dB
-	codec_set_register(PCMB_VOLUME, -12&PCMx_VOL_MASK); // -6 dB
+	codec_set_register(PCMA_VOLUME, 0&PCMx_VOL_MASK); // -6 dB
+	codec_set_register(PCMB_VOLUME, 0&PCMx_VOL_MASK); // -6 dB
 
 	// Set headphones volume
-	codec_set_register(HPA_VOLUME, -12); // -6 dB
-	codec_set_register(HPB_VOLUME, -12); // -6 dB
+	codec_set_register(HPA_VOLUME, 0); // -6 dB
+	codec_set_register(HPB_VOLUME, 0); // -6 dB
 
 	// Set speaker volume
 	codec_set_register(SPKA_VOLUME, -12); // -6 dB

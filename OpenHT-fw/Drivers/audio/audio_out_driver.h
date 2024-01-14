@@ -35,7 +35,7 @@ typedef enum {
  * Power on the codec, initializes and start the SAI peripheral. Initial output volume is -60.
  * Takes about 1ms.
  */
-void audio_out_enable();
+void audio_out_init();
 
 /**
  * De-initialize the audio output
@@ -65,6 +65,7 @@ void audio_set_output(AudioOutputDevice output);
  * @param	muted	If true, mutes the output. If false, output is normal.
  */
 void audio_set_mute(bool muted);
+
 
 void codec_set_register(uint8_t address, uint8_t value);
 void codec_get_register(uint8_t address, uint8_t *value);
