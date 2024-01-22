@@ -82,16 +82,17 @@ void StartGeneralTask(void *argument)
 	CLI_ADD_CMD("radio", radio_help, cli_radio_cmd);
 
 	// generate sound
-	osDelay(5000);
-	audio_output_beep(440, 125, 255);
+
+	audio_output_beep(440, 250, 255);
 	LOG(CLI_LOG_GENERAL, "Beep 1\r\n");
-	osDelay(135);
-	audio_output_beep(880, 125, 255);
+	osDelay(135+250);
+	audio_output_beep(880, 250, 255);
 	LOG(CLI_LOG_GENERAL, "Beep 2\r\n");
-	osDelay(135);
-	audio_output_beep(1760, 125, 255);
+	osDelay(135+250);
+	audio_output_beep(1760, 250, 255);
 	LOG(CLI_LOG_GENERAL, "Beep 3\r\n");
 
+	uint32_t beep_time = xTaskGetTickCount();
 	/* Infinite loop */
 	for(;;)
 	{
@@ -138,6 +139,11 @@ void StartGeneralTask(void *argument)
 					uSD_mounted = true;
 				}
 			}
+		}
+
+		if(xTaskGetTickCount()-beep_time > 2000){
+			audio_output_beep(440, 1000, 255);
+			beep_time = xTaskGetTickCount();
 		}
 	}
 }

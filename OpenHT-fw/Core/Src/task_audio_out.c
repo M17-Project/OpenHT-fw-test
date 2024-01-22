@@ -30,7 +30,7 @@
 #include <math.h>
 #include <string.h>
 
-#define SAI_DMA_BUFFER_SAMPLES 	(80)
+#define SAI_DMA_BUFFER_SAMPLES 	(240)
 #define SAI_DMA_BUFFER_BYTES 	(SAI_DMA_BUFFER_SAMPLES*2)
 
 #define DMA_INTERRUPT_FLAG 		(1 << 0)
@@ -40,7 +40,7 @@
 extern SAI_HandleTypeDef hsai_BlockA1;
 
 /* DMA buffer variables */
-int16_t sai_tx_buffer[SAI_DMA_BUFFER_SAMPLES*2]; // Two times 80 samples, 20ms of audio
+int16_t sai_tx_buffer[SAI_DMA_BUFFER_SAMPLES*2]; // Two times 240 samples, 20ms of audio
 int16_t *buffer_wr_pointer;
 
 osThreadId_t audio_thread_id;
@@ -49,7 +49,7 @@ osThreadId_t audio_thread_id;
 volatile bool 	beep_enabled 		= false;
 float 			beep_2_pi_f 		= 0;
 float 			beep_t 				= 0;
-float 			beep_amplitude 		= 1;
+uint16_t		beep_amplitude 		= 0;
 size_t 			beep_samples_left 	= 0;
 
 /* dma checks */
@@ -70,15 +70,18 @@ size_t audio_output_beeps_run(size_t samples, int16_t *buffer);
 
 void StartTaskAudioOut(void *argument){
 	audio_thread_id = osThreadGetId();
+	static uint32_t status_tick = 0;
+	bool speaker = true;
+
 	MX_I2C2_Init();
 
+	audio_output_speaker(speaker);
 
 	audio_out_init();
 
 	audio_output_start();
 
-	audio_output_volume(60);
-	audio_output_speaker(true);
+	audio_output_volume(100);
 
 	for(;;){
 		uint32_t flags = osThreadFlagsWait(ALL_FLAGS, osFlagsNoClear, osWaitForever);
@@ -99,7 +102,7 @@ void StartTaskAudioOut(void *argument){
 
 				// Add beeps samples
 				for(size_t i = 0; i < beep_samples_n; i++){
-					buffer_wr_pointer[i] = (buffer_wr_pointer[i] >> 1) + (beep_samples[i] >> 1);
+					buffer_wr_pointer[i] = (buffer_wr_pointer[i]/2) + (beep_samples[i]/2);
 				}
 			} /* end beep_enabled */
 			dma_done = true;
@@ -108,6 +111,19 @@ void StartTaskAudioOut(void *argument){
 				dma_underrun = false;
 			}
 		} /* end flags tests */
+
+
+		if( (osKernelGetTickCount()-status_tick) > 10000){
+			uint8_t tmp;
+			codec_get_register(STATUS, &tmp);
+			LOG(CLI_LOG_AUDIO_OUT, "Status reg = 0x%02x.\r\n", tmp);
+			codec_get_register(SPK_STATUS, &tmp);
+			LOG(CLI_LOG_AUDIO_OUT, "SPK Status reg = 0x%02x.\r\n", tmp);
+			status_tick = osKernelGetTickCount();
+			speaker = !speaker;
+			//audio_output_speaker(speaker);
+		}
+
 	} /* end for(;;) */
 }
 
@@ -138,7 +154,7 @@ void audio_output_volume(uint8_t volume){
 	}
 
 	volume = volume*(24+204)/100 - 204;
-	audio_set_volume((uint8_t)volume_converted);
+	audio_set_volume(volume);
 }
 
 void audio_output_speaker(bool enable){
@@ -154,7 +170,7 @@ void audio_output_beep(float frequency, size_t duration, uint8_t volume){
 		return;
 	}
 	beep_samples_left = duration*AUDIO_SAMPLE_RATE/1000;
-	beep_amplitude = (float)volume/UINT8_MAX;
+	beep_amplitude = INT16_MAX*((float)volume/UINT8_MAX);
 	beep_t = 0;
 	beep_2_pi_f = 2.0*M_PI*frequency;
 	beep_enabled = true;
@@ -171,8 +187,8 @@ size_t audio_output_beeps_run(size_t samples, int16_t *buffer){
 	}
 
 	for(size_t n = 0; n < samples; n++){
-		buffer[n] = INT16_MAX*beep_amplitude*sinf(beep_2_pi_f*beep_t);
-		beep_t += 1.0/8000;
+		buffer[n] = beep_amplitude*sinf(beep_2_pi_f*beep_t);
+		beep_t += 1.0/AUDIO_SAMPLE_RATE;
 	}
 
 	beep_samples_left -= samples;

@@ -163,9 +163,9 @@
 #define PCMA_SWP_LEFT			(0x0<<6)
 #define PCMA_SWP_SUM			(0x1<<6)
 #define PCMA_SWP_RIGHT			(0x3<<6)
-#define PCMB_SWP_LEFT			(0x0<<4)
+#define PCMB_SWP_RIGHT			(0x0<<4)
 #define PCMB_SWP_SUM			(0x1<<4)
-#define PCMB_SWP_RIGHT			(0x3<<4)
+#define PCMB_SWP_LEFT			(0x3<<4)
 
 #define LIMIT_CTRL_1			(0x27)
 #define LIMIT_MAX_0				(0x0<<5)

@@ -48,13 +48,13 @@ void audio_out_init(){
 
 	// Frame Sync Active Length => Half the frame for LR
 	hsai_BlockA1.Instance = SAI1_Block_A;
-	hsai_BlockA1.Init.AudioFrequency = SAI_AUDIO_FREQUENCY_8K;
+	hsai_BlockA1.Init.AudioFrequency = SAI_AUDIO_FREQUENCY_32K; // Will actually resolve to 24k
 	hsai_BlockA1.Init.AudioMode = SAI_MODEMASTER_TX;
 	hsai_BlockA1.Init.ClockSource = SAI_CLKSOURCE_PLLI2S;
 	hsai_BlockA1.Init.ClockStrobing = SAI_CLOCKSTROBING_FALLINGEDGE;
 	hsai_BlockA1.Init.CompandingMode = SAI_NOCOMPANDING;
 	hsai_BlockA1.Init.DataSize = SAI_DATASIZE_16;
-	hsai_BlockA1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
+	hsai_BlockA1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_1QF;
 	hsai_BlockA1.Init.FirstBit = SAI_FIRSTBIT_MSB;
 	//hsai_BlockA1.Init.Mckdiv = // Computed automatically
 	hsai_BlockA1.Init.MonoStereoMode = SAI_MONOMODE;
@@ -83,15 +83,15 @@ void audio_out_init(){
 
 	// Codec Config
 	codec_set_register(PWR_CTRL_1, POWER_DOWN);
-	codec_set_register(PWR_CTRL_2, PDN_HPB_INV | PDN_HPA_INV | PDN_SPKA_NORM | PDN_SPKB_NORM); // HP when PE3 is low, SPK when high
+	codec_set_register(PWR_CTRL_2, PDN_HPB_INV | PDN_HPA_INV | PDN_SPKB_OFF | PDN_SPKA_NORM); // HP when PE3 is low, SPK when high
 
 	// Audo-detection enabled 						(0b1)
 	// quarter speed								(don't care)
 	// 32k group									(don't care)
 	// no video clock								(don't care)
 	// Ratio MCLK/LRCLK of 128, SCLK/LRCLK of 64	(don't care)
-	// MCLK divide by 2								(0b1)
-	codec_set_register(CLK_CTRL, CLK_AUTO | CLK_MCLK_DIV2);
+	// MCLK do not divide by 2						(0b0)
+	codec_set_register(CLK_CTRL, CLK_AUTO);
 
 	// Slave							(0b0)
 	// SCLK polarity not inverted		(0b0)
@@ -102,20 +102,21 @@ void audio_out_init(){
 	codec_set_register(IFC_CTRL_1, IFC_SLAVE | IFC_DAC_FMT_LEFT| IFC_AUDIO_WORD_16_16);
 
 	// Set volume of PCM channels
-	codec_set_register(PCMA_VOLUME, 0&PCMx_VOL_MASK); // -6 dB
-	codec_set_register(PCMB_VOLUME, 0&PCMx_VOL_MASK); // -6 dB
+	codec_set_register(PCMA_VOLUME, (127-24)&PCMx_VOL_MASK); // -12 dB because Master can go up to +12
+	codec_set_register(PCMB_VOLUME, (127-24)&PCMx_VOL_MASK); // -12 dB
 
 	// Set headphones volume
 	codec_set_register(HPA_VOLUME, 0); // -6 dB
 	codec_set_register(HPB_VOLUME, 0); // -6 dB
 
 	// Set speaker volume
-	codec_set_register(SPKA_VOLUME, -12); // -6 dB
-	codec_set_register(SPKB_VOLUME, SPKx_VOLUME_MUTED); // SPK B Muted
+	codec_set_register(SPKA_VOLUME, 0); //0dB, max volume
+	codec_set_register(SPKB_VOLUME, 1); // SPK B Muted
 
 	// Set master volume (A and B)
-	codec_set_register(MSTRA_VOLUME, 0/*-60*/); // -30dB
-	codec_set_register(MSTRB_VOLUME, 0/*-60*/); // -30dB
+	codec_set_register(MSTRA_VOLUME, 0); // 0dB
+	codec_set_register(MSTRB_VOLUME, 0); // 0dB
+
 
 	// Continue power-up sequence (those registers are undocumented)
 	codec_set_register(0x00, 0x99);

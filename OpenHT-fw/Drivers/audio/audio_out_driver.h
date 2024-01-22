@@ -22,7 +22,7 @@
 #include "main.h"
 
 #define CS43L22_ADDR		0x94 	//8 bits address
-#define AUDIO_SAMPLE_RATE 	8000
+#define AUDIO_SAMPLE_RATE 	24000
 
 typedef enum {
 	HEADPHONES,
