@@ -47,11 +47,11 @@ uint32_t write_tx_voice_samples(int16_t *samples, uint32_t number, uint32_t time
 	return sent/2;
 }
 
-uint32_t write_tx_voice_samples_from_isr(int16_t *samples, uint32_t number, uint32_t timeout){
+/*uint32_t write_tx_voice_samples_from_isr(int16_t *samples, uint32_t number, uint32_t timeout){
 	size_t sent = xStreamBufferSend(audio_in_buffer, samples, number*2, timeout);
 
 	return sent/2;
-}
+}*/
 
 uint32_t read_tx_baseband_samples(int16_t *samples, uint32_t number, uint32_t timeout){
 	size_t read = xStreamBufferReceive(audio_in_buffer, samples, number*2, timeout);

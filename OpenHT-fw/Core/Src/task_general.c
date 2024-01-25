@@ -92,7 +92,7 @@ void StartGeneralTask(void *argument)
 	audio_output_beep(1760, 250, 255);
 	LOG(CLI_LOG_GENERAL, "Beep 3\r\n");
 
-	uint32_t beep_time = xTaskGetTickCount();
+	// uint32_t beep_time = xTaskGetTickCount();
 	/* Infinite loop */
 	for(;;)
 	{
@@ -141,10 +141,15 @@ void StartGeneralTask(void *argument)
 			}
 		}
 
-		if(xTaskGetTickCount()-beep_time > 2000){
-			audio_output_beep(440, 1000, 255);
+		/*if(xTaskGetTickCount()-beep_time > 300){
+			static float freq = 100;
+			if(freq > 4000)
+				freq = 100;
+			audio_output_beep(freq, 250, 255);
+			LOG(CLI_LOG_GENERAL, "Beep at %u Hz.\r\n", (unsigned int)freq);
+			freq += 100;
 			beep_time = xTaskGetTickCount();
-		}
+		}*/
 	}
 }
 

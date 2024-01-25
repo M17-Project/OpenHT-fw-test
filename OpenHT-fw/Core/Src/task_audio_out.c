@@ -18,11 +18,11 @@
 
 #include "task_audio_out.h"
 
+#include "main.h"
 #include "task_audio_process.h"
 #include "cli_commands.h"
 
 #include "../../Drivers/audio/audio_out_driver.h"
-#include "main.h"
 #include "../../Drivers/audio/cs43l22.h"
 #include "../shell/inc/sys_command_line.h"
 
@@ -71,19 +71,17 @@ size_t audio_output_beeps_run(size_t samples, int16_t *buffer);
 
 void StartTaskAudioOut(void *argument){
 	audio_thread_id = osThreadGetId();
-	static uint32_t status_tick = 0;
-	bool speaker = true;
+	// static uint32_t status_tick = 0;
+	// bool speaker = true;
+
 	CLI_ADD_CMD("audio", audio_help, cli_audio_cmd);
 
 	MX_I2C2_Init();
 
-	audio_output_speaker(speaker);
-
+	audio_output_speaker(false);
 	audio_out_init();
-
 	audio_output_start();
-
-	audio_output_volume(100);
+	audio_output_volume(75);
 
 	for(;;){
 		uint32_t flags = osThreadFlagsWait(ALL_FLAGS, osFlagsNoClear, osWaitForever);
@@ -115,7 +113,7 @@ void StartTaskAudioOut(void *argument){
 		} /* end flags tests */
 
 
-		if( (osKernelGetTickCount()-status_tick) > 10000){
+		/*if( (osKernelGetTickCount()-status_tick) > 10000){
 			uint8_t tmp;
 			codec_get_register(STATUS, &tmp);
 			LOG(CLI_LOG_AUDIO_OUT, "Status reg = 0x%02x.\r\n", tmp);
@@ -124,7 +122,7 @@ void StartTaskAudioOut(void *argument){
 			status_tick = osKernelGetTickCount();
 			speaker = !speaker;
 			//audio_output_speaker(speaker);
-		}
+		}*/
 
 	} /* end for(;;) */
 }
