@@ -50,7 +50,7 @@ osThreadId_t audio_thread_id;
 volatile bool 	beep_enabled 		= false;
 float 			beep_2_pi_f 		= 0;
 float 			beep_t 				= 0;
-uint16_t		beep_amplitude 		= 0;
+int16_t			beep_amplitude 		= 0;
 size_t 			beep_samples_left 	= 0;
 
 /* dma checks */

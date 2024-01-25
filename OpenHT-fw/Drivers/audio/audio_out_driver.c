@@ -48,13 +48,13 @@ void audio_out_init(){
 
 	// Frame Sync Active Length => Half the frame for LR
 	hsai_BlockA1.Instance = SAI1_Block_A;
-	hsai_BlockA1.Init.AudioFrequency = SAI_AUDIO_FREQUENCY_32K; // Will actually resolve to 24k
+	hsai_BlockA1.Init.AudioFrequency = AUDIO_SAMPLE_RATE; // Will actually resolve to 24k
 	hsai_BlockA1.Init.AudioMode = SAI_MODEMASTER_TX;
 	hsai_BlockA1.Init.ClockSource = SAI_CLKSOURCE_PLLI2S;
 	hsai_BlockA1.Init.ClockStrobing = SAI_CLOCKSTROBING_FALLINGEDGE;
 	hsai_BlockA1.Init.CompandingMode = SAI_NOCOMPANDING;
 	hsai_BlockA1.Init.DataSize = SAI_DATASIZE_16;
-	hsai_BlockA1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_1QF;
+	hsai_BlockA1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_HF;
 	hsai_BlockA1.Init.FirstBit = SAI_FIRSTBIT_MSB;
 	//hsai_BlockA1.Init.Mckdiv = // Computed automatically
 	hsai_BlockA1.Init.MonoStereoMode = SAI_MONOMODE;
@@ -64,13 +64,11 @@ void audio_out_init(){
 	hsai_BlockA1.Init.Synchro = SAI_ASYNCHRONOUS;
 	hsai_BlockA1.Init.SynchroExt = SAI_SYNCEXT_DISABLE;
 	hsai_BlockA1.Init.TriState = SAI_OUTPUT_NOTRELEASED;
-
 	hsai_BlockA1.FrameInit.ActiveFrameLength = 32;
 	hsai_BlockA1.FrameInit.FSDefinition = SAI_FS_CHANNEL_IDENTIFICATION;
 	hsai_BlockA1.FrameInit.FSOffset = SAI_FS_FIRSTBIT;
 	hsai_BlockA1.FrameInit.FSPolarity = SAI_FS_ACTIVE_LOW;
 	hsai_BlockA1.FrameInit.FrameLength = 64;
-
 	hsai_BlockA1.SlotInit.FirstBitOffset = 0;
 	hsai_BlockA1.SlotInit.SlotSize = SAI_SLOTSIZE_32B;
 	hsai_BlockA1.SlotInit.SlotNumber = 2;
@@ -79,19 +77,17 @@ void audio_out_init(){
 	// Release codec reset pin
 	HAL_GPIO_WritePin(AUDIO_RST_GPIO_Port, AUDIO_RST_Pin, GPIO_PIN_SET);
 
-	HAL_GPIO_WritePin(SPKR_HP_GPIO_Port, SPKR_HP_Pin, GPIO_PIN_RESET); // Select HP by default
-
 	// Codec Config
 	codec_set_register(PWR_CTRL_1, POWER_DOWN);
 	codec_set_register(PWR_CTRL_2, PDN_HPB_INV | PDN_HPA_INV | PDN_SPKB_OFF | PDN_SPKA_NORM); // HP when PE3 is low, SPK when high
 
-	// Audo-detection enabled 						(0b1)
-	// quarter speed								(don't care)
-	// 32k group									(don't care)
-	// no video clock								(don't care)
-	// Ratio MCLK/LRCLK of 128, SCLK/LRCLK of 64	(don't care)
-	// MCLK do not divide by 2						(0b0)
-	codec_set_register(CLK_CTRL, CLK_AUTO);
+	// Audo-detection disabled 						(0b0)
+	// Single Speed									(0b01)
+	// not in 32k group								(0b0)
+	// no video clock								(0b0)
+	// Ratio MCLK/LRCLK of 128, SCLK/LRCLK of 64	(0b00)
+	// MCLK not divided by 2						(0b0)
+	codec_set_register(CLK_CTRL, CLK_SPEED_SS | CLK_M_LR_RATIO_128);
 
 	// Slave							(0b0)
 	// SCLK polarity not inverted		(0b0)
@@ -114,9 +110,11 @@ void audio_out_init(){
 	codec_set_register(SPKB_VOLUME, 1); // SPK B Muted
 
 	// Set master volume (A and B)
-	codec_set_register(MSTRA_VOLUME, 0); // 0dB
-	codec_set_register(MSTRB_VOLUME, 0); // 0dB
+	codec_set_register(MSTRA_VOLUME, -12); // 0dB
+	codec_set_register(MSTRB_VOLUME, -12); // 0dB
 
+	codec_set_register(LIMIT_CTRL_2, PEAK_DET_LIM_EN);
+	codec_set_register(LIMIT_ATK_RATE, 0b00111111);
 
 	// Continue power-up sequence (those registers are undocumented)
 	codec_set_register(0x00, 0x99);
