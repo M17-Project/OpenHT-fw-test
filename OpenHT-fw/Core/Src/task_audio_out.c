@@ -31,7 +31,7 @@
 #include <math.h>
 #include <string.h>
 
-#define SAI_DMA_BUFFER_SAMPLES 	(240)
+#define SAI_DMA_BUFFER_SAMPLES 	(480)
 #define SAI_DMA_BUFFER_BYTES 	(SAI_DMA_BUFFER_SAMPLES*2)
 
 #define DMA_INTERRUPT_FLAG 		(1 << 0)
@@ -41,7 +41,7 @@
 extern SAI_HandleTypeDef hsai_BlockA1;
 
 /* DMA buffer variables */
-int16_t sai_tx_buffer[SAI_DMA_BUFFER_SAMPLES*2]; // Two times 240 samples, 20ms of audio
+int16_t sai_tx_buffer[SAI_DMA_BUFFER_SAMPLES*2]; // Two times 480 samples, 40ms of audio
 int16_t *buffer_wr_pointer;
 
 osThreadId_t audio_thread_id;
