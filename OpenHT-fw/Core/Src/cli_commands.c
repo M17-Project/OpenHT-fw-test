@@ -24,6 +24,7 @@
 #include "radio_settings.h"
 #include "openht_types.h"
 #include "datatypes.h"
+#include "task_audio_out.h"
 
 #include "stm32469i_discovery_qspi.h"
 
@@ -45,6 +46,11 @@ char radio_help[] = "Perform actions on the radio subsystem\r\n"
 				    "\trx\tSwitch the radio to RX mode (simulates a PTT release)\r\n"
 				    "\tfreq x\tSets the frequency of the radio to x Hz.\r\n";
 
+char audio_help[] = "Perform actions on the audio output subsystem\r\n"
+					"Usage: audio\r\n"
+					"\tspk\tSwitch the audio output to speaker\r\n"
+					"\thp\tSwitch the audio output to headphones\r\n"
+					"\tvol [0-100]\tSets the audio output volume to x.\r\n";
 
 uint8_t cli_nor_cmd(int argc, char *argv[]){
 	if(argc != 2){
@@ -113,6 +119,34 @@ uint8_t cli_radio_cmd(int argc, char *argv[]){
 		radio_settings_set_rx_freq(f);
 
 		return EXIT_SUCCESS;
+	}
+
+	printf("Incorrect usage for command %s. For usage type \"help %s\"\r\n", argv[0], argv[0]);
+	return EXIT_FAILURE;
+}
+
+uint8_t cli_audio_cmd(int argc, char *argv[]){
+	if(argc == 2){
+		if(!strcmp(argv[1], "spk")){
+			printf("Switching audio output to speaker.\r\n");
+			audio_output_speaker(true);
+			return EXIT_SUCCESS;
+		}else if(!strcmp(argv[1], "hp")){
+			printf("Switching audio output to headphones.\r\n");
+			audio_output_speaker(false);
+			return EXIT_SUCCESS;
+		}
+	}else if(argc == 3){
+		if(!strcmp(argv[1], "vol")){
+			unsigned long int volume = strtoul(argv[2], NULL, 10);
+			if(volume > 100){
+				volume = 100;
+			}
+			audio_output_volume(volume);
+
+			printf("Set audio output volume to %lu.\r\n", volume);
+			return EXIT_SUCCESS;
+		}
 	}
 
 	printf("Incorrect usage for command %s. For usage type \"help %s\"\r\n", argv[0], argv[0]);

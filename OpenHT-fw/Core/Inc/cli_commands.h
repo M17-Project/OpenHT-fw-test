@@ -29,4 +29,7 @@ uint8_t cli_nor_cmd(int argc, char *argv[]);
 extern char radio_help[];
 uint8_t cli_radio_cmd(int argc, char *argv[]);
 
+extern char audio_help[];
+uint8_t cli_audio_cmd(int argc, char *argv[]);
+
 #endif /* INC_CLI_COMMANDS_H_ */

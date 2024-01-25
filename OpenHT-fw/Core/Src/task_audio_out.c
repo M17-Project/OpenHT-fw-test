@@ -19,6 +19,7 @@
 #include "task_audio_out.h"
 
 #include "task_audio_process.h"
+#include "cli_commands.h"
 
 #include "../../Drivers/audio/audio_out_driver.h"
 #include "main.h"
@@ -72,6 +73,7 @@ void StartTaskAudioOut(void *argument){
 	audio_thread_id = osThreadGetId();
 	static uint32_t status_tick = 0;
 	bool speaker = true;
+	CLI_ADD_CMD("audio", audio_help, cli_audio_cmd);
 
 	MX_I2C2_Init();
 
