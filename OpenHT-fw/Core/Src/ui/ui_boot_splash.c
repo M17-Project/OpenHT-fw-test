@@ -27,7 +27,7 @@
 
 extern RNG_HandleTypeDef hrng;
 
-#define NUM_MSGS 13
+#define NUM_MSGS 15
 static char * silly_boot_status[NUM_MSGS] = {
 		"/*       reticulating splines         */",
 		"/*  buffering for hyperspace bypass   */",
@@ -42,6 +42,8 @@ static char * silly_boot_status[NUM_MSGS] = {
 		"/*         oh no, not again           */",
 		"/*     setting volume to eleven       */",
 		"/*         blasts with vapor          */",
+		"/*   reversing reversed connectors    */",
+		"/*      adding missing pull-ups       */",
 		};
 
 static char default_status[] =
